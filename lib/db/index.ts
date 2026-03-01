@@ -24,10 +24,10 @@ export {
   // High-level helpers
   applyTranslations,
   applyManyTranslations,
-  // Post-specific helpers
-  createPostWithTranslations,
-  getPostWithTranslation,
-  getPostsWithTranslation,
+  // Campaign-specific helpers
+  createCampaignWithTranslations,
+  getCampaignWithTranslation,
+  getCampaignsWithTranslation,
 } from './translations'
 
 // Types
@@ -42,12 +42,11 @@ export type {
 } from './translations'
 
 export type {
-  PostWithTranslation,
-  PostWithAuthor,
-  CreatePostInput,
-  CreatorProfileWithTranslation,
-  CreateCreatorProfileInput,
+  CampaignWithTranslation,
+  InfluencerProfileWithTranslation,
   BrandProfileWithTranslation,
+  CreateCampaignInput,
+  CreateInfluencerProfileInput,
   CreateBrandProfileInput,
   TranslatedResponse,
   PaginationMeta,

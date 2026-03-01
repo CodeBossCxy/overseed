@@ -128,12 +128,8 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session?.user && token) {
-        const userId = String(token.sub || token.id || '')
-        session.user = {
-          ...session.user,
-          id: userId,
-          userType: token.userType as any,
-        }
+        (session.user as any).id = `${token.sub || token.id || ''}`;
+        (session.user as any).userType = token.userType
       }
       return session
     },
