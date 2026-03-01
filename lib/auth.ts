@@ -27,7 +27,7 @@ function WeChatProvider(options: {
     token: {
       url: 'https://api.weixin.qq.com/sns/oauth2/access_token',
       async request({ params, provider }) {
-        const url = new URL(provider.token?.url!)
+        const url = new URL('https://api.weixin.qq.com/sns/oauth2/access_token')
         url.searchParams.append('appid', options.clientId)
         url.searchParams.append('secret', options.clientSecret)
         url.searchParams.append('code', params.code!)
@@ -41,7 +41,7 @@ function WeChatProvider(options: {
     userinfo: {
       url: 'https://api.weixin.qq.com/sns/userinfo',
       async request({ tokens, provider }) {
-        const url = new URL(provider.userinfo?.url!)
+        const url = new URL('https://api.weixin.qq.com/sns/userinfo')
         url.searchParams.append('access_token', tokens.access_token!)
         url.searchParams.append('openid', tokens.openid)
         url.searchParams.append('lang', 'en')
