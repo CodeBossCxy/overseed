@@ -42,6 +42,15 @@ export const translations = {
       announcement: {
         welcome: 'Welcome to Overseed! Start connecting with brands and creators today.',
       },
+      howItWorks: {
+        title: 'How It Works',
+        step1Title: 'Browse Campaigns',
+        step1Desc: 'Discover brand collaborations that match your niche and audience.',
+        step2Title: 'Apply & Connect',
+        step2Desc: 'Submit your application and showcase your value to brands.',
+        step3Title: 'Create & Earn',
+        step3Desc: 'Collaborate, create content, and get compensated for your work.',
+      },
     },
     categories: {
       fashion: 'Fashion',
@@ -67,7 +76,7 @@ export const translations = {
       terms: 'Terms of Service',
       privacy: 'Privacy Policy',
       contact: 'Contact Us',
-      copyright: '© 2024 Overseed. All rights reserved.',
+      copyright: '© 2026 Overseed. All rights reserved.',
       tagline: 'Connecting brands with creators worldwide for authentic collaborations.',
     },
   },
@@ -114,6 +123,15 @@ export const translations = {
       announcement: {
         welcome: '欢迎来到 Overseed！立即开始与品牌和达人建立联系。',
       },
+      howItWorks: {
+        title: '使用流程',
+        step1Title: '浏览活动',
+        step1Desc: '发现与您的领域和受众匹配的品牌合作机会。',
+        step2Title: '申请合作',
+        step2Desc: '提交申请，向品牌展示您的价值。',
+        step3Title: '创作变现',
+        step3Desc: '与品牌合作，创作内容，获得相应报酬。',
+      },
     },
     categories: {
       fashion: '时尚',
@@ -139,7 +157,7 @@ export const translations = {
       terms: '服务条款',
       privacy: '隐私政策',
       contact: '联系我们',
-      copyright: '© 2024 Overseed. 版权所有。',
+      copyright: '© 2026 Overseed. 版权所有。',
       tagline: '连接全球品牌与创作者，打造真实的合作关系。',
     },
   },

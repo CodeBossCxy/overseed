@@ -1,23 +1,21 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
 export default function SignUpPage() {
   const searchParams = useSearchParams()
   const userType = searchParams.get('type') || null
+  const [showWeChatPopup, setShowWeChatPopup] = useState(false)
 
   const handleGoogleSignIn = () => {
     signIn('google', { callbackUrl: userType === 'brand' ? '/brand' : '/creator' })
   }
 
-  const handleFacebookSignIn = () => {
-    signIn('facebook', { callbackUrl: userType === 'brand' ? '/brand' : '/creator' })
-  }
-
   const handleWeChatSignIn = () => {
-    signIn('wechat', { callbackUrl: userType === 'brand' ? '/brand' : '/creator' })
+    setShowWeChatPopup(true)
   }
 
   return (
@@ -100,16 +98,6 @@ export default function SignUpPage() {
             </button>
 
             <button
-              onClick={handleFacebookSignIn}
-              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-[#1877F2] text-sm font-medium text-white hover:bg-[#166FE5] transition"
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Continue with Facebook
-            </button>
-
-            <button
               onClick={handleWeChatSignIn}
               className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-[#07C160] text-sm font-medium text-white hover:bg-[#06AD51] transition"
             >
@@ -145,6 +133,27 @@ export default function SignUpPage() {
           </div>
         </div>
       </div>
+
+      {/* WeChat Coming Soon Popup */}
+      {showWeChatPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowWeChatPopup(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-[#07C160] rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">WeChat Login Coming Soon</h3>
+            <p className="text-gray-600 text-sm mb-4">WeChat login is currently under development. Please use Google or email to sign up for now.</p>
+            <button
+              onClick={() => setShowWeChatPopup(false)}
+              className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

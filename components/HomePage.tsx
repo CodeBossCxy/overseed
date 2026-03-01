@@ -198,28 +198,28 @@ export default function HomePage({ campaigns: initialCampaigns }: { campaigns: C
       {/* How It Works */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">{t.home.howItWorks.title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">1</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Browse Campaigns</h3>
-              <p className="text-gray-600">Discover brand collaborations that match your niche and audience.</p>
+              <h3 className="text-xl font-semibold mb-2">{t.home.howItWorks.step1Title}</h3>
+              <p className="text-gray-600">{t.home.howItWorks.step1Desc}</p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">2</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Apply & Connect</h3>
-              <p className="text-gray-600">Submit your application and showcase your value to brands.</p>
+              <h3 className="text-xl font-semibold mb-2">{t.home.howItWorks.step2Title}</h3>
+              <p className="text-gray-600">{t.home.howItWorks.step2Desc}</p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">3</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Create & Earn</h3>
-              <p className="text-gray-600">Collaborate, create content, and get compensated for your work.</p>
+              <h3 className="text-xl font-semibold mb-2">{t.home.howItWorks.step3Title}</h3>
+              <p className="text-gray-600">{t.home.howItWorks.step3Desc}</p>
             </div>
           </div>
         </div>
