@@ -1,0 +1,468 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// ENUMS
+// ===========================================
+
+enum UserType {
+  INFLUENCER
+  BRAND
+  AGENCY
+  ADMIN
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  WITHDRAWN
+  COMPLETED
+}
+
+enum CompensationType {
+  PAID
+  GIFTED
+  PAID_PLUS_GIFT
+  AFFILIATE
+  NEGOTIABLE
+}
+
+enum ContentType {
+  IMAGE_POST
+  VIDEO
+  STORY
+  REEL
+  ANY
+}
+
+enum AlertFrequency {
+  INSTANT
+  DAILY
+  WEEKLY
+}
+
+// ===========================================
+// MULTILINGUAL SUPPORT
+// ===========================================
+
+model Translation {
+  id               String   @id @default(cuid())
+  entityType       String   // "Campaign", "InfluencerProfile", "BrandProfile"
+  entityId         String   // ID of the translated entity
+  fieldName        String   // "title", "description", "bio", etc.
+  languageCode     String   // "en", "zh", "es", etc.
+  content          String   @db.Text
+  isAutoTranslated Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([entityType, entityId, fieldName, languageCode])
+  @@index([entityType, entityId])
+  @@index([languageCode])
+  @@map("translations")
+}
+
+// ===========================================
+// USERS & AUTHENTICATION
+// ===========================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  userType      UserType  @default(INFLUENCER)
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts          Account[]
+  sessions          Session[]
+  savedSearches     SavedSearch[]
+  influencerProfile InfluencerProfile?
+  brandProfile      BrandProfile?
+  agencyProfile     AgencyProfile?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ===========================================
+// LOOKUP TABLES
+// ===========================================
+
+model Category {
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  slug         String  @unique
+  iconUrl      String?
+  parentId     Int?
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+
+  parent             Category?          @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children           Category[]         @relation("CategoryToCategory")
+  campaignCategories CampaignCategory[]
+
+  @@map("categories")
+}
+
+model Platform {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  slug     String  @unique
+  iconUrl  String?
+  isActive Boolean @default(true)
+
+  socialAccounts              InfluencerSocialAccount[]
+  campaignPlatforms           CampaignPlatform[]
+  campaignFollowerRequirements CampaignFollowerRequirement[]
+
+  @@map("platforms")
+}
+
+// ===========================================
+// INFLUENCER PROFILES
+// ===========================================
+
+model InfluencerProfile {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  originalLanguage String    @default("en")
+  displayName      String?
+  avatarUrl        String?
+  bio              String?   @db.Text
+  locationCity     String?
+  locationState    String?
+  locationCountry  String?   @default("USA")
+  primaryNiche     String?
+  secondaryNiches  String[]
+  languages        String[]
+  isVerified       Boolean   @default(false)
+  verificationDate DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialAccounts  InfluencerSocialAccount[]
+  applications    Application[]
+  savedCampaigns  SavedCampaign[]
+
+  @@map("influencer_profiles")
+}
+
+model InfluencerSocialAccount {
+  id             String    @id @default(cuid())
+  influencerId   String
+  platformId     Int
+  username       String
+  profileUrl     String?
+  followerCount  Int       @default(0)
+  engagementRate Decimal?  @db.Decimal(5, 2)
+  isVerified     Boolean   @default(false)
+  lastSyncedAt   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  platform     Platform          @relation(fields: [platformId], references: [id])
+  applications Application[]
+
+  @@unique([influencerId, platformId])
+  @@map("influencer_social_accounts")
+}
+
+// ===========================================
+// BRAND PROFILES
+// ===========================================
+
+model BrandProfile {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  originalLanguage String    @default("en")
+  companyName      String?
+  logoUrl          String?
+  websiteUrl       String?
+  description      String?   @db.Text
+  industry         String?
+  companySize      String?   // 'startup', 'small', 'medium', 'enterprise'
+  contactName      String?
+  contactEmail     String?
+  contactPhone     String?
+  isVerified       Boolean   @default(false)
+  verificationDate DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns Campaign[]
+
+  @@map("brand_profiles")
+}
+
+// ===========================================
+// AGENCY PROFILES
+// ===========================================
+
+model AgencyProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  agencyName   String
+  logoUrl      String?
+  websiteUrl   String?
+  description  String?  @db.Text
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns Campaign[]
+
+  @@map("agency_profiles")
+}
+
+// ===========================================
+// CAMPAIGNS
+// ===========================================
+
+model Campaign {
+  id               String         @id @default(cuid())
+  brandId          String
+  agencyId         String?
+  originalLanguage String         @default("en")
+
+  // Basic Info
+  title            String
+  description      String?        @db.Text
+
+  // Status & Dates
+  status           CampaignStatus @default(DRAFT)
+  publishedAt      DateTime?
+  deadline         DateTime?
+  campaignStartDate DateTime?
+  campaignEndDate  DateTime?
+
+  // Slots & Applications
+  totalSlots       Int            @default(10)
+  filledSlots      Int            @default(0)
+
+  // Compensation
+  compensationType CompensationType
+  paymentMin       Decimal?       @db.Decimal(10, 2)
+  paymentMax       Decimal?       @db.Decimal(10, 2)
+  giftDescription  String?
+  giftValue        Decimal?       @db.Decimal(10, 2)
+
+  // Requirements
+  requiresProductPurchase Boolean @default(false)
+  productPurchaseAmount   Decimal? @db.Decimal(10, 2)
+  isProductReimbursed     Boolean @default(false)
+
+  // Content Requirements
+  contentType      ContentType?
+  contentGuidelines String?       @db.Text
+  wordCountMin     Int?
+  wordCountMax     Int?
+  hashtagsRequired String?
+  mentionsRequired String?
+
+  // Media
+  images           String[]
+
+  // Visibility & Discovery
+  isFeatured       Boolean        @default(false)
+  viewCount        Int            @default(0)
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  // Relations
+  brand                BrandProfile                  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  agency               AgencyProfile?                @relation(fields: [agencyId], references: [id])
+  platforms            CampaignPlatform[]
+  categories           CampaignCategory[]
+  followerRequirements CampaignFollowerRequirement[]
+  media                CampaignMedia[]
+  applications         Application[]
+  savedBy              SavedCampaign[]
+
+  @@index([status, createdAt])
+  @@index([brandId])
+  @@index([deadline])
+  @@map("campaigns")
+}
+
+model CampaignPlatform {
+  campaignId String
+  platformId Int
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  platform Platform @relation(fields: [platformId], references: [id])
+
+  @@id([campaignId, platformId])
+  @@map("campaign_platforms")
+}
+
+model CampaignCategory {
+  campaignId String
+  categoryId Int
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@id([campaignId, categoryId])
+  @@map("campaign_categories")
+}
+
+model CampaignFollowerRequirement {
+  id                String   @id @default(cuid())
+  campaignId        String
+  platformId        Int
+  minFollowers      Int      @default(0)
+  maxFollowers      Int?
+  minEngagementRate Decimal? @db.Decimal(5, 2)
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  platform Platform @relation(fields: [platformId], references: [id])
+
+  @@unique([campaignId, platformId])
+  @@map("campaign_follower_requirements")
+}
+
+model CampaignMedia {
+  id           String   @id @default(cuid())
+  campaignId   String
+  mediaUrl     String
+  mediaType    String   @default("image") // 'image' or 'video'
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_media")
+}
+
+// ===========================================
+// APPLICATIONS
+// ===========================================
+
+model Application {
+  id               String            @id @default(cuid())
+  campaignId       String
+  influencerId     String
+  socialAccountId  String?
+  status           ApplicationStatus @default(PENDING)
+  pitchMessage     String?           @db.Text
+  proposedRate     Decimal?          @db.Decimal(10, 2)
+  brandNotes       String?           @db.Text
+  rejectionReason  String?
+  appliedAt        DateTime          @default(now())
+  reviewedAt       DateTime?
+  approvedAt       DateTime?
+  completedAt      DateTime?
+  updatedAt        DateTime          @updatedAt
+
+  // Relations
+  campaign      Campaign                 @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencer    InfluencerProfile        @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  socialAccount InfluencerSocialAccount? @relation(fields: [socialAccountId], references: [id])
+
+  @@unique([campaignId, influencerId])
+  @@index([influencerId, status])
+  @@index([campaignId, status])
+  @@map("applications")
+}
+
+// ===========================================
+// SAVED CAMPAIGNS & SEARCHES
+// ===========================================
+
+model SavedCampaign {
+  influencerId String
+  campaignId   String
+  savedAt      DateTime @default(now())
+
+  influencer InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  campaign   Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@id([influencerId, campaignId])
+  @@map("saved_campaigns")
+}
+
+model SavedSearch {
+  id         String         @id @default(cuid())
+  userId     String
+  name       String
+  filters    Json
+  frequency  AlertFrequency @default(INSTANT)
+  isActive   Boolean        @default(true)
+  lastSentAt DateTime?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_searches")
+}

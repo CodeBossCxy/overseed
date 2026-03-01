@@ -1,0 +1,70 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+import CampaignDetail from './CampaignDetail'
+
+interface CampaignDetailWrapperProps {
+  initialCampaign: any
+  isOwner: boolean
+  hasApplied: boolean
+  isSaved: boolean
+  isAuthenticated: boolean
+}
+
+export default function CampaignDetailWrapper({
+  initialCampaign,
+  isOwner,
+  hasApplied,
+  isSaved,
+  isAuthenticated,
+}: CampaignDetailWrapperProps) {
+  const { locale } = useLanguage()
+  const [campaign, setCampaign] = useState(initialCampaign)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    async function fetchTranslatedCampaign() {
+      setIsLoading(true)
+      try {
+        const response = await fetch(`/api/campaigns/${initialCampaign.id}?lang=${locale}`)
+        const data = await response.json()
+        if (data && !data.message) {
+          setCampaign(data)
+        }
+      } catch (error) {
+        console.error('Error fetching campaign:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTranslatedCampaign()
+  }, [locale, initialCampaign.id])
+
+  if (isLoading) {
+    return (
+      <div className="animate-pulse">
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <CampaignDetail
+      campaign={campaign}
+      isOwner={isOwner}
+      hasApplied={hasApplied}
+      isSaved={isSaved}
+      isAuthenticated={isAuthenticated}
+    />
+  )
+}

@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "home": "Home",
+    "browse": "Browse",
+    "create": "Create Post",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "profile": "Profile",
+    "brandCenter": "Brand Center",
+    "creatorCenter": "Creator Center",
+    "alerts": "Alerts"
+  },
+  "footer": {
+    "about": "About Overseed",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact Us",
+    "copyright": "© 2024 Overseed. All rights reserved."
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "delete": "Delete",
+    "edit": "Edit",
+    "apply": "Apply",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "viewMore": "View More",
+    "loadMore": "Load More"
+  },
+  "userTypes": {
+    "brand": "Brand",
+    "creator": "Creator",
+    "both": "Both"
+  },
+  "categories": {
+    "all": "All",
+    "fashion": "Fashion",
+    "beauty": "Beauty",
+    "tech": "Tech",
+    "food": "Food & Drink",
+    "travel": "Travel",
+    "fitness": "Fitness",
+    "lifestyle": "Lifestyle",
+    "gaming": "Gaming"
+  }
+}

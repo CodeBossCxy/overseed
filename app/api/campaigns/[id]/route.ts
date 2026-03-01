@@ -1,0 +1,270 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { getTranslatedEntity } from '@/lib/translation-service'
+import { SupportedLanguage, isSupportedLanguage } from '@/lib/db/translations'
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const lang = searchParams.get('lang') || 'en'
+    const targetLanguage: SupportedLanguage = isSupportedLanguage(lang) ? lang : 'en'
+
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: params.id },
+      include: {
+        brand: {
+          select: {
+            id: true,
+            userId: true,
+            companyName: true,
+            logoUrl: true,
+            websiteUrl: true,
+            description: true,
+            industry: true,
+            isVerified: true,
+          },
+        },
+        agency: {
+          select: {
+            id: true,
+            agencyName: true,
+            logoUrl: true,
+          },
+        },
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        platforms: {
+          include: {
+            platform: true,
+          },
+        },
+        followerRequirements: {
+          include: {
+            platform: true,
+          },
+        },
+        media: {
+          orderBy: {
+            displayOrder: 'asc',
+          },
+        },
+        _count: {
+          select: {
+            applications: true,
+          },
+        },
+      },
+    })
+
+    if (!campaign) {
+      return NextResponse.json({ message: 'Campaign not found' }, { status: 404 })
+    }
+
+    // Increment view count
+    await prisma.campaign.update({
+      where: { id: params.id },
+      data: { viewCount: { increment: 1 } },
+    })
+
+    // Translate campaign if needed
+    const translatedCampaign = await getTranslatedEntity(
+      'Campaign',
+      campaign,
+      targetLanguage
+    )
+
+    return NextResponse.json({
+      ...translatedCampaign,
+      _meta: { language: targetLanguage },
+    })
+  } catch (error) {
+    console.error('Error fetching campaign:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = (session.user as any).id
+
+    // Check if campaign exists and user owns it
+    const existingCampaign = await prisma.campaign.findUnique({
+      where: { id: params.id },
+      include: {
+        brand: true,
+      },
+    })
+
+    if (!existingCampaign) {
+      return NextResponse.json({ message: 'Campaign not found' }, { status: 404 })
+    }
+
+    if (existingCampaign.brand.userId !== userId) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+    }
+
+    const data = await req.json()
+
+    // Update campaign
+    const campaign = await prisma.campaign.update({
+      where: { id: params.id },
+      data: {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        deadline: data.deadline ? new Date(data.deadline) : undefined,
+        campaignStartDate: data.campaignStartDate ? new Date(data.campaignStartDate) : undefined,
+        campaignEndDate: data.campaignEndDate ? new Date(data.campaignEndDate) : undefined,
+        totalSlots: data.totalSlots,
+        compensationType: data.compensationType,
+        paymentMin: data.paymentMin,
+        paymentMax: data.paymentMax,
+        giftDescription: data.giftDescription,
+        giftValue: data.giftValue,
+        requiresProductPurchase: data.requiresProductPurchase,
+        productPurchaseAmount: data.productPurchaseAmount,
+        isProductReimbursed: data.isProductReimbursed,
+        contentType: data.contentType,
+        contentGuidelines: data.contentGuidelines,
+        wordCountMin: data.wordCountMin,
+        wordCountMax: data.wordCountMax,
+        hashtagsRequired: data.hashtagsRequired,
+        mentionsRequired: data.mentionsRequired,
+        images: data.images,
+        publishedAt: data.status === 'ACTIVE' && !existingCampaign.publishedAt ? new Date() : undefined,
+      },
+    })
+
+    // Update platforms if provided
+    if (data.platformIds !== undefined) {
+      await prisma.campaignPlatform.deleteMany({
+        where: { campaignId: params.id },
+      })
+      if (data.platformIds.length > 0) {
+        await prisma.campaignPlatform.createMany({
+          data: data.platformIds.map((platformId: number) => ({
+            campaignId: params.id,
+            platformId,
+          })),
+        })
+      }
+    }
+
+    // Update categories if provided
+    if (data.categoryIds !== undefined) {
+      await prisma.campaignCategory.deleteMany({
+        where: { campaignId: params.id },
+      })
+      if (data.categoryIds.length > 0) {
+        await prisma.campaignCategory.createMany({
+          data: data.categoryIds.map((categoryId: number) => ({
+            campaignId: params.id,
+            categoryId,
+          })),
+        })
+      }
+    }
+
+    // Update follower requirements if provided
+    if (data.followerRequirements !== undefined) {
+      await prisma.campaignFollowerRequirement.deleteMany({
+        where: { campaignId: params.id },
+      })
+      if (data.followerRequirements.length > 0) {
+        await prisma.campaignFollowerRequirement.createMany({
+          data: data.followerRequirements.map((req: any) => ({
+            campaignId: params.id,
+            platformId: req.platformId,
+            minFollowers: req.minFollowers || 0,
+            maxFollowers: req.maxFollowers,
+            minEngagementRate: req.minEngagementRate,
+          })),
+        })
+      }
+    }
+
+    // Fetch updated campaign with relations
+    const updatedCampaign = await prisma.campaign.findUnique({
+      where: { id: params.id },
+      include: {
+        brand: true,
+        categories: { include: { category: true } },
+        platforms: { include: { platform: true } },
+        followerRequirements: { include: { platform: true } },
+      },
+    })
+
+    return NextResponse.json(updatedCampaign)
+  } catch (error) {
+    console.error('Error updating campaign:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = (session.user as any).id
+
+    // Check if campaign exists and user owns it
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: params.id },
+      include: {
+        brand: true,
+      },
+    })
+
+    if (!campaign) {
+      return NextResponse.json({ message: 'Campaign not found' }, { status: 404 })
+    }
+
+    if (campaign.brand.userId !== userId) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+    }
+
+    // Soft delete by setting status to CANCELLED
+    await prisma.campaign.update({
+      where: { id: params.id },
+      data: { status: 'CANCELLED' },
+    })
+
+    return NextResponse.json({ message: 'Campaign cancelled successfully' })
+  } catch (error) {
+    console.error('Error deleting campaign:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

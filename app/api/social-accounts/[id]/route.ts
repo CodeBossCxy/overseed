@@ -1,0 +1,103 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+// PATCH: Update social account
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = (session.user as any).id
+
+    // Check if user owns this social account
+    const socialAccount = await prisma.influencerSocialAccount.findUnique({
+      where: { id: params.id },
+      include: {
+        influencer: true,
+      },
+    })
+
+    if (!socialAccount) {
+      return NextResponse.json({ message: 'Social account not found' }, { status: 404 })
+    }
+
+    if (socialAccount.influencer.userId !== userId) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+    }
+
+    const data = await req.json()
+
+    const updated = await prisma.influencerSocialAccount.update({
+      where: { id: params.id },
+      data: {
+        username: data.username,
+        profileUrl: data.profileUrl,
+        followerCount: data.followerCount,
+        engagementRate: data.engagementRate,
+      },
+      include: {
+        platform: true,
+      },
+    })
+
+    return NextResponse.json(updated)
+  } catch (error) {
+    console.error('Error updating social account:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE: Unlink social account
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = (session.user as any).id
+
+    // Check if user owns this social account
+    const socialAccount = await prisma.influencerSocialAccount.findUnique({
+      where: { id: params.id },
+      include: {
+        influencer: true,
+      },
+    })
+
+    if (!socialAccount) {
+      return NextResponse.json({ message: 'Social account not found' }, { status: 404 })
+    }
+
+    if (socialAccount.influencer.userId !== userId) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+    }
+
+    await prisma.influencerSocialAccount.delete({
+      where: { id: params.id },
+    })
+
+    return NextResponse.json({ message: 'Social account unlinked successfully' })
+  } catch (error) {
+    console.error('Error unlinking social account:', error)
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

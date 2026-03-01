@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "home": "首页",
+    "browse": "浏览",
+    "create": "发布信息",
+    "login": "登录",
+    "signup": "注册",
+    "logout": "退出",
+    "profile": "个人中心",
+    "brandCenter": "品牌中心",
+    "creatorCenter": "达人中心",
+    "alerts": "提醒"
+  },
+  "footer": {
+    "about": "关于我们",
+    "terms": "服务条款",
+    "privacy": "隐私政策",
+    "contact": "联系我们",
+    "copyright": "© 2024 Overseed. 版权所有。"
+  },
+  "buttons": {
+    "save": "保存",
+    "cancel": "取消",
+    "submit": "提交",
+    "delete": "删除",
+    "edit": "编辑",
+    "apply": "报名",
+    "search": "搜索",
+    "filter": "筛选",
+    "clear": "清除",
+    "viewMore": "查看更多",
+    "loadMore": "加载更多"
+  },
+  "userTypes": {
+    "brand": "品牌方",
+    "creator": "达人",
+    "both": "两者"
+  },
+  "categories": {
+    "all": "全部",
+    "fashion": "时尚",
+    "beauty": "美妆",
+    "tech": "科技",
+    "food": "美食",
+    "travel": "旅游",
+    "fitness": "健身",
+    "lifestyle": "生活方式",
+    "gaming": "游戏"
+  }
+}

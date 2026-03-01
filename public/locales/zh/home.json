@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "连接全球品牌与达人",
+    "subtitle": "Overseed 帮助品牌找到完美的达人，让创作者发现精彩的合作机会",
+    "brandCTA": "我是品牌方",
+    "creatorCTA": "我是达人"
+  },
+  "search": {
+    "placeholder": "搜索合作机会...",
+    "location": "地区",
+    "category": "分类",
+    "searchButton": "搜索"
+  },
+  "filters": {
+    "all": "全部",
+    "highReward": "高奖励",
+    "urgent": "急招",
+    "platformPay": "平台结算",
+    "directBrand": "品牌直招"
+  },
+  "latestPosts": {
+    "title": "最新发布",
+    "noResults": "暂无信息",
+    "featured": "精选",
+    "new": "新"
+  },
+  "announcement": {
+    "title": "公告",
+    "default": "欢迎来到 Overseed！立即开始与品牌和达人建立联系。"
+  }
+}

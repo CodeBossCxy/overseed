@@ -1,0 +1,665 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+interface Category {
+  id: number
+  name: string
+  slug: string
+}
+
+interface Platform {
+  id: number
+  name: string
+  slug: string
+}
+
+interface CampaignFormProps {
+  categories: Category[]
+  platforms: Platform[]
+  initialData?: any
+  isEditing?: boolean
+}
+
+export default function CampaignForm({
+  categories,
+  platforms,
+  initialData,
+  isEditing = false,
+}: CampaignFormProps) {
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [step, setStep] = useState(1)
+
+  const [formData, setFormData] = useState({
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    status: initialData?.status || 'DRAFT',
+    deadline: initialData?.deadline ? new Date(initialData.deadline).toISOString().split('T')[0] : '',
+    campaignStartDate: initialData?.campaignStartDate ? new Date(initialData.campaignStartDate).toISOString().split('T')[0] : '',
+    campaignEndDate: initialData?.campaignEndDate ? new Date(initialData.campaignEndDate).toISOString().split('T')[0] : '',
+    totalSlots: initialData?.totalSlots || 10,
+    compensationType: initialData?.compensationType || 'PAID',
+    paymentMin: initialData?.paymentMin || '',
+    paymentMax: initialData?.paymentMax || '',
+    giftDescription: initialData?.giftDescription || '',
+    giftValue: initialData?.giftValue || '',
+    requiresProductPurchase: initialData?.requiresProductPurchase || false,
+    productPurchaseAmount: initialData?.productPurchaseAmount || '',
+    isProductReimbursed: initialData?.isProductReimbursed || false,
+    contentType: initialData?.contentType || 'ANY',
+    contentGuidelines: initialData?.contentGuidelines || '',
+    wordCountMin: initialData?.wordCountMin || '',
+    wordCountMax: initialData?.wordCountMax || '',
+    hashtagsRequired: initialData?.hashtagsRequired || '',
+    mentionsRequired: initialData?.mentionsRequired || '',
+    categoryIds: initialData?.categories?.map((c: any) => c.category.id) || [],
+    platformIds: initialData?.platforms?.map((p: any) => p.platform.id) || [],
+    followerRequirements: initialData?.followerRequirements?.map((r: any) => ({
+      platformId: r.platform.id,
+      minFollowers: r.minFollowers,
+      maxFollowers: r.maxFollowers,
+    })) || [],
+    images: initialData?.images || [],
+  })
+
+  const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      const submitData = {
+        ...formData,
+        status: asDraft ? 'DRAFT' : 'PENDING_REVIEW',
+        paymentMin: formData.paymentMin ? parseFloat(formData.paymentMin) : null,
+        paymentMax: formData.paymentMax ? parseFloat(formData.paymentMax) : null,
+        giftValue: formData.giftValue ? parseFloat(formData.giftValue) : null,
+        productPurchaseAmount: formData.productPurchaseAmount ? parseFloat(formData.productPurchaseAmount) : null,
+        wordCountMin: formData.wordCountMin ? parseInt(formData.wordCountMin) : null,
+        wordCountMax: formData.wordCountMax ? parseInt(formData.wordCountMax) : null,
+        deadline: formData.deadline || null,
+        campaignStartDate: formData.campaignStartDate || null,
+        campaignEndDate: formData.campaignEndDate || null,
+      }
+
+      const url = isEditing ? `/api/campaigns/${initialData.id}` : '/api/campaigns'
+      const method = isEditing ? 'PATCH' : 'POST'
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Failed to save campaign')
+      }
+
+      const campaign = await response.json()
+      router.push(`/dashboard/brand/campaigns/${campaign.id}`)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCategoryToggle = (id: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryIds: prev.categoryIds.includes(id)
+        ? prev.categoryIds.filter((cid: number) => cid !== id)
+        : [...prev.categoryIds, id],
+    }))
+  }
+
+  const handlePlatformToggle = (id: number) => {
+    setFormData((prev) => {
+      const newPlatformIds = prev.platformIds.includes(id)
+        ? prev.platformIds.filter((pid: number) => pid !== id)
+        : [...prev.platformIds, id]
+
+      // Update follower requirements to match selected platforms
+      const newRequirements = newPlatformIds.map((pid: number) => {
+        const existing = prev.followerRequirements.find((r: any) => r.platformId === pid)
+        return existing || { platformId: pid, minFollowers: 0, maxFollowers: null }
+      })
+
+      return {
+        ...prev,
+        platformIds: newPlatformIds,
+        followerRequirements: newRequirements,
+      }
+    })
+  }
+
+  const updateFollowerRequirement = (platformId: number, field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      followerRequirements: prev.followerRequirements.map((r: any) =>
+        r.platformId === platformId ? { ...r, [field]: value } : r
+      ),
+    }))
+  }
+
+  const renderStep1 = () => (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold">Basic Information</h2>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Campaign Title *</label>
+        <input
+          type="text"
+          required
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+          placeholder="e.g., Summer Beauty Campaign"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Description</label>
+        <textarea
+          rows={6}
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+          placeholder="Describe your campaign, what you're looking for, and any important details..."
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Categories *</label>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => handleCategoryToggle(cat.id)}
+              className={`px-3 py-1.5 rounded-full text-sm transition ${
+                formData.categoryIds.includes(cat.id)
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Application Deadline</label>
+          <input
+            type="date"
+            value={formData.deadline}
+            onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Number of Spots</label>
+          <input
+            type="number"
+            min="1"
+            value={formData.totalSlots}
+            onChange={(e) => setFormData({ ...formData, totalSlots: parseInt(e.target.value) || 1 })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Campaign Start Date</label>
+          <input
+            type="date"
+            value={formData.campaignStartDate}
+            onChange={(e) => setFormData({ ...formData, campaignStartDate: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Campaign End Date</label>
+          <input
+            type="date"
+            value={formData.campaignEndDate}
+            onChange={(e) => setFormData({ ...formData, campaignEndDate: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+      </div>
+
+      {/* Campaign Images */}
+      <div>
+        <label className="block text-sm font-medium mb-2">Campaign Images</label>
+        <p className="text-sm text-gray-500 mb-3">Add images to showcase your products or campaign visuals</p>
+
+        {/* Image Preview */}
+        {formData.images.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            {formData.images.map((url: string, index: number) => (
+              <div key={index} className="relative group">
+                <img
+                  src={url}
+                  alt={`Campaign image ${index + 1}`}
+                  className="w-full h-24 object-cover rounded-lg border"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Invalid+URL'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData({
+                      ...formData,
+                      images: formData.images.filter((_: string, i: number) => i !== index),
+                    })
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add Image Input */}
+        <div className="flex gap-2">
+          <input
+            type="url"
+            id="newImageUrl"
+            placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                const input = e.target as HTMLInputElement
+                if (input.value.trim()) {
+                  setFormData({
+                    ...formData,
+                    images: [...formData.images, input.value.trim()],
+                  })
+                  input.value = ''
+                }
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const input = document.getElementById('newImageUrl') as HTMLInputElement
+              if (input.value.trim()) {
+                setFormData({
+                  ...formData,
+                  images: [...formData.images, input.value.trim()],
+                })
+                input.value = ''
+              }
+            }}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition"
+          >
+            Add
+          </button>
+        </div>
+        <p className="text-xs text-gray-400 mt-1">Press Enter or click Add to include the image</p>
+      </div>
+    </div>
+  )
+
+  const renderStep2 = () => (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold">Compensation</h2>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Compensation Type *</label>
+        <div className="space-y-2">
+          {[
+            { value: 'PAID', label: 'Paid', desc: 'Monetary compensation' },
+            { value: 'GIFTED', label: 'Gifted', desc: 'Product/service only' },
+            { value: 'PAID_PLUS_GIFT', label: 'Paid + Gift', desc: 'Both payment and product' },
+            { value: 'AFFILIATE', label: 'Affiliate', desc: 'Commission-based' },
+            { value: 'NEGOTIABLE', label: 'Negotiable', desc: 'Open to discussion' },
+          ].map((option) => (
+            <label key={option.value} className="flex items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-gray-50">
+              <input
+                type="radio"
+                name="compensationType"
+                value={option.value}
+                checked={formData.compensationType === option.value}
+                onChange={(e) => setFormData({ ...formData, compensationType: e.target.value })}
+                className="mt-1"
+              />
+              <div>
+                <span className="font-medium">{option.label}</span>
+                <p className="text-sm text-gray-500">{option.desc}</p>
+              </div>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {['PAID', 'PAID_PLUS_GIFT', 'NEGOTIABLE'].includes(formData.compensationType) && (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Payment Min ($)</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.paymentMin}
+              onChange={(e) => setFormData({ ...formData, paymentMin: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Payment Max ($)</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.paymentMax}
+              onChange={(e) => setFormData({ ...formData, paymentMax: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+              placeholder="0"
+            />
+          </div>
+        </div>
+      )}
+
+      {['GIFTED', 'PAID_PLUS_GIFT'].includes(formData.compensationType) && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Gift Description</label>
+            <input
+              type="text"
+              value={formData.giftDescription}
+              onChange={(e) => setFormData({ ...formData, giftDescription: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+              placeholder="e.g., Full skincare set"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Gift Value ($)</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.giftValue}
+              onChange={(e) => setFormData({ ...formData, giftValue: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+              placeholder="0"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="p-4 bg-gray-50 rounded-lg space-y-3">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={formData.requiresProductPurchase}
+            onChange={(e) => setFormData({ ...formData, requiresProductPurchase: e.target.checked })}
+            className="rounded"
+          />
+          <span className="text-sm font-medium">Requires product purchase</span>
+        </label>
+        {formData.requiresProductPurchase && (
+          <>
+            <div>
+              <label className="block text-sm font-medium mb-1">Purchase Amount ($)</label>
+              <input
+                type="number"
+                min="0"
+                value={formData.productPurchaseAmount}
+                onChange={(e) => setFormData({ ...formData, productPurchaseAmount: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isProductReimbursed}
+                onChange={(e) => setFormData({ ...formData, isProductReimbursed: e.target.checked })}
+                className="rounded"
+              />
+              <span className="text-sm">Purchase will be reimbursed</span>
+            </label>
+          </>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderStep3 = () => (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold">Platform & Requirements</h2>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Target Platforms *</label>
+        <div className="flex flex-wrap gap-2">
+          {platforms.map((plat) => (
+            <button
+              key={plat.id}
+              type="button"
+              onClick={() => handlePlatformToggle(plat.id)}
+              className={`px-4 py-2 rounded-md text-sm transition ${
+                formData.platformIds.includes(plat.id)
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {plat.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {formData.followerRequirements.length > 0 && (
+        <div className="space-y-4">
+          <label className="block text-sm font-medium">Follower Requirements by Platform</label>
+          {formData.followerRequirements.map((req: any) => {
+            const platform = platforms.find((p) => p.id === req.platformId)
+            return (
+              <div key={req.platformId} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <span className="w-24 font-medium">{platform?.name}</span>
+                <div className="flex-1 grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Min Followers</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={req.minFollowers}
+                      onChange={(e) => updateFollowerRequirement(req.platformId, 'minFollowers', parseInt(e.target.value) || 0)}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Max Followers (optional)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={req.maxFollowers || ''}
+                      onChange={(e) => updateFollowerRequirement(req.platformId, 'maxFollowers', e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+                      placeholder="No limit"
+                    />
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Content Type</label>
+        <select
+          value={formData.contentType}
+          onChange={(e) => setFormData({ ...formData, contentType: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="ANY">Any Format</option>
+          <option value="IMAGE_POST">Image Post</option>
+          <option value="VIDEO">Video</option>
+          <option value="STORY">Story</option>
+          <option value="REEL">Reel</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Content Guidelines</label>
+        <textarea
+          rows={4}
+          value={formData.contentGuidelines}
+          onChange={(e) => setFormData({ ...formData, contentGuidelines: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+          placeholder="Describe your content requirements, do's and don'ts..."
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Required Hashtags</label>
+          <input
+            type="text"
+            value={formData.hashtagsRequired}
+            onChange={(e) => setFormData({ ...formData, hashtagsRequired: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+            placeholder="#brand #campaign"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Required Mentions</label>
+          <input
+            type="text"
+            value={formData.mentionsRequired}
+            onChange={(e) => setFormData({ ...formData, mentionsRequired: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+            placeholder="@brandname"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Min Word Count</label>
+          <input
+            type="number"
+            min="0"
+            value={formData.wordCountMin}
+            onChange={(e) => setFormData({ ...formData, wordCountMin: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+            placeholder="No minimum"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Max Word Count</label>
+          <input
+            type="number"
+            min="0"
+            value={formData.wordCountMax}
+            onChange={(e) => setFormData({ ...formData, wordCountMax: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
+            placeholder="No maximum"
+          />
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <form onSubmit={(e) => handleSubmit(e, false)} className="max-w-3xl mx-auto">
+      {/* Progress Steps */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex items-center">
+              <button
+                type="button"
+                onClick={() => setStep(s)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition ${
+                  step === s
+                    ? 'bg-primary-600 text-white'
+                    : step > s
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-200 text-gray-600'
+                }`}
+              >
+                {step > s ? '✓' : s}
+              </button>
+              {s < 3 && (
+                <div className={`w-24 md:w-32 h-1 mx-2 ${step > s ? 'bg-green-500' : 'bg-gray-200'}`} />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-2 text-sm text-gray-600">
+          <span>Basic Info</span>
+          <span>Compensation</span>
+          <span>Requirements</span>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
+
+      {/* Form Steps */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        {step === 1 && renderStep1()}
+        {step === 2 && renderStep2()}
+        {step === 3 && renderStep3()}
+      </div>
+
+      {/* Navigation */}
+      <div className="mt-6 flex items-center justify-between">
+        <div>
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={() => setStep(step - 1)}
+              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+            >
+              Back
+            </button>
+          )}
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={(e) => handleSubmit(e, true)}
+            disabled={isSubmitting}
+            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition disabled:opacity-50"
+          >
+            Save as Draft
+          </button>
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={() => setStep(step + 1)}
+              className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition disabled:opacity-50"
+            >
+              {isSubmitting ? 'Saving...' : isEditing ? 'Update Campaign' : 'Submit for Review'}
+            </button>
+          )}
+        </div>
+      </div>
+    </form>
+  )
+}
