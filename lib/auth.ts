@@ -42,8 +42,8 @@ function WeChatProvider(options: {
       url: 'https://api.weixin.qq.com/sns/userinfo',
       async request({ tokens, provider }) {
         const url = new URL('https://api.weixin.qq.com/sns/userinfo')
-        url.searchParams.append('access_token', tokens.access_token!)
-        url.searchParams.append('openid', tokens.openid)
+        url.searchParams.append('access_token', tokens.access_token as string)
+        url.searchParams.append('openid', tokens.openid as string)
         url.searchParams.append('lang', 'en')
 
         const response = await fetch(url.toString())
