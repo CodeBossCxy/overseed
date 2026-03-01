@@ -92,7 +92,7 @@ export default function CampaignDetail({
   const spotsLeft = campaign.totalSlots - campaign.filledSlots
   const isDeadlinePassed = campaign.deadline && new Date(campaign.deadline) < new Date()
 
-  const getContentTypeLabel = (type: string | null) => {
+  const getContentTypeLabel = (type: string | null | undefined) => {
     const types: Record<string, string> = {
       IMAGE_POST: 'Image Post',
       VIDEO: 'Video',
