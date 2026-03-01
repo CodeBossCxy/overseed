@@ -73,7 +73,7 @@ export default function CampaignForm({
     try {
       const submitData = {
         ...formData,
-        status: asDraft ? 'DRAFT' : 'PENDING_REVIEW',
+        status: asDraft ? 'DRAFT' : 'ACTIVE',
         paymentMin: formData.paymentMin ? parseFloat(formData.paymentMin) : null,
         paymentMax: formData.paymentMax ? parseFloat(formData.paymentMax) : null,
         giftValue: formData.giftValue ? parseFloat(formData.giftValue) : null,
