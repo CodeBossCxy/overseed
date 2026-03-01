@@ -6,11 +6,12 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-export default async function CampaignDetailPage({ params }: { params: { id: string } }) {
+export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       brand: {
         select: {
@@ -83,7 +84,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
       const application = await prisma.application.findUnique({
         where: {
           campaignId_influencerId: {
-            campaignId: params.id,
+            campaignId: id,
             influencerId: influencerProfile.id,
           },
         },
@@ -95,7 +96,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         where: {
           influencerId_campaignId: {
             influencerId: influencerProfile.id,
-            campaignId: params.id,
+            campaignId: id,
           },
         },
       })
@@ -105,7 +106,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
 
   // Increment view count
   await prisma.campaign.update({
-    where: { id: params.id },
+    where: { id: id },
     data: { viewCount: { increment: 1 } },
   })
 
@@ -114,7 +115,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const similarCampaigns = await prisma.campaign.findMany({
     where: {
       status: 'ACTIVE',
-      id: { not: params.id },
+      id: { not: id },
       categories: {
         some: {
           categoryId: { in: categoryIds },

@@ -6,7 +6,8 @@ import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import CompensationBadge from '@/components/campaigns/CompensationBadge'
 
-export default async function BrandCampaignDetailPage({ params }: { params: { id: string } }) {
+export default async function BrandCampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
@@ -16,7 +17,7 @@ export default async function BrandCampaignDetailPage({ params }: { params: { id
   const userId = (session.user as any).id
 
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: {
       brand: true,
       categories: {
@@ -54,7 +55,7 @@ export default async function BrandCampaignDetailPage({ params }: { params: { id
   // Get application stats
   const applicationStats = await prisma.application.groupBy({
     by: ['status'],
-    where: { campaignId: params.id },
+    where: { campaignId: id },
     _count: true,
   })
 

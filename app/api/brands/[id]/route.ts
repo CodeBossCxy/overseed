@@ -4,11 +4,12 @@ import { prisma } from '@/lib/prisma'
 // GET: Public brand profile
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const brand = await prisma.brandProfile.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -57,7 +58,7 @@ export async function GET(
     const completedCollaborations = await prisma.application.count({
       where: {
         campaign: {
-          brandId: params.id,
+          brandId: id,
         },
         status: 'COMPLETED',
       },

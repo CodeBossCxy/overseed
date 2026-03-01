@@ -4,11 +4,12 @@ import { prisma } from '@/lib/prisma'
 // GET: Public influencer profile
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const influencer = await prisma.influencerProfile.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -39,7 +40,7 @@ export async function GET(
     // Get completed campaigns count
     const completedCount = await prisma.application.count({
       where: {
-        influencerId: params.id,
+        influencerId: id,
         status: 'COMPLETED',
       },
     })

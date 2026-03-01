@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma'
 // GET: Get single application details
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -18,7 +19,7 @@ export async function GET(
     const userId = (session.user as any).id
 
     const application = await prisma.application.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         campaign: {
           include: {
@@ -76,9 +77,10 @@ export async function GET(
 // PATCH: Update application status (brand approves/rejects or influencer updates)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -88,7 +90,7 @@ export async function PATCH(
     const userId = (session.user as any).id
 
     const application = await prisma.application.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         campaign: {
           include: {
@@ -151,7 +153,7 @@ export async function PATCH(
       }
 
       const updated = await prisma.application.update({
-        where: { id: params.id },
+        where: { id },
         data: updateData,
         include: {
           campaign: {
@@ -202,7 +204,7 @@ export async function PATCH(
       }
 
       const updated = await prisma.application.update({
-        where: { id: params.id },
+        where: { id },
         data: updateData,
         include: {
           campaign: {
@@ -239,9 +241,10 @@ export async function PATCH(
 // DELETE: Withdraw application (influencer only)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -251,7 +254,7 @@ export async function DELETE(
     const userId = (session.user as any).id
 
     const application = await prisma.application.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         influencer: true,
       },
@@ -275,7 +278,7 @@ export async function DELETE(
 
     // Update status to WITHDRAWN instead of deleting
     await prisma.application.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: 'WITHDRAWN' },
     })
 

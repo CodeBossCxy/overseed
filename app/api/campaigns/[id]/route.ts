@@ -7,15 +7,16 @@ import { SupportedLanguage, isSupportedLanguage } from '@/lib/db/translations'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { searchParams } = new URL(req.url)
     const lang = searchParams.get('lang') || 'en'
     const targetLanguage: SupportedLanguage = isSupportedLanguage(lang) ? lang : 'en'
 
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         brand: {
           select: {
@@ -70,7 +71,7 @@ export async function GET(
 
     // Increment view count
     await prisma.campaign.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { viewCount: { increment: 1 } },
     })
 
@@ -96,9 +97,10 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -109,7 +111,7 @@ export async function PATCH(
 
     // Check if campaign exists and user owns it
     const existingCampaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         brand: true,
       },
@@ -127,7 +129,7 @@ export async function PATCH(
 
     // Update campaign
     const campaign = await prisma.campaign.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         title: data.title,
         description: data.description,
@@ -158,12 +160,12 @@ export async function PATCH(
     // Update platforms if provided
     if (data.platformIds !== undefined) {
       await prisma.campaignPlatform.deleteMany({
-        where: { campaignId: params.id },
+        where: { campaignId: id },
       })
       if (data.platformIds.length > 0) {
         await prisma.campaignPlatform.createMany({
           data: data.platformIds.map((platformId: number) => ({
-            campaignId: params.id,
+            campaignId: id,
             platformId,
           })),
         })
@@ -173,12 +175,12 @@ export async function PATCH(
     // Update categories if provided
     if (data.categoryIds !== undefined) {
       await prisma.campaignCategory.deleteMany({
-        where: { campaignId: params.id },
+        where: { campaignId: id },
       })
       if (data.categoryIds.length > 0) {
         await prisma.campaignCategory.createMany({
           data: data.categoryIds.map((categoryId: number) => ({
-            campaignId: params.id,
+            campaignId: id,
             categoryId,
           })),
         })
@@ -188,12 +190,12 @@ export async function PATCH(
     // Update follower requirements if provided
     if (data.followerRequirements !== undefined) {
       await prisma.campaignFollowerRequirement.deleteMany({
-        where: { campaignId: params.id },
+        where: { campaignId: id },
       })
       if (data.followerRequirements.length > 0) {
         await prisma.campaignFollowerRequirement.createMany({
           data: data.followerRequirements.map((req: any) => ({
-            campaignId: params.id,
+            campaignId: id,
             platformId: req.platformId,
             minFollowers: req.minFollowers || 0,
             maxFollowers: req.maxFollowers,
@@ -205,7 +207,7 @@ export async function PATCH(
 
     // Fetch updated campaign with relations
     const updatedCampaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         brand: true,
         categories: { include: { category: true } },
@@ -226,9 +228,10 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -239,7 +242,7 @@ export async function DELETE(
 
     // Check if campaign exists and user owns it
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         brand: true,
       },
@@ -255,7 +258,7 @@ export async function DELETE(
 
     // Soft delete by setting status to CANCELLED
     await prisma.campaign.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { status: 'CANCELLED' },
     })
 

@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma'
 // GET: View all applications for a campaign (brand only)
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -19,7 +20,7 @@ export async function GET(
 
     // Check if campaign exists and user owns it
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         brand: true,
       },
@@ -36,7 +37,7 @@ export async function GET(
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
 
-    const where: any = { campaignId: params.id }
+    const where: any = { campaignId: id }
     if (status) {
       where.status = status
     }

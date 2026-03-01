@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma'
 // POST: Apply to a campaign (influencer only)
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -31,7 +32,7 @@ export async function POST(
 
     // Check if campaign exists and is active
     const campaign = await prisma.campaign.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         followerRequirements: true,
       },
@@ -68,7 +69,7 @@ export async function POST(
     const existingApplication = await prisma.application.findUnique({
       where: {
         campaignId_influencerId: {
-          campaignId: params.id,
+          campaignId: id,
           influencerId: influencerProfile.id,
         },
       },
@@ -86,7 +87,7 @@ export async function POST(
     // Create application
     const application = await prisma.application.create({
       data: {
-        campaignId: params.id,
+        campaignId: id,
         influencerId: influencerProfile.id,
         socialAccountId: data.socialAccountId,
         pitchMessage: data.pitchMessage,

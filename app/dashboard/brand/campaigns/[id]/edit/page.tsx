@@ -5,7 +5,8 @@ import { authOptions } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 
-export default async function EditCampaignPage({ params }: { params: { id: string } }) {
+export default async function EditCampaignPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
@@ -16,7 +17,7 @@ export default async function EditCampaignPage({ params }: { params: { id: strin
 
   // Fetch campaign with all relations
   const campaign = await prisma.campaign.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: {
       brand: true,
       categories: { include: { category: true } },

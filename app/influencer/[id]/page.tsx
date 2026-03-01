@@ -3,9 +3,10 @@ import InfluencerProfile from '@/components/profiles/InfluencerProfile'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
-export default async function InfluencerProfilePage({ params }: { params: { id: string } }) {
+export default async function InfluencerProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const influencer = await prisma.influencerProfile.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       user: {
         select: {
@@ -32,7 +33,7 @@ export default async function InfluencerProfilePage({ params }: { params: { id: 
   // Get completed campaigns count
   const completedCampaigns = await prisma.application.count({
     where: {
-      influencerId: params.id,
+      influencerId: id,
       status: 'COMPLETED',
     },
   })

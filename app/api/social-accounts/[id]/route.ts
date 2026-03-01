@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma'
 // PATCH: Update social account
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -19,7 +20,7 @@ export async function PATCH(
 
     // Check if user owns this social account
     const socialAccount = await prisma.influencerSocialAccount.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         influencer: true,
       },
@@ -36,7 +37,7 @@ export async function PATCH(
     const data = await req.json()
 
     const updated = await prisma.influencerSocialAccount.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         username: data.username,
         profileUrl: data.profileUrl,
@@ -61,9 +62,10 @@ export async function PATCH(
 // DELETE: Unlink social account
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user) {
@@ -74,7 +76,7 @@ export async function DELETE(
 
     // Check if user owns this social account
     const socialAccount = await prisma.influencerSocialAccount.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         influencer: true,
       },
@@ -89,7 +91,7 @@ export async function DELETE(
     }
 
     await prisma.influencerSocialAccount.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ message: 'Social account unlinked successfully' })
