@@ -31,11 +31,11 @@ async function uploadToS3(buffer: Buffer, key: string, contentType: string): Pro
       Key: key,
       Body: buffer,
       ContentType: contentType,
-      ACL: 'public-read',
     })
   )
 
-  return `https://${process.env.S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+  // Return a proxy path served by our own API, no S3 public access needed
+  return `/api/s3-image/${key}`
 }
 
 async function uploadToLocal(buffer: Buffer, filename: string): Promise<string> {
