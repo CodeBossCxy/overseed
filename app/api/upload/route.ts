@@ -31,6 +31,7 @@ async function uploadToS3(buffer: Buffer, key: string, contentType: string): Pro
       Key: key,
       Body: buffer,
       ContentType: contentType,
+      ACL: 'public-read',
     })
   )
 
