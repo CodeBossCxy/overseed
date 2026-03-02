@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import CampaignCard from './campaigns/CampaignCard'
 
@@ -42,7 +43,10 @@ interface Campaign {
 }
 
 export default function HomePage({ campaigns: initialCampaigns }: { campaigns: Campaign[] }) {
+  const { data: session } = useSession()
   const { t, locale } = useLanguage()
+  const userType = (session?.user as any)?.userType
+  const dashboardLink = userType === 'BRAND' ? '/dashboard/brand' : '/dashboard/influencer'
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -76,21 +80,32 @@ export default function HomePage({ campaigns: initialCampaigns }: { campaigns: C
             {t.home.hero.subtitle}
           </p>
 
-          {/* Dual CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/auth/signup?type=brand"
-              className="px-8 py-4 bg-white text-primary-600 rounded-lg font-semibold text-lg hover:bg-gray-100 transition w-full sm:w-auto"
-            >
-              {t.home.hero.brandCTA}
-            </Link>
-            <Link
-              href="/auth/signup?type=influencer"
-              className="px-8 py-4 bg-primary-700 text-white rounded-lg font-semibold text-lg hover:bg-primary-600 transition border-2 border-white w-full sm:w-auto"
-            >
-              {t.home.hero.creatorCTA}
-            </Link>
-          </div>
+          {/* CTAs — hide role-selection buttons once the user has an account */}
+          {session ? (
+            <div className="flex justify-center">
+              <Link
+                href={dashboardLink}
+                className="px-8 py-4 bg-white text-primary-600 rounded-lg font-semibold text-lg hover:bg-gray-100 transition"
+              >
+                {t.nav.myCenter}
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                href="/auth/signup?type=brand"
+                className="px-8 py-4 bg-white text-primary-600 rounded-lg font-semibold text-lg hover:bg-gray-100 transition w-full sm:w-auto"
+              >
+                {t.home.hero.brandCTA}
+              </Link>
+              <Link
+                href="/auth/signup?type=influencer"
+                className="px-8 py-4 bg-primary-700 text-white rounded-lg font-semibold text-lg hover:bg-primary-600 transition border-2 border-white w-full sm:w-auto"
+              >
+                {t.home.hero.creatorCTA}
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 

@@ -119,10 +119,20 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (user) {
         token.id = user.id
         token.userType = (user as any).userType
+      }
+      // Re-read userType from DB when session.update() is called client-side
+      if (trigger === 'update' && token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { userType: true },
+        })
+        if (dbUser) {
+          token.userType = dbUser.userType
+        }
       }
       return token
     },

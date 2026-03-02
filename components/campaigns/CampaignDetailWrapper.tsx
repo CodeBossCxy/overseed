@@ -10,6 +10,7 @@ interface CampaignDetailWrapperProps {
   hasApplied: boolean
   isSaved: boolean
   isAuthenticated: boolean
+  userType?: string | null
 }
 
 export default function CampaignDetailWrapper({
@@ -18,6 +19,7 @@ export default function CampaignDetailWrapper({
   hasApplied,
   isSaved,
   isAuthenticated,
+  userType,
 }: CampaignDetailWrapperProps) {
   const { locale } = useLanguage()
   const [campaign, setCampaign] = useState(initialCampaign)
@@ -65,6 +67,7 @@ export default function CampaignDetailWrapper({
       hasApplied={hasApplied}
       isSaved={isSaved}
       isAuthenticated={isAuthenticated}
+      userType={userType}
     />
   )
 }

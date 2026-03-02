@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import CompensationBadge from './CompensationBadge'
 import CampaignStats from './CampaignStats'
@@ -80,6 +82,7 @@ interface CampaignDetailProps {
   hasApplied?: boolean
   isSaved?: boolean
   isAuthenticated?: boolean
+  userType?: string | null
 }
 
 export default function CampaignDetail({
@@ -88,9 +91,31 @@ export default function CampaignDetail({
   hasApplied = false,
   isSaved = false,
   isAuthenticated = false,
+  userType,
 }: CampaignDetailProps) {
+  const router = useRouter()
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const spotsLeft = campaign.totalSlots - campaign.filledSlots
   const isDeadlinePassed = campaign.deadline && new Date(campaign.deadline) < new Date()
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/campaigns/${campaign.id}`, { method: 'DELETE' })
+      if (res.ok) {
+        router.push('/')
+      } else {
+        alert('Failed to delete campaign')
+      }
+    } catch {
+      alert('Failed to delete campaign')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
+    }
+  }
 
   const getContentTypeLabel = (type: string | null | undefined) => {
     const types: Record<string, string> = {
@@ -335,42 +360,56 @@ export default function CampaignDetail({
                 >
                   Edit Campaign
                 </Link>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full px-4 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition text-center"
+                >
+                  Delete Campaign
+                </button>
               </>
             ) : (
               <>
-                {!isDeadlinePassed && spotsLeft > 0 && (
-                  hasApplied ? (
-                    <button
-                      disabled
-                      className="w-full px-4 py-3 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed text-center font-medium"
-                    >
-                      Already Applied
-                    </button>
-                  ) : isAuthenticated ? (
-                    <Link
-                      href={`/campaign/${campaign.id}/apply`}
-                      className="block w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-center font-medium"
-                    >
-                      Apply Now
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/auth/signin"
-                      className="block w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-center font-medium"
-                    >
-                      Sign In to Apply
-                    </Link>
-                  )
-                )}
-                {isDeadlinePassed && (
-                  <div className="text-center text-red-600 font-medium">
-                    Application deadline has passed
+                {userType === 'BRAND' ? (
+                  <div className="text-center text-gray-500 text-sm py-2">
+                    Only creators can apply to campaigns
                   </div>
-                )}
-                {spotsLeft === 0 && !isDeadlinePassed && (
-                  <div className="text-center text-orange-600 font-medium">
-                    All spots have been filled
-                  </div>
+                ) : (
+                  <>
+                    {!isDeadlinePassed && spotsLeft > 0 && (
+                      hasApplied ? (
+                        <button
+                          disabled
+                          className="w-full px-4 py-3 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed text-center font-medium"
+                        >
+                          Already Applied
+                        </button>
+                      ) : isAuthenticated ? (
+                        <Link
+                          href={`/campaign/${campaign.id}/apply`}
+                          className="block w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-center font-medium"
+                        >
+                          Apply Now
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/auth/signin"
+                          className="block w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-center font-medium"
+                        >
+                          Sign In to Apply
+                        </Link>
+                      )
+                    )}
+                    {isDeadlinePassed && (
+                      <div className="text-center text-red-600 font-medium">
+                        Application deadline has passed
+                      </div>
+                    )}
+                    {spotsLeft === 0 && !isDeadlinePassed && (
+                      <div className="text-center text-orange-600 font-medium">
+                        All spots have been filled
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -413,6 +452,36 @@ export default function CampaignDetail({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Delete Campaign</h3>
+            <p className="text-gray-600 text-sm mb-4">Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

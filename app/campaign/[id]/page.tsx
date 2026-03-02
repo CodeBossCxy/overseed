@@ -158,6 +158,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           hasApplied={hasApplied}
           isSaved={isSaved}
           isAuthenticated={!!session}
+          userType={session ? ((session.user as any).userType || 'INFLUENCER') : null}
         />
 
         {/* Similar Campaigns */}

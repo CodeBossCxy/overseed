@@ -11,6 +11,9 @@ export const translations = {
       brandCenter: 'Brand Center',
       creatorCenter: 'Creator Center',
       alerts: 'Alerts',
+      switchToBrand: 'Switch to Brand',
+      switchToCreator: 'Switch to Creator',
+      switching: 'Switching...',
     },
     home: {
       hero: {
@@ -92,6 +95,9 @@ export const translations = {
       brandCenter: '品牌中心',
       creatorCenter: '达人中心',
       alerts: '提醒',
+      switchToBrand: '切换为品牌方',
+      switchToCreator: '切换为达人',
+      switching: '切换中...',
     },
     home: {
       hero: {

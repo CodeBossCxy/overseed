@@ -14,6 +14,16 @@ export default async function NewCampaignPage() {
 
   const userId = (session.user as any).id
 
+  // Read userType from DB (not JWT session) to avoid stale-token redirects
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { userType: true },
+  })
+
+  if (dbUser?.userType !== 'BRAND') {
+    redirect('/dashboard/influencer')
+  }
+
   // Check if user has a brand profile
   const brandProfile = await prisma.brandProfile.findUnique({
     where: { userId },

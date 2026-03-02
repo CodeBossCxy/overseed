@@ -14,6 +14,17 @@ export default async function BrandDashboardPage() {
 
   const userId = (session.user as any).id
 
+  // Read userType from DB (not JWT session) to avoid stale-token redirects
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { userType: true },
+  })
+  const userType = dbUser?.userType || 'INFLUENCER'
+
+  if (userType === 'INFLUENCER') {
+    redirect('/dashboard/influencer')
+  }
+
   // Get or create brand profile
   let brandProfile = await prisma.brandProfile.findUnique({
     where: { userId },

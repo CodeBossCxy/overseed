@@ -1,0 +1,58 @@
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+type ViewMode = 'BRAND' | 'INFLUENCER'
+
+export function useViewMode() {
+  const { data: session, update } = useSession()
+  const router = useRouter()
+  const [isSwitching, setIsSwitching] = useState(false)
+
+  const currentMode: ViewMode =
+    (session?.user as any)?.userType === 'BRAND' ? 'BRAND' : 'INFLUENCER'
+
+  const isBrand = currentMode === 'BRAND'
+  const isInfluencer = currentMode === 'INFLUENCER'
+
+  const switchView = async (targetMode?: ViewMode) => {
+    const newMode = targetMode ?? (isBrand ? 'INFLUENCER' : 'BRAND')
+    if (newMode === currentMode) return
+
+    setIsSwitching(true)
+    try {
+      const res = await fetch('/api/user/switch-view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ viewMode: newMode }),
+      })
+
+      if (!res.ok) {
+        console.error('Switch view failed:', await res.text())
+        return
+      }
+
+      // Refresh the JWT cookie so it matches the DB
+      await update()
+
+      // Navigate to the correct dashboard
+      const dashboard =
+        newMode === 'BRAND' ? '/dashboard/brand' : '/dashboard/influencer'
+      router.push(dashboard)
+      // Force server components to re-render with fresh data
+      router.refresh()
+    } finally {
+      setIsSwitching(false)
+    }
+  }
+
+  return {
+    currentMode,
+    isBrand,
+    isInfluencer,
+    switchView,
+    isSwitching,
+  }
+}

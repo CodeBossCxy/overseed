@@ -1,5 +1,6 @@
 import Header from './Header'
 import Footer from './Footer'
+import CreateCampaignFAB from './CreateCampaignFAB'
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <Footer />
+      <CreateCampaignFAB />
     </div>
   )
 }

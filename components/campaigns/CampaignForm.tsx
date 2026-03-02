@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Category {
@@ -106,6 +106,98 @@ export default function CampaignForm({
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // ── Image upload state ──
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const uploadFiles = async (files: File[]) => {
+    if (files.length === 0) return
+
+    // Client-side validation
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    const maxSize = 5 * 1024 * 1024
+    const maxTotal = 8
+
+    const remaining = maxTotal - formData.images.length
+    if (remaining <= 0) {
+      setUploadError('Maximum 8 images allowed')
+      return
+    }
+
+    const filesToUpload = files.slice(0, remaining)
+
+    for (const f of filesToUpload) {
+      if (!allowed.includes(f.type)) {
+        setUploadError(`"${f.name}" is not a supported image type (JPEG, PNG, WebP, GIF)`)
+        return
+      }
+      if (f.size > maxSize) {
+        setUploadError(`"${f.name}" exceeds the 5 MB limit`)
+        return
+      }
+    }
+
+    setUploadError(null)
+    setIsUploading(true)
+
+    try {
+      const body = new FormData()
+      filesToUpload.forEach((f) => body.append('files', f))
+
+      const res = await fetch('/api/upload', { method: 'POST', body })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Upload failed')
+      }
+
+      const { urls } = await res.json()
+      setFormData((prev) => ({ ...prev, images: [...prev.images, ...urls] }))
+    } catch (err: any) {
+      setUploadError(err.message)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      uploadFiles(Array.from(e.target.files))
+      e.target.value = '' // reset so same file can be re-selected
+    }
+  }
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDragging(false)
+      if (e.dataTransfer.files) {
+        uploadFiles(Array.from(e.dataTransfer.files))
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [formData.images.length]
+  )
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const removeImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_: string, i: number) => i !== index),
+    }))
   }
 
   const handleCategoryToggle = (id: number) => {
@@ -239,30 +331,31 @@ export default function CampaignForm({
       {/* Campaign Images */}
       <div>
         <label className="block text-sm font-medium mb-2">Campaign Images</label>
-        <p className="text-sm text-gray-500 mb-3">Add images to showcase your products or campaign visuals</p>
+        <p className="text-sm text-gray-500 mb-3">
+          Upload up to 8 images to showcase your products or campaign visuals (JPEG, PNG, WebP, GIF — max 5 MB each)
+        </p>
 
-        {/* Image Preview */}
+        {/* Upload error */}
+        {uploadError && (
+          <div className="mb-3 p-3 text-sm text-red-600 bg-red-50 rounded-md">
+            {uploadError}
+          </div>
+        )}
+
+        {/* Image Preview Grid */}
         {formData.images.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             {formData.images.map((url: string, index: number) => (
-              <div key={index} className="relative group">
+              <div key={index} className="relative group aspect-square">
                 <img
                   src={url}
                   alt={`Campaign image ${index + 1}`}
-                  className="w-full h-24 object-cover rounded-lg border"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Invalid+URL'
-                  }}
+                  className="w-full h-full object-cover rounded-lg border"
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormData({
-                      ...formData,
-                      images: formData.images.filter((_: string, i: number) => i !== index),
-                    })
-                  }}
-                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                  onClick={() => removeImage(index)}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-sm"
                 >
                   ×
                 </button>
@@ -271,45 +364,51 @@ export default function CampaignForm({
           </div>
         )}
 
-        {/* Add Image Input */}
-        <div className="flex gap-2">
-          <input
-            type="url"
-            id="newImageUrl"
-            placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                const input = e.target as HTMLInputElement
-                if (input.value.trim()) {
-                  setFormData({
-                    ...formData,
-                    images: [...formData.images, input.value.trim()],
-                  })
-                  input.value = ''
-                }
-              }
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              const input = document.getElementById('newImageUrl') as HTMLInputElement
-              if (input.value.trim()) {
-                setFormData({
-                  ...formData,
-                  images: [...formData.images, input.value.trim()],
-                })
-                input.value = ''
-              }
-            }}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition"
+        {/* Drop zone + file picker */}
+        {formData.images.length < 8 && (
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition ${
+              isDragging
+                ? 'border-primary-500 bg-primary-50'
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
           >
-            Add
-          </button>
-        </div>
-        <p className="text-xs text-gray-400 mt-1">Press Enter or click Add to include the image</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+
+            {isUploading ? (
+              <div className="flex flex-col items-center gap-2">
+                <svg className="w-8 h-8 text-primary-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <p className="text-sm text-gray-500">Uploading...</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 16v-8m0 0l-3 3m3-3l3 3M2 16.5V18a2 2 0 002 2h16a2 2 0 002-2v-1.5M6 12l-2 2M18 12l2 2" />
+                </svg>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium text-primary-600">Click to upload</span> or drag and drop
+                </p>
+                <p className="text-xs text-gray-400">
+                  {formData.images.length}/8 images added
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
