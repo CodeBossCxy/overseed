@@ -107,6 +107,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials')
         }
 
+        if (!user.emailVerified) {
+          throw new Error('Please verify your email first')
+        }
+
         return user
       },
     }),
