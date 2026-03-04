@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import MainLayout from '@/components/MainLayout'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export default function InfluencerProfilePage() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -119,7 +121,7 @@ export default function InfluencerProfilePage() {
       <MainLayout>
         <div className="max-w-3xl mx-auto px-4 py-12 text-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-gray-500">Loading profile...</p>
+          <p className="mt-4 text-gray-500">{t.influencer.profile.loading}</p>
         </div>
       </MainLayout>
     )
@@ -129,8 +131,8 @@ export default function InfluencerProfilePage() {
     <MainLayout>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Edit Profile</h1>
-          <p className="text-gray-600 mt-1">Update your influencer profile information</p>
+          <h1 className="text-3xl font-bold">{t.influencer.profile.title}</h1>
+          <p className="text-gray-600 mt-1">{t.influencer.profile.subtitle}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
@@ -142,77 +144,77 @@ export default function InfluencerProfilePage() {
 
           {success && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
-              Profile updated successfully!
+              {t.influencer.profile.success}
             </div>
           )}
 
           {/* Display Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">Display Name</label>
+            <label className="block text-sm font-medium mb-1">{t.influencer.profile.displayName}</label>
             <input
               type="text"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Your display name"
+              placeholder={t.influencer.profile.displayNamePlaceholder}
             />
           </div>
 
           {/* Bio */}
           <div>
-            <label className="block text-sm font-medium mb-1">Bio</label>
+            <label className="block text-sm font-medium mb-1">{t.influencer.profile.bio}</label>
             <textarea
               rows={4}
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Tell brands about yourself and your content..."
+              placeholder={t.influencer.profile.bioPlaceholder}
             />
           </div>
 
           {/* Location */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">City</label>
+              <label className="block text-sm font-medium mb-1">{t.influencer.profile.city}</label>
               <input
                 type="text"
                 value={formData.locationCity}
                 onChange={(e) => setFormData({ ...formData, locationCity: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="City"
+                placeholder={t.influencer.profile.city}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">State/Province</label>
+              <label className="block text-sm font-medium mb-1">{t.influencer.profile.stateProvince}</label>
               <input
                 type="text"
                 value={formData.locationState}
                 onChange={(e) => setFormData({ ...formData, locationState: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="State"
+                placeholder={t.influencer.profile.stateProvince}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Country</label>
+              <label className="block text-sm font-medium mb-1">{t.influencer.profile.country}</label>
               <input
                 type="text"
                 value={formData.locationCountry}
                 onChange={(e) => setFormData({ ...formData, locationCountry: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Country"
+                placeholder={t.influencer.profile.country}
               />
             </div>
           </div>
 
           {/* Primary Niche */}
           <div>
-            <label className="block text-sm font-medium mb-1">Primary Niche</label>
+            <label className="block text-sm font-medium mb-1">{t.influencer.profile.primaryNiche}</label>
             <select
               value={formData.primaryNiche}
               onChange={(e) => setFormData({ ...formData, primaryNiche: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
-              <option value="">Select your main niche</option>
+              <option value="">{t.influencer.profile.selectNiche}</option>
               {niches.map((niche) => (
                 <option key={niche} value={niche}>
                   {niche}
@@ -223,7 +225,7 @@ export default function InfluencerProfilePage() {
 
           {/* Secondary Niches */}
           <div>
-            <label className="block text-sm font-medium mb-2">Secondary Niches</label>
+            <label className="block text-sm font-medium mb-2">{t.influencer.profile.secondaryNiches}</label>
             <div className="flex flex-wrap gap-2">
               {niches
                 .filter((n) => n !== formData.primaryNiche)
@@ -246,7 +248,7 @@ export default function InfluencerProfilePage() {
 
           {/* Languages */}
           <div>
-            <label className="block text-sm font-medium mb-2">Languages</label>
+            <label className="block text-sm font-medium mb-2">{t.influencer.profile.languages}</label>
             <div className="flex flex-wrap gap-2">
               {languages.map((lang) => (
                 <button
@@ -272,7 +274,7 @@ export default function InfluencerProfilePage() {
               disabled={isSaving}
               className="w-full px-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition font-medium disabled:opacity-50"
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? t.influencer.profile.saving : t.influencer.profile.saveChanges}
             </button>
           </div>
         </form>

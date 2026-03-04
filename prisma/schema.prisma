@@ -214,17 +214,21 @@ model InfluencerProfile {
 }
 
 model InfluencerSocialAccount {
-  id             String    @id @default(cuid())
-  influencerId   String
-  platformId     Int
-  username       String
-  profileUrl     String?
-  followerCount  Int       @default(0)
-  engagementRate Decimal?  @db.Decimal(5, 2)
-  isVerified     Boolean   @default(false)
-  lastSyncedAt   DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  influencerId       String
+  platformId         Int
+  username           String
+  profileUrl         String?
+  followerCount      Int       @default(0)
+  likesCount         Int?
+  engagementRate     Decimal?  @db.Decimal(5, 2)
+  isVerified         Boolean   @default(false)
+  verificationMethod String?   // "url" | "screenshot" | "manual"
+  screenshotUrl      String?
+  verifiedAt         DateTime?
+  lastSyncedAt       DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
   platform     Platform          @relation(fields: [platformId], references: [id])

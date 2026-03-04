@@ -6,6 +6,7 @@ import MainLayout from '@/components/MainLayout'
 import ApplicationStatus from '@/components/applications/ApplicationStatus'
 import ApplicationActions from '@/components/applications/ApplicationActions'
 import Link from 'next/link'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface Application {
   id: string
@@ -44,6 +45,7 @@ export default function CampaignApplicationsPage() {
   const params = useParams()
   const router = useRouter()
   const campaignId = params.id as string
+  const { t } = useLanguage()
 
   const [campaign, setCampaign] = useState<any>(null)
   const [applications, setApplications] = useState<Application[]>([])
@@ -93,12 +95,12 @@ export default function CampaignApplicationsPage() {
   }
 
   const statusFilters = [
-    { value: '', label: 'All' },
-    { value: 'PENDING', label: 'Pending' },
-    { value: 'UNDER_REVIEW', label: 'Under Review' },
-    { value: 'APPROVED', label: 'Approved' },
-    { value: 'REJECTED', label: 'Rejected' },
-    { value: 'COMPLETED', label: 'Completed' },
+    { value: '', label: t.brand.applications.all },
+    { value: 'PENDING', label: t.brand.applications.pending },
+    { value: 'UNDER_REVIEW', label: t.brand.applications.underReview },
+    { value: 'APPROVED', label: t.brand.applications.approved },
+    { value: 'REJECTED', label: t.brand.applications.rejected },
+    { value: 'COMPLETED', label: t.brand.applications.completed },
   ]
 
   if (isLoading) {
@@ -106,7 +108,7 @@ export default function CampaignApplicationsPage() {
       <MainLayout>
         <div className="max-w-6xl mx-auto px-4 py-12 text-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-gray-500">Loading applications...</p>
+          <p className="mt-4 text-gray-500">{t.brand.applications.loading}</p>
         </div>
       </MainLayout>
     )
@@ -118,12 +120,12 @@ export default function CampaignApplicationsPage() {
         {/* Header */}
         <div className="mb-8">
           <Link href="/dashboard/brand/campaigns" className="text-primary-600 hover:underline text-sm mb-2 inline-block">
-            &larr; Back to Campaigns
+            {t.brand.applications.backToCampaigns}
           </Link>
-          <h1 className="text-3xl font-bold">Applications</h1>
+          <h1 className="text-3xl font-bold">{t.brand.applications.title}</h1>
           {campaign && (
             <p className="text-gray-600 mt-1">
-              For: {campaign.title} ({applications.length} applications)
+              {t.brand.applications.forCampaign} {campaign.title} ({applications.length} {t.brand.applications.applicationsCount})
             </p>
           )}
         </div>
@@ -151,7 +153,7 @@ export default function CampaignApplicationsPage() {
             {applications.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                 <p className="text-gray-500">
-                  {filter ? `No ${filter.toLowerCase().replace('_', ' ')} applications` : 'No applications yet'}
+                  {filter ? `No ${filter.toLowerCase().replace('_', ' ')} applications` : t.brand.applications.noApplications}
                 </p>
               </div>
             ) : (
@@ -235,14 +237,14 @@ export default function CampaignApplicationsPage() {
                 {/* Social Accounts */}
                 {selectedApplication.influencer.socialAccounts.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">Social Platforms</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">{t.brand.applications.socialPlatforms}</h3>
                     <div className="space-y-2">
                       {selectedApplication.influencer.socialAccounts.map((account, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span>
                             {account.platform.name} (@{account.username})
                           </span>
-                          <span className="font-medium">{account.followerCount.toLocaleString()} followers</span>
+                          <span className="font-medium">{account.followerCount.toLocaleString()} {t.brand.applications.followers}</span>
                         </div>
                       ))}
                     </div>
@@ -252,7 +254,7 @@ export default function CampaignApplicationsPage() {
                 {/* Selected Account for Campaign */}
                 {selectedApplication.socialAccount && (
                   <div className="mb-6 p-3 bg-blue-50 rounded-lg">
-                    <h3 className="text-sm font-medium text-blue-800 mb-1">Account for this campaign</h3>
+                    <h3 className="text-sm font-medium text-blue-800 mb-1">{t.brand.applications.accountForCampaign}</h3>
                     <p className="text-sm text-blue-700">
                       {selectedApplication.socialAccount.platform.name} - @{selectedApplication.socialAccount.username}
                       ({selectedApplication.socialAccount.followerCount.toLocaleString()} followers)
@@ -263,7 +265,7 @@ export default function CampaignApplicationsPage() {
                 {/* Pitch Message */}
                 {selectedApplication.pitchMessage && (
                   <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">Pitch Message</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">{t.brand.applications.pitchMessage}</h3>
                     <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
                       {selectedApplication.pitchMessage}
                     </p>
@@ -273,7 +275,7 @@ export default function CampaignApplicationsPage() {
                 {/* Proposed Rate */}
                 {selectedApplication.proposedRate && (
                   <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Proposed Rate</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">{t.brand.applications.proposedRate}</h3>
                     <p className="text-lg font-semibold text-primary-600">
                       ${Number(selectedApplication.proposedRate).toLocaleString()}
                     </p>
@@ -282,9 +284,9 @@ export default function CampaignApplicationsPage() {
 
                 {/* Applied Date */}
                 <div className="mb-6 text-sm text-gray-500">
-                  Applied on {new Date(selectedApplication.appliedAt).toLocaleDateString()}
+                  {t.brand.applications.appliedOn} {new Date(selectedApplication.appliedAt).toLocaleDateString()}
                   {selectedApplication.reviewedAt && (
-                    <span> &bull; Reviewed on {new Date(selectedApplication.reviewedAt).toLocaleDateString()}</span>
+                    <span> &bull; {t.brand.applications.reviewedOn} {new Date(selectedApplication.reviewedAt).toLocaleDateString()}</span>
                   )}
                 </div>
 
@@ -294,12 +296,12 @@ export default function CampaignApplicationsPage() {
                   className="text-primary-600 hover:underline text-sm mb-6 inline-block"
                   target="_blank"
                 >
-                  View Full Profile &rarr;
+                  {t.brand.applications.viewFullProfile} →
                 </Link>
 
                 {/* Actions */}
                 <div className="pt-6 border-t">
-                  <h3 className="text-sm font-medium text-gray-500 mb-3">Actions</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">{t.brand.applications.actions}</h3>
                   <ApplicationActions
                     applicationId={selectedApplication.id}
                     currentStatus={selectedApplication.status}
@@ -309,7 +311,7 @@ export default function CampaignApplicationsPage() {
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-                <p className="text-gray-500">Select an application to view details</p>
+                <p className="text-gray-500">{t.brand.applications.selectApplication}</p>
               </div>
             )}
           </div>

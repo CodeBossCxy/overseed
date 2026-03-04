@@ -38,7 +38,7 @@ export default function Header() {
             </Link>
             {session && isBrand && (
               <Link href="/dashboard/brand/campaigns/new" className="text-gray-700 hover:text-primary-600 transition">
-                Create Campaign
+                {t.nav.createCampaign}
               </Link>
             )}
           </nav>
@@ -162,7 +162,7 @@ export default function Header() {
                       className="text-gray-700 hover:text-primary-600 transition"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Create Campaign
+                      {t.nav.createCampaign}
                     </Link>
                   )}
                   <button

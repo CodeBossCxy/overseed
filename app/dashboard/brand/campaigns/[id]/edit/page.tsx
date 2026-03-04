@@ -1,5 +1,6 @@
 import MainLayout from '@/components/MainLayout'
 import CampaignForm from '@/components/campaigns/CampaignForm'
+import { EditCampaignHeading } from '@/components/dashboard/BrandCampaignHeadings'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
@@ -49,10 +50,7 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Edit Campaign</h1>
-          <p className="text-gray-600 mt-1">Update your campaign details</p>
-        </div>
+        <EditCampaignHeading />
 
         <CampaignForm
           categories={categories}

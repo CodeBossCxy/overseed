@@ -4,12 +4,14 @@ import { signIn } from 'next-auth/react'
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 type Step = 'form' | 'otp'
 
 export default function SignUpPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { locale, t } = useLanguage()
   const userType = searchParams.get('type') || null
   const [showWeChatPopup, setShowWeChatPopup] = useState(false)
 
@@ -39,12 +41,12 @@ export default function SignUpPage() {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError(t.auth.signup.errorPasswordsMismatch)
       return
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError(t.auth.signup.errorPasswordLength)
       return
     }
 
@@ -53,7 +55,7 @@ export default function SignUpPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, userType }),
+        body: JSON.stringify({ name, email, password, userType, locale }),
       })
 
       const data = await res.json()
@@ -66,7 +68,7 @@ export default function SignUpPage() {
       setStep('otp')
       setResendCooldown(60)
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t.auth.signup.errorGeneric)
     } finally {
       setIsLoading(false)
     }
@@ -111,7 +113,7 @@ export default function SignUpPage() {
     setError('')
     const code = otp.join('')
     if (code.length !== 6) {
-      setError('Please enter the full 6-digit code')
+      setError(t.auth.otp.errorFullCode)
       return
     }
 
@@ -126,7 +128,7 @@ export default function SignUpPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Verification failed')
+        setError(data.error || t.auth.otp.errorVerification)
         return
       }
 
@@ -138,13 +140,13 @@ export default function SignUpPage() {
       })
 
       if (signInResult?.error) {
-        setError('Verification succeeded but sign-in failed. Please sign in manually.')
+        setError(t.auth.otp.errorSignIn)
         return
       }
 
       router.push(userType === 'brand' ? '/brand' : '/creator')
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t.auth.signup.errorGeneric)
     } finally {
       setIsLoading(false)
     }
@@ -159,7 +161,7 @@ export default function SignUpPage() {
       const res = await fetch('/api/auth/resend-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, locale }),
       })
 
       const data = await res.json()
@@ -172,7 +174,7 @@ export default function SignUpPage() {
       setOtp(['', '', '', '', '', ''])
       setResendCooldown(60)
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t.auth.signup.errorGeneric)
     } finally {
       setIsLoading(false)
     }
@@ -193,26 +195,26 @@ export default function SignUpPage() {
           <span className="text-4xl font-bold text-primary-600">Overseed</span>
         </Link>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          {step === 'otp' ? 'Verify your email' : 'Create your account'}
+          {step === 'otp' ? t.auth.otp.title : t.auth.signup.title}
         </h2>
         {step === 'otp' ? (
           <p className="mt-2 text-center text-sm text-gray-600">
-            We sent a 6-digit code to <span className="font-medium">{email}</span>
+            {t.auth.otp.sentCode} <span className="font-medium">{email}</span>
           </p>
         ) : (
           <>
             {userType && (
               <p className="mt-2 text-center text-sm text-gray-600">
-                Joining as a{' '}
+                {t.auth.signup.joiningAs}{' '}
                 <span className="font-semibold text-primary-600">
-                  {userType === 'brand' ? 'Brand' : 'Creator'}
+                  {userType === 'brand' ? t.auth.signup.brand : t.auth.signup.creator}
                 </span>
               </p>
             )}
             <p className="mt-2 text-center text-sm text-gray-600">
-              Already have an account?{' '}
+              {t.auth.signup.alreadyHaveAccount}{' '}
               <Link href="/auth/signin" className="font-medium text-primary-600 hover:text-primary-500">
-                Sign in
+                {t.auth.signup.signIn}
               </Link>
             </p>
           </>
@@ -251,7 +253,7 @@ export default function SignUpPage() {
                 disabled={isLoading || otp.join('').length !== 6}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {isLoading ? 'Verifying...' : 'Verify & Sign In'}
+                {isLoading ? t.auth.otp.verifying : t.auth.otp.verifyAndSignIn}
               </button>
 
               <div className="mt-4 text-center">
@@ -261,8 +263,8 @@ export default function SignUpPage() {
                   className="text-sm font-medium text-primary-600 hover:text-primary-500 disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
                   {resendCooldown > 0
-                    ? `Resend code in ${resendCooldown}s`
-                    : 'Resend code'}
+                    ? `${t.auth.otp.resendIn} ${resendCooldown}s`
+                    : t.auth.otp.resendCode}
                 </button>
               </div>
 
@@ -271,7 +273,7 @@ export default function SignUpPage() {
                   onClick={() => { setStep('form'); setError(''); setOtp(['', '', '', '', '', '']) }}
                   className="text-sm text-gray-500 hover:text-gray-700"
                 >
-                  Back to signup
+                  {t.auth.otp.backToSignup}
                 </button>
               </div>
             </div>
@@ -282,7 +284,7 @@ export default function SignUpPage() {
               {!userType && (
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    I am a:
+                    {t.auth.signup.iAmA}
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <Link
@@ -290,14 +292,14 @@ export default function SignUpPage() {
                       className="px-4 py-3 border-2 border-gray-300 rounded-md text-center hover:border-primary-500 hover:bg-primary-50 transition"
                     >
                       <div className="text-2xl mb-1">🏢</div>
-                      <div className="font-medium">Brand</div>
+                      <div className="font-medium">{t.auth.signup.brand}</div>
                     </Link>
                     <Link
                       href="/auth/signup?type=creator"
                       className="px-4 py-3 border-2 border-gray-300 rounded-md text-center hover:border-primary-500 hover:bg-primary-50 transition"
                     >
                       <div className="text-2xl mb-1">✨</div>
-                      <div className="font-medium">Creator</div>
+                      <div className="font-medium">{t.auth.signup.creator}</div>
                     </Link>
                   </div>
                 </div>
@@ -327,7 +329,7 @@ export default function SignUpPage() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Continue with Google
+                  {t.auth.signup.continueGoogle}
                 </button>
 
                 <button
@@ -337,7 +339,7 @@ export default function SignUpPage() {
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z" />
                   </svg>
-                  Continue with WeChat
+                  {t.auth.signup.continueWeChat}
                 </button>
               </div>
 
@@ -347,7 +349,7 @@ export default function SignUpPage() {
                     <div className="w-full border-t border-gray-300" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or sign up with email</span>
+                    <span className="px-2 bg-white text-gray-500">{t.auth.signup.divider}</span>
                   </div>
                 </div>
               </div>
@@ -361,7 +363,7 @@ export default function SignUpPage() {
 
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Full Name
+                    {t.auth.signup.fullName}
                   </label>
                   <input
                     id="name"
@@ -376,7 +378,7 @@ export default function SignUpPage() {
 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email
+                    {t.auth.signup.email}
                   </label>
                   <input
                     id="email"
@@ -391,7 +393,7 @@ export default function SignUpPage() {
 
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    Password
+                    {t.auth.signup.password}
                   </label>
                   <input
                     id="password"
@@ -407,7 +409,7 @@ export default function SignUpPage() {
 
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                    Confirm Password
+                    {t.auth.signup.confirmPassword}
                   </label>
                   <input
                     id="confirmPassword"
@@ -426,19 +428,19 @@ export default function SignUpPage() {
                   disabled={isLoading}
                   className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
-                  {isLoading ? 'Creating account...' : 'Create Account'}
+                  {isLoading ? t.auth.signup.creatingAccount : t.auth.signup.createAccount}
                 </button>
               </form>
 
               <div className="mt-6">
                 <p className="text-xs text-center text-gray-500">
-                  By continuing, you agree to Overseed's{' '}
+                  {t.auth.legal.prefix}{' '}
                   <Link href="/terms" className="underline">
-                    Terms of Service
+                    {t.auth.legal.terms}
                   </Link>{' '}
-                  and{' '}
+                  {t.auth.legal.and}{' '}
                   <Link href="/privacy" className="underline">
-                    Privacy Policy
+                    {t.auth.legal.privacy}
                   </Link>
                 </p>
               </div>
@@ -456,13 +458,13 @@ export default function SignUpPage() {
                 <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">WeChat Login Coming Soon</h3>
-            <p className="text-gray-600 text-sm mb-4">WeChat login is currently under development. Please use Google or email to sign up for now.</p>
+            <h3 className="text-lg font-semibold mb-2">{t.auth.wechat.title}</h3>
+            <p className="text-gray-600 text-sm mb-4">{t.auth.wechat.descSignup}</p>
             <button
               onClick={() => setShowWeChatPopup(false)}
               className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
             >
-              OK
+              {t.auth.wechat.ok}
             </button>
           </div>
         </div>

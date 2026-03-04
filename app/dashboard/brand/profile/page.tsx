@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import MainLayout from '@/components/MainLayout'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export default function BrandProfilePage() {
+  const { t } = useLanguage()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -105,7 +107,7 @@ export default function BrandProfilePage() {
       <MainLayout>
         <div className="max-w-3xl mx-auto px-4 py-12 text-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-gray-500">Loading profile...</p>
+          <p className="mt-4 text-gray-500">{t.brand.profile.loading}</p>
         </div>
       </MainLayout>
     )
@@ -115,8 +117,8 @@ export default function BrandProfilePage() {
     <MainLayout>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Company Profile</h1>
-          <p className="text-gray-600 mt-1">Manage your brand information</p>
+          <h1 className="text-3xl font-bold">{t.brand.profile.title}</h1>
+          <p className="text-gray-600 mt-1">{t.brand.profile.subtitle}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
@@ -128,26 +130,26 @@ export default function BrandProfilePage() {
 
           {success && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
-              Profile updated successfully!
+              {t.brand.profile.success}
             </div>
           )}
 
           {/* Company Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">Company Name *</label>
+            <label className="block text-sm font-medium mb-1">{t.brand.profile.companyName}</label>
             <input
               type="text"
               required
               value={formData.companyName}
               onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Your company name"
+              placeholder={t.brand.profile.companyNamePlaceholder}
             />
           </div>
 
           {/* Logo URL */}
           <div>
-            <label className="block text-sm font-medium mb-1">Logo URL</label>
+            <label className="block text-sm font-medium mb-1">{t.brand.profile.logoUrl}</label>
             <input
               type="url"
               value={formData.logoUrl}
@@ -171,19 +173,19 @@ export default function BrandProfilePage() {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium mb-1">Company Description</label>
+            <label className="block text-sm font-medium mb-1">{t.brand.profile.description}</label>
             <textarea
               rows={4}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Tell influencers about your company and brand..."
+              placeholder={t.brand.profile.descriptionPlaceholder}
             />
           </div>
 
           {/* Website */}
           <div>
-            <label className="block text-sm font-medium mb-1">Website URL</label>
+            <label className="block text-sm font-medium mb-1">{t.brand.profile.websiteUrl}</label>
             <input
               type="url"
               value={formData.websiteUrl}
@@ -196,13 +198,13 @@ export default function BrandProfilePage() {
           {/* Industry & Company Size */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Industry</label>
+              <label className="block text-sm font-medium mb-1">{t.brand.profile.industry}</label>
               <select
                 value={formData.industry}
                 onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
-                <option value="">Select industry</option>
+                <option value="">{t.brand.profile.selectIndustry}</option>
                 {industries.map((industry) => (
                   <option key={industry} value={industry}>
                     {industry}
@@ -211,13 +213,13 @@ export default function BrandProfilePage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Company Size</label>
+              <label className="block text-sm font-medium mb-1">{t.brand.profile.companySize}</label>
               <select
                 value={formData.companySize}
                 onChange={(e) => setFormData({ ...formData, companySize: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
-                <option value="">Select size</option>
+                <option value="">{t.brand.profile.selectSize}</option>
                 {companySizes.map((size) => (
                   <option key={size.value} value={size.value}>
                     {size.label}
@@ -229,20 +231,20 @@ export default function BrandProfilePage() {
 
           {/* Contact Information */}
           <div className="pt-4 border-t">
-            <h3 className="text-lg font-medium mb-4">Contact Information</h3>
+            <h3 className="text-lg font-medium mb-4">{t.brand.profile.contactInfo}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Contact Name</label>
+                <label className="block text-sm font-medium mb-1">{t.brand.profile.contactName}</label>
                 <input
                   type="text"
                   value={formData.contactName}
                   onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Primary contact name"
+                  placeholder={t.brand.profile.contactNamePlaceholder}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Contact Email</label>
+                <label className="block text-sm font-medium mb-1">{t.brand.profile.contactEmail}</label>
                 <input
                   type="email"
                   value={formData.contactEmail}
@@ -252,7 +254,7 @@ export default function BrandProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Contact Phone</label>
+                <label className="block text-sm font-medium mb-1">{t.brand.profile.contactPhone}</label>
                 <input
                   type="tel"
                   value={formData.contactPhone}
@@ -271,7 +273,7 @@ export default function BrandProfilePage() {
               disabled={isSaving}
               className="w-full px-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition font-medium disabled:opacity-50"
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? t.brand.profile.saving : t.brand.profile.saveChanges}
             </button>
           </div>
         </form>

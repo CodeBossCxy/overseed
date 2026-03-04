@@ -1,6 +1,7 @@
 import MainLayout from '@/components/MainLayout'
 import CampaignCard from '@/components/campaigns/CampaignCard'
 import CampaignFilters from '@/components/campaigns/CampaignFilters'
+import { BrowseTitle, BrowseResultsCount, BrowseEmpty } from '@/components/browse/BrowseI18nText'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
@@ -100,10 +101,7 @@ export default async function BrowsePage({
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Browse Campaigns</h1>
-          <p className="text-gray-600">Find the perfect collaboration for you</p>
-        </div>
+        <BrowseTitle />
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
@@ -113,19 +111,12 @@ export default async function BrowsePage({
           <div className="flex-1">
             {/* Results count */}
             <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-sm text-gray-600">
-                {campaigns.length} campaigns found
-              </div>
+              <BrowseResultsCount count={campaigns.length} />
             </div>
 
             {/* Campaigns List */}
             {campaigns.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-                <p className="text-gray-500 text-lg mb-4">No campaigns match your filters</p>
-                <a href="/browse" className="text-primary-600 hover:underline">
-                  Clear all filters
-                </a>
-              </div>
+              <BrowseEmpty />
             ) : (
               <div className="space-y-4">
                 {campaigns.map((campaign) => (

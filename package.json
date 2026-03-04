@@ -22,6 +22,7 @@
     "next": "^15.5.12",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.10.1",
+    "openai": "^6.25.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.48.2",

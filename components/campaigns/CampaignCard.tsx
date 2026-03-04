@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import CompensationBadge from './CompensationBadge'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface CampaignCardProps {
   campaign: {
@@ -47,6 +48,7 @@ interface CampaignCardProps {
 }
 
 export default function CampaignCard({ campaign }: CampaignCardProps) {
+  const { t } = useLanguage()
   const spotsLeft = campaign.totalSlots - campaign.filledSlots
   const isUrgent = campaign.deadline && new Date(campaign.deadline) <= new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
 
@@ -91,12 +93,12 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             ))}
             {campaign.isFeatured && (
               <span className="text-xs font-medium text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded">
-                Featured
+                {t.campaignCard.featured}
               </span>
             )}
             {isUrgent && (
               <span className="text-xs font-medium text-red-700 bg-red-100 px-2 py-0.5 rounded">
-                Urgent
+                {t.campaignCard.urgent}
               </span>
             )}
           </div>
@@ -136,13 +138,13 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             )}
             {campaign.followerRequirements && campaign.followerRequirements.length > 0 && (
               <span>
-                {campaign.followerRequirements[0].minFollowers.toLocaleString()}+ followers
+                {campaign.followerRequirements[0].minFollowers.toLocaleString()}+ {t.campaignCard.followers}
               </span>
             )}
             {campaign._count && (
-              <span>{campaign._count.applications} applied</span>
+              <span>{campaign._count.applications} {t.campaignCard.applied}</span>
             )}
-            <span>{spotsLeft} spots left</span>
+            <span>{spotsLeft} {t.campaignCard.spotsLeft}</span>
           </div>
         </div>
 
@@ -156,7 +158,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           />
           {campaign.deadline && (
             <span className={`text-xs ${isUrgent ? 'text-red-600' : 'text-gray-500'}`}>
-              Due: {new Date(campaign.deadline).toLocaleDateString()}
+              {t.campaignCard.due} {new Date(campaign.deadline).toLocaleDateString()}
             </span>
           )}
         </div>

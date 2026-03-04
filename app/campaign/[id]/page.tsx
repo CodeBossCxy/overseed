@@ -1,6 +1,7 @@
 import MainLayout from '@/components/MainLayout'
 import CampaignDetailWrapper from '@/components/campaigns/CampaignDetailWrapper'
 import CampaignCard from '@/components/campaigns/CampaignCard'
+import SimilarCampaignsHeading from '@/components/campaigns/SimilarCampaignsHeading'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
@@ -164,7 +165,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         {/* Similar Campaigns */}
         {similarCampaigns.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Similar Campaigns</h2>
+            <SimilarCampaignsHeading />
             <div className="space-y-4">
               {similarCampaigns.map((c) => (
                 <CampaignCard key={c.id} campaign={c as any} />

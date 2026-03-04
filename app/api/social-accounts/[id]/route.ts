@@ -36,14 +36,34 @@ export async function PATCH(
 
     const data = await req.json()
 
+    // Build update data
+    const updateData: Record<string, any> = {
+      username: data.username,
+      profileUrl: data.profileUrl,
+      followerCount: data.followerCount,
+      engagementRate: data.engagementRate,
+    }
+
+    if (data.likesCount !== undefined) {
+      updateData.likesCount = data.likesCount
+    }
+
+    if (data.verificationMethod) {
+      updateData.verificationMethod = data.verificationMethod
+      const isVerified = data.verificationMethod === 'url' || data.verificationMethod === 'screenshot'
+      updateData.isVerified = isVerified
+      if (isVerified) {
+        updateData.verifiedAt = new Date()
+      }
+    }
+
+    if (data.screenshotUrl !== undefined) {
+      updateData.screenshotUrl = data.screenshotUrl
+    }
+
     const updated = await prisma.influencerSocialAccount.update({
       where: { id },
-      data: {
-        username: data.username,
-        profileUrl: data.profileUrl,
-        followerCount: data.followerCount,
-        engagementRate: data.engagementRate,
-      },
+      data: updateData,
       include: {
         platform: true,
       },

@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import MainLayout from '@/components/MainLayout'
 import ApplicationCard from '@/components/applications/ApplicationCard'
 import Link from 'next/link'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export default function InfluencerApplicationsPage() {
+  const { t } = useLanguage()
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<string>('')
@@ -55,12 +57,12 @@ export default function InfluencerApplicationsPage() {
   }
 
   const statusFilters = [
-    { value: '', label: 'All' },
-    { value: 'PENDING', label: 'Pending' },
-    { value: 'UNDER_REVIEW', label: 'Under Review' },
-    { value: 'APPROVED', label: 'Approved' },
-    { value: 'REJECTED', label: 'Rejected' },
-    { value: 'COMPLETED', label: 'Completed' },
+    { value: '', label: t.influencer.applications.all },
+    { value: 'PENDING', label: t.influencer.applications.pending },
+    { value: 'UNDER_REVIEW', label: t.influencer.applications.underReview },
+    { value: 'APPROVED', label: t.influencer.applications.approved },
+    { value: 'REJECTED', label: t.influencer.applications.rejected },
+    { value: 'COMPLETED', label: t.influencer.applications.completed },
   ]
 
   return (
@@ -69,14 +71,14 @@ export default function InfluencerApplicationsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">My Applications</h1>
-            <p className="text-gray-600 mt-1">Track your campaign applications</p>
+            <h1 className="text-3xl font-bold">{t.influencer.applications.title}</h1>
+            <p className="text-gray-600 mt-1">{t.influencer.applications.subtitle}</p>
           </div>
           <Link
             href="/browse"
             className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
           >
-            Browse Campaigns
+            {t.influencer.applications.browseCampaigns}
           </Link>
         </div>
 
@@ -101,18 +103,18 @@ export default function InfluencerApplicationsPage() {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-500">Loading applications...</p>
+            <p className="mt-4 text-gray-500">{t.influencer.applications.loading}</p>
           </div>
         ) : applications.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <p className="text-gray-500 text-lg mb-4">
-              {filter ? `No ${filter.toLowerCase().replace('_', ' ')} applications` : 'No applications yet'}
+              {filter ? `No ${filter.toLowerCase().replace('_', ' ')} applications` : t.influencer.applications.noApplications}
             </p>
             <Link
               href="/browse"
               className="inline-block px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
             >
-              Find Campaigns
+              {t.influencer.applications.findCampaigns}
             </Link>
           </div>
         ) : (

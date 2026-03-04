@@ -4,7 +4,7 @@ import { sendOTPEmail } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json()
+    const { email, locale } = await request.json()
 
     if (!email) {
       return NextResponse.json(
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       },
     })
 
-    await sendOTPEmail(email.toLowerCase(), otp)
+    await sendOTPEmail(email.toLowerCase(), otp, locale || 'en')
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -65,6 +65,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Determine verification status
+    const verificationMethod = data.verificationMethod || 'manual'
+    const isVerified = verificationMethod === 'url' || verificationMethod === 'screenshot'
+    const verifiedAt = isVerified ? new Date() : null
+
     // Create social account
     const socialAccount = await prisma.influencerSocialAccount.create({
       data: {
@@ -73,7 +78,12 @@ export async function POST(req: NextRequest) {
         username: data.username,
         profileUrl: data.profileUrl,
         followerCount: data.followerCount || 0,
+        likesCount: data.likesCount || null,
         engagementRate: data.engagementRate,
+        isVerified,
+        verificationMethod,
+        screenshotUrl: data.screenshotUrl || null,
+        verifiedAt,
       },
       include: {
         platform: true,

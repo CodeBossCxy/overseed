@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import MainLayout from '@/components/MainLayout'
 import SocialAccountList from '@/components/profiles/SocialAccountList'
 import SocialAccountForm from '@/components/profiles/SocialAccountForm'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface SocialAccount {
   id: string
@@ -17,6 +18,8 @@ interface SocialAccount {
   followerCount: number
   engagementRate?: number | string | null
   isVerified: boolean
+  verificationMethod?: string | null
+  verifiedAt?: string | null
 }
 
 interface Platform {
@@ -26,6 +29,7 @@ interface Platform {
 }
 
 export default function SocialAccountsPage() {
+  const { t } = useLanguage()
   const [accounts, setAccounts] = useState<SocialAccount[]>([])
   const [platforms, setPlatforms] = useState<Platform[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -89,7 +93,7 @@ export default function SocialAccountsPage() {
       <MainLayout>
         <div className="max-w-3xl mx-auto px-4 py-12 text-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-gray-500">Loading accounts...</p>
+          <p className="mt-4 text-gray-500">{t.influencer.accounts.loading}</p>
         </div>
       </MainLayout>
     )
@@ -100,46 +104,48 @@ export default function SocialAccountsPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Social Accounts</h1>
-            <p className="text-gray-600 mt-1">Manage your linked social media accounts</p>
+            <h1 className="text-3xl font-bold">{t.influencer.accounts.title}</h1>
+            <p className="text-gray-600 mt-1">{t.influencer.accounts.subtitle}</p>
           </div>
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
               className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
             >
-              Add Account
+              {t.influencer.accounts.addAccount}
             </button>
           )}
         </div>
 
         {showForm ? (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">Link New Account</h2>
+            <h2 className="text-lg font-semibold mb-4">{t.influencer.accounts.linkNew}</h2>
             <SocialAccountForm
               platforms={platforms}
               existingPlatformIds={existingPlatformIds}
               onSuccess={handleAddSuccess}
               onCancel={() => setShowForm(false)}
+              translations={t.influencer.accounts as unknown as Record<string, string>}
             />
           </div>
         ) : null}
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4">Connected Accounts</h2>
+          <h2 className="text-lg font-semibold mb-4">{t.influencer.accounts.connectedAccounts}</h2>
           <SocialAccountList
             accounts={accounts as any}
             isPublicView={false}
             onDelete={handleDelete}
+            onAdd={() => setShowForm(true)}
           />
         </div>
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-medium text-blue-800 mb-2">Why link your accounts?</h3>
+          <h3 className="font-medium text-blue-800 mb-2">{t.influencer.accounts.whyLink}</h3>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>Brands can see your reach and engagement</li>
-            <li>Select which account to use for each campaign</li>
-            <li>Build credibility with verified follower counts</li>
+            <li>{t.influencer.accounts.reason1}</li>
+            <li>{t.influencer.accounts.reason2}</li>
+            <li>{t.influencer.accounts.reason3}</li>
           </ul>
         </div>
       </div>
