@@ -198,7 +198,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Social Proof Bar */}
+      {/* Social Proof Bar - hidden for now
       <section className="border-t border-b border-gray-100 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <p className="text-center text-sm text-gray-500 mb-8 font-medium uppercase tracking-wider">
@@ -220,6 +220,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      */}
 
       {/* Platform Section */}
       <section className="py-24 bg-white">
