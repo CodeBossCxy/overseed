@@ -1,5 +1,7 @@
 'use client'
 
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+
 interface CompensationBadgeProps {
   type: string
   paymentMin?: number | string | null
@@ -15,6 +17,8 @@ export default function CompensationBadge({
   giftDescription,
   size = 'md',
 }: CompensationBadgeProps) {
+  const { t } = useLanguage()
+
   const sizeClasses = {
     sm: 'text-xs px-2 py-1',
     md: 'text-sm px-3 py-1.5',
@@ -36,7 +40,7 @@ export default function CompensationBadge({
     switch (type) {
       case 'PAID':
         return {
-          label: 'Paid',
+          label: t.campaign.paid,
           color: 'bg-green-100 text-green-800',
           amount: paymentMin && paymentMax
             ? `${formatAmount(paymentMin)} - ${formatAmount(paymentMax)}`
@@ -46,13 +50,13 @@ export default function CompensationBadge({
         }
       case 'GIFTED':
         return {
-          label: 'Gifted',
+          label: t.campaign.gifted,
           color: 'bg-purple-100 text-purple-800',
-          amount: giftDescription || 'Product Gifted',
+          amount: giftDescription || t.campaign.productGifted,
         }
       case 'PAID_PLUS_GIFT':
         return {
-          label: 'Paid + Gift',
+          label: t.campaign.paidPlusGift,
           color: 'bg-blue-100 text-blue-800',
           amount: paymentMin || paymentMax
             ? formatAmount(paymentMax || paymentMin)
@@ -60,17 +64,17 @@ export default function CompensationBadge({
         }
       case 'AFFILIATE':
         return {
-          label: 'Affiliate',
+          label: t.campaign.affiliate,
           color: 'bg-orange-100 text-orange-800',
-          amount: 'Commission Based',
+          amount: t.campaign.commissionBased,
         }
       case 'NEGOTIABLE':
         return {
-          label: 'Negotiable',
+          label: t.campaign.negotiable,
           color: 'bg-gray-100 text-gray-800',
           amount: paymentMin || paymentMax
-            ? `Up to ${formatAmount(paymentMax || paymentMin)}`
-            : 'Rate Negotiable',
+            ? `${t.campaign.upTo} ${formatAmount(paymentMax || paymentMin)}`
+            : t.campaign.rateNegotiable,
         }
       default:
         return {

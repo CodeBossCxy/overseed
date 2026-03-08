@@ -127,15 +127,17 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.userType = (user as any).userType
+        token.subscriptionTier = (user as any).subscriptionTier || 'FREE'
       }
       // Re-read userType from DB when session.update() is called client-side
       if (trigger === 'update' && token.sub) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
-          select: { userType: true },
+          select: { userType: true, subscriptionTier: true },
         })
         if (dbUser) {
           token.userType = dbUser.userType
+          token.subscriptionTier = dbUser.subscriptionTier
         }
       }
       return token
@@ -143,7 +145,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session?.user && token) {
         (session.user as any).id = `${token.sub || token.id || ''}`;
-        (session.user as any).userType = token.userType
+        (session.user as any).userType = token.userType;
+        (session.user as any).subscriptionTier = token.subscriptionTier || 'FREE'
       }
       return session
     },

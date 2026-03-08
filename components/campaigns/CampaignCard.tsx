@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import CompensationBadge from './CompensationBadge'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 
@@ -61,15 +62,19 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         {/* Image */}
         <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg overflow-hidden">
           {campaign.images && campaign.images.length > 0 ? (
-            <img
+            <Image
               src={campaign.images[0]}
               alt={campaign.title}
+              width={128}
+              height={128}
               className="w-full h-full object-cover"
             />
           ) : campaign.brand.logoUrl ? (
-            <img
+            <Image
               src={campaign.brand.logoUrl}
               alt={campaign.brand.companyName || 'Brand'}
+              width={128}
+              height={128}
               className="w-full h-full object-contain p-4 bg-white"
             />
           ) : (
@@ -88,7 +93,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
                 key={category.slug}
                 className="text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded"
               >
-                {category.name}
+                {t.categoryNames[category.name] || category.name}
               </span>
             ))}
             {campaign.isFeatured && (
@@ -110,7 +115,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
 
           {/* Brand Name */}
           <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
-            <span>{campaign.brand.companyName || 'Anonymous Brand'}</span>
+            <span>{campaign.brand.companyName || t.campaign.anonymousBrand}</span>
             {campaign.brand.isVerified && (
               <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                 <path

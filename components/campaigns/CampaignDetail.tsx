@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import CompensationBadge from './CompensationBadge'
 import CampaignStats from './CampaignStats'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface CampaignDetailProps {
   campaign: {
@@ -83,6 +85,7 @@ interface CampaignDetailProps {
   isSaved?: boolean
   isAuthenticated?: boolean
   userType?: string | null
+  subscriptionTier?: string | null
 }
 
 export default function CampaignDetail({
@@ -92,8 +95,10 @@ export default function CampaignDetail({
   isSaved = false,
   isAuthenticated = false,
   userType,
+  subscriptionTier,
 }: CampaignDetailProps) {
   const router = useRouter()
+  const { t } = useLanguage()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -119,13 +124,13 @@ export default function CampaignDetail({
 
   const getContentTypeLabel = (type: string | null | undefined) => {
     const types: Record<string, string> = {
-      IMAGE_POST: 'Image Post',
-      VIDEO: 'Video',
-      STORY: 'Story',
-      REEL: 'Reel',
-      ANY: 'Any Format',
+      IMAGE_POST: t.campaign.imagePost,
+      VIDEO: t.campaign.video,
+      STORY: t.campaign.story,
+      REEL: t.campaign.reel,
+      ANY: t.campaign.anyFormat,
     }
-    return type ? types[type] || type : 'Not specified'
+    return type ? types[type] || type : t.campaign.notSpecified
   }
 
   return (
@@ -144,22 +149,22 @@ export default function CampaignDetail({
                       key={category.id}
                       className="text-sm font-medium text-primary-600 bg-primary-100 px-3 py-1 rounded-full"
                     >
-                      {category.name}
+                      {t.categoryNames[category.name] || category.name}
                     </span>
                   ))}
                   {campaign.isFeatured && (
                     <span className="text-sm font-medium text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full">
-                      Featured
+                      {t.campaign.featured}
                     </span>
                   )}
                 </div>
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">{campaign.title}</h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                  <span>{campaign.viewCount.toLocaleString()} views</span>
-                  <span>Posted {new Date(campaign.createdAt).toLocaleDateString()}</span>
+                  <span>{campaign.viewCount.toLocaleString()} {t.campaign.views_count}</span>
+                  <span>{t.campaign.posted} {new Date(campaign.createdAt).toLocaleDateString()}</span>
                   {campaign.deadline && (
                     <span className={isDeadlinePassed ? 'text-red-600' : 'text-orange-600'}>
-                      {isDeadlinePassed ? 'Deadline passed' : `Deadline: ${new Date(campaign.deadline).toLocaleDateString()}`}
+                      {isDeadlinePassed ? t.campaign.deadlinePassedLabel : `${t.campaign.deadline} ${new Date(campaign.deadline).toLocaleDateString()}`}
                     </span>
                   )}
                 </div>
@@ -173,7 +178,7 @@ export default function CampaignDetail({
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {campaign.images.map((image, index) => (
                   <div key={index} className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                    <img src={image} alt={`Campaign image ${index + 1}`} className="w-full h-full object-cover" />
+                    <Image src={image} alt={`Campaign image ${index + 1}`} width={400} height={225} className="w-full h-full object-cover" />
                   </div>
                 ))}
                 {campaign.media.map((media) => (
@@ -181,7 +186,7 @@ export default function CampaignDetail({
                     {media.mediaType === 'video' ? (
                       <video src={media.mediaUrl} className="w-full h-full object-cover" controls />
                     ) : (
-                      <img src={media.mediaUrl} alt="Campaign media" className="w-full h-full object-cover" />
+                      <Image src={media.mediaUrl} alt="Campaign media" width={400} height={225} className="w-full h-full object-cover" />
                     )}
                   </div>
                 ))}
@@ -191,19 +196,19 @@ export default function CampaignDetail({
 
           {/* Description */}
           <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold mb-4">About This Campaign</h2>
+            <h2 className="text-xl font-semibold mb-4">{t.campaign.aboutThisCampaign}</h2>
             <div className="prose max-w-none">
-              <p className="whitespace-pre-wrap text-gray-700">{campaign.description || 'No description provided.'}</p>
+              <p className="whitespace-pre-wrap text-gray-700">{campaign.description || t.campaign.noDescription}</p>
             </div>
           </div>
 
           {/* Requirements */}
           <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold mb-4">Requirements</h2>
+            <h2 className="text-xl font-semibold mb-4">{t.campaign.requirements}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Platforms */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Platforms</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">{t.campaign.platforms}</h3>
                 <div className="flex flex-wrap gap-2">
                   {campaign.platforms.map(({ platform }) => (
                     <span key={platform.id} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
@@ -216,14 +221,14 @@ export default function CampaignDetail({
               {/* Follower Requirements */}
               {campaign.followerRequirements.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Follower Requirements</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">{t.campaign.followerRequirements}</h3>
                   <div className="space-y-1">
                     {campaign.followerRequirements.map((req, i) => (
                       <div key={i} className="text-sm">
                         <span className="font-medium">{req.platform.name}:</span>{' '}
                         {req.minFollowers.toLocaleString()}
-                        {req.maxFollowers ? ` - ${req.maxFollowers.toLocaleString()}` : '+'} followers
-                        {req.minEngagementRate && ` (min ${req.minEngagementRate}% engagement)`}
+                        {req.maxFollowers ? ` - ${req.maxFollowers.toLocaleString()}` : '+'} {t.campaign.followers}
+                        {req.minEngagementRate && ` (min ${req.minEngagementRate}% ${t.campaign.engagement})`}
                       </div>
                     ))}
                   </div>
@@ -232,15 +237,15 @@ export default function CampaignDetail({
 
               {/* Content Type */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Content Type</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">{t.campaign.contentType}</h3>
                 <p className="text-sm">{getContentTypeLabel(campaign.contentType)}</p>
               </div>
 
               {/* Slots */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Available Spots</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">{t.campaign.availableSpots}</h3>
                 <p className="text-sm">
-                  {spotsLeft} of {campaign.totalSlots} spots remaining
+                  {t.campaign.spotsRemaining.replace('{left}', String(spotsLeft)).replace('{total}', String(campaign.totalSlots))}
                 </p>
               </div>
             </div>
@@ -249,20 +254,20 @@ export default function CampaignDetail({
           {/* Content Guidelines */}
           {campaign.contentGuidelines && (
             <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold mb-4">Content Guidelines</h2>
+              <h2 className="text-xl font-semibold mb-4">{t.campaign.contentGuidelines}</h2>
               <p className="text-gray-700 whitespace-pre-wrap">{campaign.contentGuidelines}</p>
 
               {(campaign.hashtagsRequired || campaign.mentionsRequired) && (
                 <div className="mt-4 space-y-2">
                   {campaign.hashtagsRequired && (
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Required Hashtags: </span>
+                      <span className="text-sm font-medium text-gray-500">{t.campaign.requiredHashtags} </span>
                       <span className="text-sm text-primary-600">{campaign.hashtagsRequired}</span>
                     </div>
                   )}
                   {campaign.mentionsRequired && (
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Required Mentions: </span>
+                      <span className="text-sm font-medium text-gray-500">{t.campaign.requiredMentions} </span>
                       <span className="text-sm text-primary-600">{campaign.mentionsRequired}</span>
                     </div>
                   )}
@@ -271,7 +276,7 @@ export default function CampaignDetail({
 
               {(campaign.wordCountMin || campaign.wordCountMax) && (
                 <div className="mt-2">
-                  <span className="text-sm font-medium text-gray-500">Word Count: </span>
+                  <span className="text-sm font-medium text-gray-500">{t.campaign.wordCount} </span>
                   <span className="text-sm">
                     {campaign.wordCountMin && `Min ${campaign.wordCountMin}`}
                     {campaign.wordCountMin && campaign.wordCountMax && ' - '}
@@ -285,17 +290,17 @@ export default function CampaignDetail({
           {/* Campaign Timeline */}
           {(campaign.campaignStartDate || campaign.campaignEndDate) && (
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Campaign Timeline</h2>
+              <h2 className="text-xl font-semibold mb-4">{t.campaign.campaignTimeline}</h2>
               <div className="flex flex-wrap gap-6">
                 {campaign.campaignStartDate && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Start Date: </span>
+                    <span className="text-sm font-medium text-gray-500">{t.campaign.startDate} </span>
                     <span className="text-sm">{new Date(campaign.campaignStartDate).toLocaleDateString()}</span>
                   </div>
                 )}
                 {campaign.campaignEndDate && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">End Date: </span>
+                    <span className="text-sm font-medium text-gray-500">{t.campaign.endDate} </span>
                     <span className="text-sm">{new Date(campaign.campaignEndDate).toLocaleDateString()}</span>
                   </div>
                 )}
@@ -310,7 +315,7 @@ export default function CampaignDetail({
         <div className="bg-white rounded-lg shadow-md p-6 sticky top-20 space-y-6">
           {/* Compensation */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">Compensation</h3>
+            <h3 className="text-lg font-semibold mb-3">{t.campaign.compensation}</h3>
             <CompensationBadge
               type={campaign.compensationType}
               paymentMin={campaign.paymentMin}
@@ -320,16 +325,16 @@ export default function CampaignDetail({
             />
             {campaign.giftValue && (
               <p className="text-sm text-gray-500 mt-2">
-                Gift value: ${Number(campaign.giftValue).toLocaleString()}
+                {t.campaign.giftValue} ${Number(campaign.giftValue).toLocaleString()}
               </p>
             )}
             {campaign.requiresProductPurchase && (
               <div className="mt-3 p-3 bg-yellow-50 rounded-lg text-sm">
-                <p className="font-medium text-yellow-800">Requires Product Purchase</p>
+                <p className="font-medium text-yellow-800">{t.campaign.requiresProductPurchase}</p>
                 {campaign.productPurchaseAmount && (
                   <p className="text-yellow-700">
-                    Amount: ${Number(campaign.productPurchaseAmount).toLocaleString()}
-                    {campaign.isProductReimbursed && ' (Reimbursed)'}
+                    ${Number(campaign.productPurchaseAmount).toLocaleString()}
+                    {campaign.isProductReimbursed && ` ${t.campaign.reimbursed}`}
                   </p>
                 )}
               </div>
@@ -352,26 +357,26 @@ export default function CampaignDetail({
                   href={`/dashboard/brand/campaigns/${campaign.id}/applications`}
                   className="block w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-center font-medium"
                 >
-                  View Applications ({campaign._count.applications})
+                  {t.campaign.viewApplications} ({campaign._count.applications})
                 </Link>
                 <Link
                   href={`/dashboard/brand/campaigns/${campaign.id}/edit`}
                   className="block w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-center"
                 >
-                  Edit Campaign
+                  {t.campaign.editCampaign}
                 </Link>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
                   className="w-full px-4 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition text-center"
                 >
-                  Delete Campaign
+                  {t.campaign.deleteCampaign}
                 </button>
               </>
             ) : (
               <>
                 {userType === 'BRAND' ? (
                   <div className="text-center text-gray-500 text-sm py-2">
-                    Only creators can apply to campaigns
+                    {t.campaign.onlyCreatorsCanApply}
                   </div>
                 ) : (
                   <>
@@ -381,32 +386,39 @@ export default function CampaignDetail({
                           disabled
                           className="w-full px-4 py-3 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed text-center font-medium"
                         >
-                          Already Applied
+                          {t.campaign.alreadyApplied}
                         </button>
+                      ) : isAuthenticated && subscriptionTier === 'FREE' ? (
+                        <Link
+                          href="/dashboard/upgrade"
+                          className="block w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition text-center font-medium"
+                        >
+                          Upgrade to Pro to Apply
+                        </Link>
                       ) : isAuthenticated ? (
                         <Link
                           href={`/campaign/${campaign.id}/apply`}
                           className="block w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-center font-medium"
                         >
-                          Apply Now
+                          {t.campaign.applyNow}
                         </Link>
                       ) : (
                         <Link
                           href="/auth/signin"
                           className="block w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-center font-medium"
                         >
-                          Sign In to Apply
+                          {t.campaign.signInToApply}
                         </Link>
                       )
                     )}
                     {isDeadlinePassed && (
                       <div className="text-center text-red-600 font-medium">
-                        Application deadline has passed
+                        {t.campaign.deadlinePassed}
                       </div>
                     )}
                     {spotsLeft === 0 && !isDeadlinePassed && (
                       <div className="text-center text-orange-600 font-medium">
-                        All spots have been filled
+                        {t.campaign.allSpotsFilled}
                       </div>
                     )}
                   </>
@@ -417,11 +429,11 @@ export default function CampaignDetail({
 
           {/* Brand Info */}
           <div className="pt-4 border-t">
-            <h3 className="text-sm font-semibold text-gray-500 mb-3">Posted by</h3>
+            <h3 className="text-sm font-semibold text-gray-500 mb-3">{t.campaign.postedBy}</h3>
             <Link href={`/brand/${campaign.brand.id}`} className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-lg -mx-2">
               <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                 {campaign.brand.logoUrl ? (
-                  <img src={campaign.brand.logoUrl} alt={campaign.brand.companyName || 'Brand'} className="w-full h-full object-cover" />
+                  <Image src={campaign.brand.logoUrl} alt={campaign.brand.companyName || 'Brand'} width={48} height={48} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-500 text-xl">
                     {campaign.brand.companyName?.charAt(0) || 'B'}
@@ -430,7 +442,7 @@ export default function CampaignDetail({
               </div>
               <div>
                 <div className="flex items-center gap-1">
-                  <p className="font-medium">{campaign.brand.companyName || 'Anonymous Brand'}</p>
+                  <p className="font-medium">{campaign.brand.companyName || t.campaign.anonymousBrand}</p>
                   {campaign.brand.isVerified && (
                     <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -447,7 +459,7 @@ export default function CampaignDetail({
           {/* Report */}
           <div className="pt-4 border-t">
             <button className="text-sm text-red-600 hover:underline">
-              Report this campaign
+              {t.campaign.reportCampaign}
             </button>
           </div>
         </div>
@@ -462,21 +474,21 @@ export default function CampaignDetail({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Delete Campaign</h3>
-            <p className="text-gray-600 text-sm mb-4">Are you sure you want to delete &quot;{campaign.title}&quot;? This action cannot be undone.</p>
+            <h3 className="text-lg font-semibold mb-2">{t.campaign.deleteConfirmTitle}</h3>
+            <p className="text-gray-600 text-sm mb-4">{t.campaign.deleteConfirmMessage.replace('{title}', campaign.title)}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
               >
-                Cancel
+                {t.campaign.cancel}
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? t.campaign.deleting : t.common.delete}
               </button>
             </div>
           </div>

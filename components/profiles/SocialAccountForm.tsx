@@ -369,6 +369,41 @@ export default function SocialAccountForm({
                 onChange={(e) => {
                   setScreenshotPlatformId(e.target.value)
                   setFormData({ ...formData, platformId: e.target.value })
+                  setError(null)
+                  // If a file is already selected, re-trigger analysis with the new platform
+                  if (e.target.value && screenshotFile) {
+                    const platformObj = platforms.find((p) => p.id === parseInt(e.target.value))
+                    if (platformObj) {
+                      setIsAnalyzing(true)
+                      const fd = new FormData()
+                      fd.append('file', screenshotFile)
+                      fd.append('platformSlug', platformObj.slug)
+                      fetch('/api/social-accounts/analyze-screenshot', {
+                        method: 'POST',
+                        body: fd,
+                      })
+                        .then(async (res) => {
+                          if (!res.ok) {
+                            const data = await res.json()
+                            setError(data.message || label('analysisError', 'Analysis failed'))
+                            return
+                          }
+                          const data = await res.json()
+                          setScreenshotUrl(data.screenshotUrl)
+                          setAnalysisResult(data.analysis)
+                          setFormData((prev) => ({
+                            ...prev,
+                            platformId: e.target.value,
+                            username: data.analysis.username || prev.username,
+                            followerCount: data.analysis.followerCount ? String(data.analysis.followerCount) : prev.followerCount,
+                            likesCount: data.analysis.likesCount ? String(data.analysis.likesCount) : prev.likesCount,
+                            engagementRate: data.analysis.engagementRate ? String(data.analysis.engagementRate) : prev.engagementRate,
+                          }))
+                        })
+                        .catch(() => setError(label('analysisError', 'Failed to analyze screenshot')))
+                        .finally(() => setIsAnalyzing(false))
+                    }
+                  }
                 }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >

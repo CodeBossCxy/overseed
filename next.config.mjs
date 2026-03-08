@@ -5,13 +5,24 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: '**.amazonaws.com',
+      },
+      {
+        protocol: 'https',
         hostname: '**',
       },
     ],
+    formats: ['image/webp'],
   },
   eslint: {
-    // Allow production builds to successfully complete even with ESLint errors
     ignoreDuringBuilds: true,
+  },
+  experimental: {
+    optimizePackageImports: ['@prisma/client', 'zod', 'react-hook-form'],
+    staleTimes: {
+      dynamic: 0,
+      static: 180,
+    },
   },
 };
 

@@ -30,7 +30,7 @@ async function googleTranslate(
 
   if (!apiKey) {
     // Fall back to simple translation if no API key
-    return simpleTranslate(text, targetLang, sourceLang)
+    return freeTranslate(text, targetLang, sourceLang)
   }
 
   try {
@@ -57,94 +57,87 @@ async function googleTranslate(
     return text
   } catch (error) {
     console.error('Google Translate error:', error)
-    return simpleTranslate(text, targetLang, sourceLang)
+    return freeTranslate(text, targetLang, sourceLang)
   }
 }
 
 /**
- * Simple dictionary-based translation for common terms
- * Used as fallback when API is not available
+ * Free translation using MyMemory API
+ * No API key required (up to 5000 chars/day anonymous, more with email)
  */
-const TRANSLATION_DICTIONARY: Record<string, Record<string, string>> = {
-  // Campaign-related terms
-  'Looking for': { zh: '正在寻找' },
-  'influencers': { zh: '网红' },
-  'creators': { zh: '创作者' },
-  'to promote': { zh: '来推广' },
-  'our': { zh: '我们的' },
-  'products': { zh: '产品' },
-  'brand': { zh: '品牌' },
-  'campaign': { zh: '活动' },
-  'collaboration': { zh: '合作' },
-  'partnership': { zh: '合作伙伴关系' },
-  'sponsored': { zh: '赞助' },
-  'content': { zh: '内容' },
-  'post': { zh: '帖子' },
-  'video': { zh: '视频' },
-  'story': { zh: '故事' },
-  'reel': { zh: '短视频' },
-  'beauty': { zh: '美妆' },
-  'skincare': { zh: '护肤' },
-  'fashion': { zh: '时尚' },
-  'lifestyle': { zh: '生活方式' },
-  'food': { zh: '美食' },
-  'travel': { zh: '旅行' },
-  'fitness': { zh: '健身' },
-  'tech': { zh: '科技' },
-  'gaming': { zh: '游戏' },
-  'paid': { zh: '付费' },
-  'gifted': { zh: '赠品' },
-  'free': { zh: '免费' },
-  'followers': { zh: '粉丝' },
-  'engagement': { zh: '互动率' },
-  'rate': { zh: '费率' },
-  'compensation': { zh: '报酬' },
-  'requirements': { zh: '要求' },
-  'guidelines': { zh: '指南' },
-  'deadline': { zh: '截止日期' },
-  'apply': { zh: '申请' },
-  'application': { zh: '申请' },
-  'approved': { zh: '已批准' },
-  'pending': { zh: '待处理' },
-  'rejected': { zh: '已拒绝' },
-  // Common phrases
-  'We are looking for': { zh: '我们正在寻找' },
-  'Join us': { zh: '加入我们' },
-  'Share your': { zh: '分享您的' },
-  'Create content': { zh: '创建内容' },
-  'Must have': { zh: '必须有' },
-  'at least': { zh: '至少' },
-  'Instagram': { zh: 'Instagram' },
-  'TikTok': { zh: 'TikTok' },
-  'YouTube': { zh: 'YouTube' },
-  'Twitter': { zh: 'Twitter' },
-  'Facebook': { zh: 'Facebook' },
-}
-
-function simpleTranslate(
+async function freeTranslate(
   text: string,
   targetLang: string,
-  _sourceLang: string = 'en'
-): string {
-  if (targetLang === 'en' || !text) return text
+  sourceLang: string = 'en'
+): Promise<string> {
+  if (!text || targetLang === sourceLang) return text
 
-  let result = text
+  // MyMemory uses language codes like "en|zh" (simplified Chinese)
+  const langMap: Record<string, string> = { zh: 'zh-CN' }
+  const target = langMap[targetLang] || targetLang
+  const source = langMap[sourceLang] || sourceLang
 
-  // Sort by length (longest first) to avoid partial replacements
-  const sortedTerms = Object.keys(TRANSLATION_DICTIONARY).sort(
-    (a, b) => b.length - a.length
-  )
-
-  for (const term of sortedTerms) {
-    const translation = TRANSLATION_DICTIONARY[term][targetLang]
-    if (translation) {
-      // Case-insensitive replacement
-      const regex = new RegExp(term, 'gi')
-      result = result.replace(regex, translation)
+  try {
+    // Split long text into chunks (MyMemory has 500 char limit per request)
+    const MAX_CHUNK = 500
+    if (text.length <= MAX_CHUNK) {
+      return await translateChunk(text, source, target)
     }
+
+    // Split by paragraphs/sentences to stay under limit
+    const paragraphs = text.split(/\n+/)
+    const translatedParts: string[] = []
+
+    for (const paragraph of paragraphs) {
+      if (!paragraph.trim()) {
+        translatedParts.push(paragraph)
+        continue
+      }
+      if (paragraph.length <= MAX_CHUNK) {
+        translatedParts.push(await translateChunk(paragraph, source, target))
+      } else {
+        // Split by sentences
+        const sentences = paragraph.match(/[^.!?]+[.!?]*/g) || [paragraph]
+        let chunk = ''
+        const chunks: string[] = []
+        for (const sentence of sentences) {
+          if ((chunk + sentence).length > MAX_CHUNK && chunk) {
+            chunks.push(chunk)
+            chunk = sentence
+          } else {
+            chunk += sentence
+          }
+        }
+        if (chunk) chunks.push(chunk)
+
+        const translated = await Promise.all(
+          chunks.map((c) => translateChunk(c, source, target))
+        )
+        translatedParts.push(translated.join(''))
+      }
+    }
+
+    return translatedParts.join('\n')
+  } catch (error) {
+    console.error('Free translate error:', error)
+    return text // Return original text on failure instead of garbled mix
+  }
+}
+
+async function translateChunk(
+  text: string,
+  sourceLang: string,
+  targetLang: string
+): Promise<string> {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`
+  const response = await fetch(url)
+  const data = await response.json()
+
+  if (data.responseStatus === 200 && data.responseData?.translatedText) {
+    return data.responseData.translatedText
   }
 
-  return result
+  return text
 }
 
 // ===========================================

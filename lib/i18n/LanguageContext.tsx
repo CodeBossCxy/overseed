@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
 import { translations, Locale } from './translations'
 
 interface LanguageContextType {
@@ -22,16 +22,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const setLocale = (newLocale: Locale) => {
+  const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)
     localStorage.setItem('locale', newLocale)
-  }
+  }, [])
 
-  const value = {
+  const value = useMemo(() => ({
     locale,
     setLocale,
     t: translations[locale],
-  }
+  }), [locale, setLocale])
 
   return (
     <LanguageContext.Provider value={value}>

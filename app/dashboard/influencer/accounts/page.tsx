@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import MainLayout from '@/components/MainLayout'
 import SocialAccountList from '@/components/profiles/SocialAccountList'
 import SocialAccountForm from '@/components/profiles/SocialAccountForm'
+import UpgradePrompt from '@/components/UpgradePrompt'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface SocialAccount {
@@ -30,6 +32,8 @@ interface Platform {
 
 export default function SocialAccountsPage() {
   const { t } = useLanguage()
+  const { data: session } = useSession()
+  const subscriptionTier = (session?.user as any)?.subscriptionTier || 'FREE'
   const [accounts, setAccounts] = useState<SocialAccount[]>([])
   const [platforms, setPlatforms] = useState<Platform[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -94,6 +98,19 @@ export default function SocialAccountsPage() {
         <div className="max-w-3xl mx-auto px-4 py-12 text-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto"></div>
           <p className="mt-4 text-gray-500">{t.influencer.accounts.loading}</p>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  if (subscriptionTier === 'FREE') {
+    return (
+      <MainLayout>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl font-bold mb-8">{t.influencer.accounts.title}</h1>
+          <div className="bg-white rounded-lg shadow-md">
+            <UpgradePrompt feature="social-accounts" />
+          </div>
         </div>
       </MainLayout>
     )

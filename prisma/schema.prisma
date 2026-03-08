@@ -61,6 +61,11 @@ enum AlertFrequency {
   WEEKLY
 }
 
+enum SubscriptionTier {
+  FREE
+  PRO
+}
+
 // ===========================================
 // MULTILINGUAL SUPPORT
 // ===========================================
@@ -93,7 +98,8 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  userType      UserType  @default(INFLUENCER)
+  userType         UserType         @default(INFLUENCER)
+  subscriptionTier SubscriptionTier @default(FREE)
   isVerified    Boolean   @default(false)
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())

@@ -34,15 +34,12 @@ export function useViewMode() {
         return
       }
 
-      // Refresh the JWT cookie so it matches the DB
+      // Refresh the JWT cookie so it matches the DB, then navigate
       await update()
 
-      // Navigate to the correct dashboard
       const dashboard =
         newMode === 'BRAND' ? '/dashboard/brand' : '/dashboard/influencer'
       router.push(dashboard)
-      // Force server components to re-render with fresh data
-      router.refresh()
     } finally {
       setIsSwitching(false)
     }

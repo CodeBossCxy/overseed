@@ -1,11 +1,28 @@
 import MainLayout from '@/components/MainLayout'
 import CampaignDetailWrapper from '@/components/campaigns/CampaignDetailWrapper'
-import CampaignCard from '@/components/campaigns/CampaignCard'
-import SimilarCampaignsHeading from '@/components/campaigns/SimilarCampaignsHeading'
+import SimilarCampaigns from '@/components/campaigns/SimilarCampaigns'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const campaign = await prisma.campaign.findUnique({
+    where: { id },
+    select: { title: true, description: true, brand: { select: { companyName: true } } },
+  })
+  if (!campaign) return { title: 'Campaign Not Found' }
+  return {
+    title: campaign.title,
+    description: campaign.description?.slice(0, 160) || `Campaign by ${campaign.brand.companyName}`,
+    openGraph: {
+      title: campaign.title,
+      description: campaign.description?.slice(0, 160) || undefined,
+    },
+  }
+}
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -65,90 +82,97 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
     notFound()
   }
 
-  // Check ownership and application status
+  // Check ownership and application status + get similar campaigns in parallel
   let isOwner = false
   let hasApplied = false
   let isSaved = false
 
-  if (session?.user) {
-    const userId = (session.user as any).id
-
-    // Check if owner
-    isOwner = campaign.brand.userId === userId
-
-    // Check if already applied
-    const influencerProfile = await prisma.influencerProfile.findUnique({
-      where: { userId },
-    })
-
-    if (influencerProfile) {
-      const application = await prisma.application.findUnique({
-        where: {
-          campaignId_influencerId: {
-            campaignId: id,
-            influencerId: influencerProfile.id,
-          },
-        },
-      })
-      hasApplied = !!application
-
-      // Check if saved
-      const saved = await prisma.savedCampaign.findUnique({
-        where: {
-          influencerId_campaignId: {
-            influencerId: influencerProfile.id,
-            campaignId: id,
-          },
-        },
-      })
-      isSaved = !!saved
-    }
-  }
-
-  // Increment view count
-  await prisma.campaign.update({
-    where: { id: id },
-    data: { viewCount: { increment: 1 } },
-  })
-
-  // Get similar campaigns
   const categoryIds = campaign.categories.map((c) => c.categoryId)
-  const similarCampaigns = await prisma.campaign.findMany({
-    where: {
-      status: 'ACTIVE',
-      id: { not: id },
-      categories: {
-        some: {
-          categoryId: { in: categoryIds },
+
+  // Run view count increment and similar campaigns fetch in parallel with user checks
+  const [similarCampaigns, userCheckResult] = await Promise.all([
+    // Similar campaigns
+    prisma.campaign.findMany({
+      where: {
+        status: 'ACTIVE',
+        id: { not: id },
+        categories: {
+          some: {
+            categoryId: { in: categoryIds },
+          },
         },
       },
-    },
-    include: {
-      brand: {
-        select: {
-          companyName: true,
-          logoUrl: true,
-          isVerified: true,
+      include: {
+        brand: {
+          select: {
+            companyName: true,
+            logoUrl: true,
+            isVerified: true,
+          },
+        },
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        platforms: {
+          include: {
+            platform: true,
+          },
+        },
+        _count: {
+          select: {
+            applications: true,
+          },
         },
       },
-      categories: {
-        include: {
-          category: true,
-        },
-      },
-      platforms: {
-        include: {
-          platform: true,
-        },
-      },
-      _count: {
-        select: {
-          applications: true,
-        },
-      },
-    },
-    take: 3,
-  })
+      take: 3,
+    }),
+    // User checks + view increment
+    (async () => {
+      // Fire-and-forget view count increment (non-blocking)
+      prisma.campaign.update({
+        where: { id },
+        data: { viewCount: { increment: 1 } },
+      }).catch(() => {})
+
+      if (!session?.user) return { isOwner: false, hasApplied: false, isSaved: false }
+
+      const userId = (session.user as any).id
+      const ownerCheck = campaign.brand.userId === userId
+
+      const influencerProfile = await prisma.influencerProfile.findUnique({
+        where: { userId },
+      })
+
+      if (!influencerProfile) return { isOwner: ownerCheck, hasApplied: false, isSaved: false }
+
+      const [application, saved] = await Promise.all([
+        prisma.application.findUnique({
+          where: {
+            campaignId_influencerId: {
+              campaignId: id,
+              influencerId: influencerProfile.id,
+            },
+          },
+        }),
+        prisma.savedCampaign.findUnique({
+          where: {
+            influencerId_campaignId: {
+              influencerId: influencerProfile.id,
+              campaignId: id,
+            },
+          },
+        }),
+      ])
+
+      return { isOwner: ownerCheck, hasApplied: !!application, isSaved: !!saved }
+    })(),
+  ])
+
+  isOwner = userCheckResult.isOwner
+  hasApplied = userCheckResult.hasApplied
+  isSaved = userCheckResult.isSaved
 
   return (
     <MainLayout>
@@ -160,19 +184,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           isSaved={isSaved}
           isAuthenticated={!!session}
           userType={session ? ((session.user as any).userType || 'INFLUENCER') : null}
+          subscriptionTier={session ? ((session.user as any).subscriptionTier || 'FREE') : null}
         />
 
         {/* Similar Campaigns */}
-        {similarCampaigns.length > 0 && (
-          <div className="mt-12">
-            <SimilarCampaignsHeading />
-            <div className="space-y-4">
-              {similarCampaigns.map((c) => (
-                <CampaignCard key={c.id} campaign={c as any} />
-              ))}
-            </div>
-          </div>
-        )}
+        <SimilarCampaigns campaignId={id} initialCampaigns={similarCampaigns as any} />
       </div>
     </MainLayout>
   )

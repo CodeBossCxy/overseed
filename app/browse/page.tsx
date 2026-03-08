@@ -119,8 +119,8 @@ export default async function BrowsePage({
               <BrowseEmpty />
             ) : (
               <div className="space-y-4">
-                {campaigns.map((campaign) => (
-                  <CampaignCard key={campaign.id} campaign={campaign as any} />
+                {JSON.parse(JSON.stringify(campaigns)).map((campaign: any) => (
+                  <CampaignCard key={campaign.id} campaign={campaign} />
                 ))}
               </div>
             )}

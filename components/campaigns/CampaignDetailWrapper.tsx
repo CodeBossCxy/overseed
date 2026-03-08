@@ -11,6 +11,7 @@ interface CampaignDetailWrapperProps {
   isSaved: boolean
   isAuthenticated: boolean
   userType?: string | null
+  subscriptionTier?: string | null
 }
 
 export default function CampaignDetailWrapper({
@@ -20,6 +21,7 @@ export default function CampaignDetailWrapper({
   isSaved,
   isAuthenticated,
   userType,
+  subscriptionTier,
 }: CampaignDetailWrapperProps) {
   const { locale } = useLanguage()
   const [campaign, setCampaign] = useState(initialCampaign)
@@ -68,6 +70,7 @@ export default function CampaignDetailWrapper({
       isSaved={isSaved}
       isAuthenticated={isAuthenticated}
       userType={userType}
+      subscriptionTier={subscriptionTier}
     />
   )
 }

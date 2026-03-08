@@ -13,6 +13,15 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = (session.user as any).id
+    const subscriptionTier = (session.user as any).subscriptionTier || 'FREE'
+
+    // Free users cannot link social accounts
+    if (subscriptionTier === 'FREE') {
+      return NextResponse.json(
+        { message: 'Upgrade to Pro to link social media accounts' },
+        { status: 403 }
+      )
+    }
 
     // Check if user has an influencer profile
     const influencerProfile = await prisma.influencerProfile.findUnique({

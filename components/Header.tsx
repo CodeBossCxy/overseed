@@ -1,16 +1,71 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { useViewMode } from '@/lib/hooks/useViewMode'
-import { useState } from 'react'
+import { useTheme } from './ThemeProvider'
+import { usePathname } from 'next/navigation'
+import { useState, useRef, useEffect } from 'react'
+
+interface DropdownItem {
+  label: string
+  href: string
+}
+
+function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 text-gray-700 hover:text-primary-600 transition text-sm font-medium"
+      >
+        {label}
+        <svg className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+          {items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition"
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function Header() {
   const { data: session } = useSession()
   const { locale, setLocale, t } = useLanguage()
   const { currentMode, isBrand, switchView, isSwitching } = useViewMode()
+  const { themeMode } = useTheme()
+  const pathname = usePathname()
+  const isHomePage = pathname === '/'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
 
   const toggleLanguage = () => {
     const newLang = locale === 'en' ? 'zh' : 'en'
@@ -19,28 +74,59 @@ export default function Header() {
 
   const dashboardLink = isBrand ? '/dashboard/brand' : '/dashboard/influencer'
 
+  const navMenus = [
+    {
+      key: 'campaigns',
+      label: t.nav.campaigns,
+      items: [
+        { label: t.nav.campaignBoard, href: '/browse' },
+        { label: t.nav.featuredCampaigns, href: '/browse?sort=featured' },
+      ],
+    },
+    {
+      key: 'globalization',
+      label: t.nav.brandGlobalization,
+      items: [
+        { label: t.nav.marketInsights, href: '/market-insights' },
+        { label: t.nav.growthServices, href: '/growth-services' },
+      ],
+    },
+    {
+      key: 'pricing',
+      label: t.nav.pricing,
+      items: [
+        { label: t.nav.brandPricing, href: '/pricing/brand' },
+        { label: t.nav.creatorPricing, href: '/pricing/creator' },
+      ],
+    },
+    {
+      key: 'contact',
+      label: t.nav.contact,
+      items: [
+        { label: t.nav.contactUs, href: '/contact' },
+        { label: t.nav.businessEnquiry, href: '/contact/business' },
+        { label: t.nav.creatorCommunity, href: '/community/creator' },
+        { label: t.nav.brandCommunity, href: '/community/brand' },
+      ],
+    },
+  ]
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-primary-600">Overseed</span>
+          <Link href="/" className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto" />
+            <span className="text-2xl font-bold text-primary-600">OVERSEED</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/" className="text-gray-700 hover:text-primary-600 transition">
-              {t.nav.home}
-            </Link>
-            <Link href="/browse" className="text-gray-700 hover:text-primary-600 transition">
-              {t.nav.browse}
-            </Link>
-            {session && isBrand && (
-              <Link href="/dashboard/brand/campaigns/new" className="text-gray-700 hover:text-primary-600 transition">
-                {t.nav.createCampaign}
-              </Link>
-            )}
+          <nav className="hidden lg:flex items-center space-x-6">
+            {navMenus.map((menu) => (
+              <NavDropdown key={menu.key} label={menu.label} items={menu.items} />
+            ))}
           </nav>
 
           {/* Right side */}
@@ -55,22 +141,24 @@ export default function Header() {
 
             {/* Auth buttons */}
             {session ? (
-              <div className="hidden md:flex items-center space-x-4">
-                {/* View Switcher */}
-                <button
-                  onClick={() => switchView()}
-                  disabled={isSwitching}
-                  className="px-3 py-1 rounded-md border border-primary-300 text-primary-600 hover:bg-primary-50 transition text-sm disabled:opacity-50"
-                >
-                  {isSwitching
-                    ? t.nav.switching
-                    : isBrand
-                      ? t.nav.switchToCreator
-                      : t.nav.switchToBrand}
-                </button>
+              <div className="hidden lg:flex items-center space-x-4">
+                {/* View Switcher — hidden on home page (has its own toggle) */}
+                {!isHomePage && (
+                  <button
+                    onClick={() => switchView()}
+                    disabled={isSwitching}
+                    className="px-3 py-1 rounded-md border border-primary-300 text-primary-600 hover:bg-primary-50 transition text-sm disabled:opacity-50"
+                  >
+                    {isSwitching
+                      ? t.nav.switching
+                      : isBrand
+                        ? t.nav.switchToCreator
+                        : t.nav.switchToBrand}
+                  </button>
+                )}
                 <Link
                   href={dashboardLink}
-                  className="text-gray-700 hover:text-primary-600"
+                  className="text-gray-700 hover:text-primary-600 text-sm font-medium"
                 >
                   {t.nav.myCenter}
                 </Link>
@@ -82,16 +170,16 @@ export default function Header() {
                 </button>
               </div>
             ) : (
-              <div className="hidden md:flex items-center space-x-2">
+              <div className="hidden lg:flex items-center space-x-2">
                 <Link
                   href="/auth/signin"
-                  className="px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition"
+                  className="px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition text-sm"
                 >
                   {t.nav.login}
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 transition"
+                  className="px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 transition text-sm"
                 >
                   {t.nav.signup}
                 </Link>
@@ -101,7 +189,9 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-md hover:bg-gray-100"
+              className="lg:hidden p-2 rounded-md hover:bg-gray-100"
+              aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
@@ -116,83 +206,91 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <nav className="flex flex-col space-y-3">
-              <Link
-                href="/"
-                className="text-gray-700 hover:text-primary-600 transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t.nav.home}
-              </Link>
-              <Link
-                href="/browse"
-                className="text-gray-700 hover:text-primary-600 transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t.nav.browse}
-              </Link>
-              {session ? (
-                <>
-                  {/* Mobile View Switcher */}
+          <div className="lg:hidden py-4 border-t">
+            <nav className="flex flex-col space-y-1">
+              {navMenus.map((menu) => (
+                <div key={menu.key}>
                   <button
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      switchView()
-                    }}
-                    disabled={isSwitching}
-                    className="text-left text-primary-600 hover:text-primary-700 transition disabled:opacity-50"
+                    onClick={() => setMobileExpanded(mobileExpanded === menu.key ? null : menu.key)}
+                    className="flex items-center justify-between w-full py-2 text-gray-700 hover:text-primary-600 transition font-medium"
                   >
-                    {isSwitching
-                      ? t.nav.switching
-                      : isBrand
-                        ? t.nav.switchToCreator
-                        : t.nav.switchToBrand}
+                    {menu.label}
+                    <svg className={`w-4 h-4 transition-transform ${mobileExpanded === menu.key ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
-                  <Link
-                    href={dashboardLink}
-                    className="text-gray-700 hover:text-primary-600 transition"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {t.nav.myCenter}
-                  </Link>
-                  {isBrand && (
+                  {mobileExpanded === menu.key && (
+                    <div className="pl-4 space-y-1">
+                      {menu.items.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="block py-2 text-sm text-gray-600 hover:text-primary-600 transition"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <div className="border-t pt-3 mt-2 space-y-3">
+                {session ? (
+                  <>
+                    {!isHomePage && (
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false)
+                          switchView()
+                        }}
+                        disabled={isSwitching}
+                        className="text-left text-primary-600 hover:text-primary-700 transition disabled:opacity-50"
+                      >
+                        {isSwitching
+                          ? t.nav.switching
+                          : isBrand
+                            ? t.nav.switchToCreator
+                            : t.nav.switchToBrand}
+                      </button>
+                    )}
                     <Link
-                      href="/dashboard/brand/campaigns/new"
-                      className="text-gray-700 hover:text-primary-600 transition"
+                      href={dashboardLink}
+                      className="block text-gray-700 hover:text-primary-600 transition"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      {t.nav.createCampaign}
+                      {t.nav.myCenter}
                     </Link>
-                  )}
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      signOut()
-                    }}
-                    className="text-left text-gray-700 hover:text-primary-600 transition"
-                  >
-                    {t.nav.logout}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/auth/signin"
-                    className="text-gray-700 hover:text-primary-600 transition"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {t.nav.login}
-                  </Link>
-                  <Link
-                    href="/auth/signup"
-                    className="text-primary-600 font-medium hover:text-primary-700 transition"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {t.nav.signup}
-                  </Link>
-                </>
-              )}
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false)
+                        signOut()
+                      }}
+                      className="text-left text-gray-700 hover:text-primary-600 transition"
+                    >
+                      {t.nav.logout}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/signin"
+                      className="block text-gray-700 hover:text-primary-600 transition"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {t.nav.login}
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="block text-primary-600 font-medium hover:text-primary-700 transition"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {t.nav.signup}
+                    </Link>
+                  </>
+                )}
+              </div>
             </nav>
           </div>
         )}
