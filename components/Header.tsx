@@ -87,6 +87,7 @@ export default function Header() {
       key: 'globalization',
       label: t.nav.brandGlobalization,
       items: [
+        { label: t.nav.aiAssistant, href: '/ai-assistant' },
         { label: t.nav.marketInsights, href: '/market-insights' },
         { label: t.nav.growthServices, href: '/growth-services' },
       ],
