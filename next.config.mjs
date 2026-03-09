@@ -18,7 +18,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
-    optimizePackageImports: ['@prisma/client', 'zod', 'react-hook-form'],
+    optimizePackageImports: ['zod', 'react-hook-form'],
     staleTimes: {
       dynamic: 0,
       static: 180,
