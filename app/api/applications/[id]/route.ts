@@ -139,6 +139,32 @@ export async function PATCH(
             where: { id: application.campaignId },
             data: { filledSlots: { increment: 1 } },
           })
+          // Auto-create conversation if one doesn't exist
+          const existingConversation = await prisma.conversation.findUnique({
+            where: { applicationId: id },
+          })
+          if (!existingConversation) {
+            await prisma.conversation.create({
+              data: {
+                applicationId: id,
+                participants: {
+                  createMany: {
+                    data: [
+                      { userId: application.campaign.brand.userId },
+                      { userId: application.influencer.userId },
+                    ],
+                  },
+                },
+                messages: {
+                  create: {
+                    senderId: userId,
+                    content: 'Application approved — you can now discuss collaboration details.',
+                    isSystemMessage: true,
+                  },
+                },
+              },
+            })
+          }
         } else if (data.status === 'COMPLETED') {
           updateData.completedAt = new Date()
         }

@@ -1,0 +1,194 @@
+RAG Implementation Plan for Overseed AI Assistant
+==================================================
+
+How It Works
+------------
+When a user sends a message:
+1. Generate an embedding (vector) of the user's question using OpenAI
+2. Search your Neon database (pgvector) for the most similar knowledge chunks
+3. Inject the matched context into the system prompt
+4. Send the augmented prompt to GPT-4o-mini as usual
+
+If nothing matches, the assistant falls back to its general knowledge — no disruption.
+
+
+Implementation Steps
+--------------------
+
+| Step | What                                    | Files                                                      |
+|------|-----------------------------------------|------------------------------------------------------------|
+|  1   | Enable pgvector on Neon + Prisma models | prisma/schema.prisma + migration SQL                       |
+|  2   | Embedding & chunking utility            | lib/embeddings.ts (new)                                    |
+|  3   | Vector similarity search                | lib/knowledge-search.ts (new)                              |
+|  4   | Admin CRUD API for knowledge docs       | app/api/admin/knowledge/route.ts + [id]/route.ts (new)     |
+|  5   | Integrate RAG into chat route           | app/api/ai-chat/route.ts (~15 lines changed)               |
+|  6   | Admin UI for managing knowledge base    | app/dashboard/brand/knowledge/page.tsx (new)               |
+|  7   | Seed initial content                    | FAQ, platform guides, market insights                      |
+
+
+Step 1: Database — pgvector + New Models
+-----------------------------------------
+Add two tables: KnowledgeDocument (the full doc) and KnowledgeChunk (split pieces with embeddings).
+The embedding column uses pgvector's vector(1536) type (matching OpenAI's text-embedding-3-small),
+with an HNSW index for fast cosine similarity search.
+
+No new packages needed — pgvector is a Neon-side extension enabled via:
+  CREATE EXTENSION IF NOT EXISTS vector;
+
+Prisma schema additions:
+
+  model KnowledgeDocument {
+    id          String   @id @default(cuid())
+    title       String
+    category    String   // "faq", "platform_guide", "market_insight", "policy", etc.
+    content     String   @db.Text
+    metadata    Json?
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    chunks      KnowledgeChunk[]
+    @@map("knowledge_documents")
+  }
+
+  model KnowledgeChunk {
+    id          String   @id @default(cuid())
+    documentId  String
+    chunkIndex  Int
+    content     String   @db.Text
+    tokenCount  Int      @default(0)
+    // embedding column added via raw SQL migration (vector(1536))
+    createdAt   DateTime @default(now())
+    document    KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+    @@index([documentId])
+    @@map("knowledge_chunks")
+  }
+
+Migration SQL (run after prisma migrate dev):
+
+  CREATE EXTENSION IF NOT EXISTS vector;
+  ALTER TABLE knowledge_chunks ADD COLUMN embedding vector(1536);
+  CREATE INDEX ON knowledge_chunks USING hnsw (embedding vector_cosine_ops);
+
+
+Step 2: Embedding & Chunking Utility (lib/embeddings.ts)
+---------------------------------------------------------
+A thin wrapper around OpenAI's embeddings API. Uses the existing CHAT_API env var.
+
+Exports:
+- generateEmbedding(text: string): Promise<number[]>
+    Calls openai.embeddings.create with model "text-embedding-3-small"
+
+- chunkText(text: string, maxTokens?: number): string[]
+    Splits a document into ~500-token chunks with 50-token overlap.
+    Strategy: split on double newlines, then single newlines, then sentences,
+    accumulating until the chunk nears 500 tokens.
+    Token count approximated by dividing character count by 4 (no external library needed).
+
+
+Step 3: Vector Similarity Search (lib/knowledge-search.ts)
+-----------------------------------------------------------
+Core retrieval function:
+
+  searchKnowledge(query: string, topK = 5, similarityThreshold = 0.7)
+    -> Promise<{ content: string; title: string; similarity: number }[]>
+
+Implementation:
+1. Call generateEmbedding(query) to get the query vector
+2. Execute raw SQL against Neon:
+
+    SELECT kc.content, kd.title,
+           1 - (kc.embedding <=> $1::vector) AS similarity
+    FROM knowledge_chunks kc
+    JOIN knowledge_documents kd ON kc.document_id = kd.id
+    WHERE kd.is_active = true
+      AND 1 - (kc.embedding <=> $1::vector) > $2
+    ORDER BY kc.embedding <=> $1::vector
+    LIMIT $3
+
+3. Return results for prompt injection
+
+The <=> operator is pgvector's cosine distance. HNSW index makes this fast even with
+thousands of chunks.
+
+
+Step 4: Admin CRUD API for Knowledge Documents
+------------------------------------------------
+Two new API route files following existing project patterns:
+
+app/api/admin/knowledge/route.ts
+  - GET: list all documents with chunk count, sorted by createdAt desc
+  - POST: accepts { title, category, content, metadata? }
+    On create: save KnowledgeDocument, chunk content, generate embeddings,
+    insert KnowledgeChunk rows with embeddings via prisma.$executeRaw
+
+app/api/admin/knowledge/[id]/route.ts
+  - GET: single document
+  - PUT: update document (if content changes, re-chunk and re-embed)
+  - DELETE: cascade deletes chunks via Prisma relation
+
+Auth: restricted to ADMIN or BRAND userType.
+
+
+Step 5: Integrate RAG into Chat Route (app/api/ai-chat/route.ts)
+-----------------------------------------------------------------
+Before calling OpenAI, retrieve relevant knowledge and append to system prompt:
+
+  const results = await searchKnowledge(latestUserMessage);
+
+  const contextBlocks = results.map(r =>
+    `[Source: ${r.title}]\n${r.content}`
+  ).join('\n\n---\n\n');
+
+  const systemPrompt = `You are a helpful AI assistant for Overseed...
+
+  ${results.length > 0 ? `Use the following knowledge base information to answer
+  the user's question when relevant. If the information doesn't fully answer the
+  question, you may supplement with your general knowledge, but prioritize the
+  knowledge base content.
+
+  KNOWLEDGE BASE CONTEXT:
+  ${contextBlocks}` : ''}`;
+
+This adds ~200-300ms to response time (the LLM call itself takes 1-3s).
+
+
+Step 6: Admin UI (app/dashboard/brand/knowledge/page.tsx)
+----------------------------------------------------------
+A dashboard page with:
+- Table listing all knowledge documents (title, category, chunk count, date, active status)
+- "New Document" button with form: title, category dropdown, content textarea
+- Edit and delete actions per row
+- Active/inactive toggle
+- Bulk import section for initial data load
+
+Follows existing dashboard layout patterns (MainLayout, Tailwind CSS).
+
+
+Step 7: Seed Initial Content
+-----------------------------
+Load foundational knowledge documents:
+- Platform FAQ: how to create a campaign, how applications work, payment flow, verification
+- Pricing/Plans: what FREE vs PRO includes
+- Global Expansion Guides: market-specific tips for key regions
+- Creator Collaboration Best Practices: how to write briefs, compensation benchmarks
+- Policy Documents: terms of service summary, content guidelines
+
+Each document should be written in Q&A or instructional format to maximize retrieval relevance.
+
+
+Key Details
+-----------
+- No new packages needed — OpenAI SDK already supports embeddings, Prisma handles raw SQL,
+  pgvector is Neon-native
+- No new env vars — reuses CHAT_API
+- Prisma caveat — vector columns must use prisma.$queryRaw since Prisma doesn't natively
+  support vector types
+- Non-disruptive — empty knowledge base = current behavior unchanged
+- Embedding model: text-embedding-3-small (1536 dimensions) — smaller and cheaper than
+  text-embedding-3-large (3072 dims), sufficient for this use case
+
+Potential Challenges:
+1. Prisma + vector types: all embedding read/write must use raw SQL ($queryRaw/$executeRaw)
+2. Embedding latency: ~100-200ms per query (acceptable given LLM takes 1-3s)
+3. Re-embedding on doc updates: fine for expected knowledge base size (tens to hundreds of docs)
+4. pgvector availability: supported on all Neon plans out of the box

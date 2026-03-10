@@ -57,6 +57,65 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
   )
 }
 
+function MessageBadge() {
+  const [unread, setUnread] = useState(0)
+  const { data: session } = useSession()
+  const badgeUserId = (session?.user as any)?.id
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const res = await fetch('/api/messages/unread')
+        if (res.ok) {
+          const data = await res.json()
+          setUnread(data.totalUnread)
+        }
+      } catch {}
+    }
+    fetchUnread()
+
+    // Use Pusher for real-time badge updates
+    let cleanup: (() => void) | undefined
+    import('@/lib/pusher-client').then(({ getPusherClient }) => {
+      const pusher = getPusherClient()
+      if (pusher && badgeUserId) {
+        const channel = pusher.subscribe(`user-${badgeUserId}`)
+        channel.bind('conversation-updated', () => {
+          fetchUnread()
+        })
+        cleanup = () => {
+          channel.unbind_all()
+          pusher.unsubscribe(`user-${badgeUserId}`)
+        }
+      }
+    })
+
+    // Fallback polling
+    const interval = setInterval(fetchUnread, 30000)
+    return () => {
+      clearInterval(interval)
+      cleanup?.()
+    }
+  }, [badgeUserId])
+
+  return (
+    <Link
+      href="/dashboard/messages"
+      className="relative text-gray-700 hover:text-primary-600 transition"
+      title="Messages"
+    >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+      {unread > 0 && (
+        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none">
+          {unread > 9 ? '9+' : unread}
+        </span>
+      )}
+    </Link>
+  )
+}
+
 export default function Header() {
   const { data: session } = useSession()
   const { locale, setLocale, t } = useLanguage()
@@ -157,6 +216,7 @@ export default function Header() {
                         : t.nav.switchToBrand}
                   </button>
                 )}
+                <MessageBadge />
                 <Link
                   href={dashboardLink}
                   className="text-gray-700 hover:text-primary-600 text-sm font-medium"
@@ -256,6 +316,13 @@ export default function Header() {
                             : t.nav.switchToBrand}
                       </button>
                     )}
+                    <Link
+                      href="/dashboard/messages"
+                      className="block text-gray-700 hover:text-primary-600 transition"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {t.messages?.title || 'Messages'}
+                    </Link>
                     <Link
                       href={dashboardLink}
                       className="block text-gray-700 hover:text-primary-600 transition"

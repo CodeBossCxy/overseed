@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import MainLayout from '@/components/MainLayout'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
 
 interface Message {
   id: string
@@ -48,17 +49,40 @@ export default function AIAssistantPage() {
     setInput('')
     setIsLoading(true)
 
-    // TODO: Replace with actual AI API call
-    setTimeout(() => {
+    try {
+      const chatHistory = [...messages, userMessage].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }))
+
+      const res = await fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: chatHistory }),
+      })
+
+      const data = await res.json()
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Thank you for your question! This AI assistant is currently being set up. Soon, I\'ll be able to help you with personalized global expansion strategies, market insights, and creator collaboration advice. Stay tuned!',
+        content: res.ok
+          ? data.content
+          : 'Sorry, something went wrong. Please try again.',
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMessage])
+    } catch {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Sorry, something went wrong. Please try again.',
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -127,7 +151,13 @@ export default function AIAssistantPage() {
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  {message.role === 'assistant' ? (
+                    <div className="text-sm leading-relaxed prose prose-sm prose-gray max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2 prose-headings:text-gray-800">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  )}
                 </div>
               </div>
             ))}

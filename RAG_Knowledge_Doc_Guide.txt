@@ -1,0 +1,109 @@
+RAG Knowledge Document Guide for Overseed AI Assistant
+=======================================================
+
+
+PART 1: What Info to Include in Knowledge Documents
+----------------------------------------------------
+
+### Platform-Specific (must have)
+- How-to guides: How to create a campaign, apply to campaigns, set up a profile,
+  connect social accounts, verify identity
+- Feature explanations: What each dashboard section does, what FREE vs PRO includes
+- Policies: Payment terms, content guidelines, approval process, dispute resolution
+- FAQ: Common questions your support team already gets repeatedly
+
+### Business Knowledge
+- Global expansion tips: Market entry strategies by region (US, EU, Asia, etc.),
+  cultural considerations, local platform preferences (TikTok vs Douyin, Instagram
+  vs Xiaohongshu)
+- Creator collaboration best practices: How to write a good brief, typical compensation
+  ranges by follower count/platform, do's and don'ts
+- Industry benchmarks: Average engagement rates, campaign ROI expectations, content
+  formats that perform well
+
+### Format Tips
+- Write in Q&A style when possible — this matches how users ask questions, improving
+  retrieval accuracy
+- Keep each document focused on one topic — don't combine unrelated info in a single doc
+- Use clear, simple language — match how users would phrase their questions
+- Include keywords users are likely to search for
+
+### What NOT to Include
+- Sensitive internal data (financial details, internal strategies)
+- Information that changes frequently (unless you plan to update it regularly)
+- Generic marketing copy — it won't help answer real questions
+
+Start with your top 20 most common support questions — that alone will cover the
+majority of what users ask. You can always add more documents later as you see what
+users are asking that the assistant can't answer well.
+
+
+PART 2: Recommended Format for Knowledge Documents
+----------------------------------------------------
+
+Use one document per topic, structured like this:
+
+
+### Q&A Format (best for FAQs and how-to guides)
+
+    TITLE: How to Create a Campaign
+    CATEGORY: platform_guide
+    TAGS: campaign, create, setup, brand
+
+    Q: How do I create a new campaign on Overseed?
+    A: Go to your Brand Dashboard and click "Campaigns" in the sidebar. Then click
+    "New Campaign" and fill in the following:
+    - Campaign name
+    - Description and goals
+    - Target platforms (Instagram, TikTok, YouTube, etc.)
+    - Budget and compensation type
+    - Timeline and deadlines
+    - Target regions/markets
+
+    Once everything is filled in, click "Publish" to make it visible to creators.
+
+    Q: Can I edit a campaign after publishing?
+    A: Yes. Go to Campaigns > click on your campaign > Edit. You can update any
+    field. Note that creators who already applied will be notified of changes.
+
+    Q: How do I close a campaign?
+    A: Go to your campaign page and click "Close Campaign". This stops new
+    applications but doesn't affect existing ones.
+
+
+### Informational Format (best for policies, pricing, guides)
+
+    TITLE: Overseed Pricing Plans
+    CATEGORY: faq
+    TAGS: pricing, free, pro, subscription
+
+    Overseed offers two plans:
+
+    FREE Plan:
+    - Create up to 3 campaigns
+    - Basic analytics
+    - Access to creator marketplace
+    - Email support
+
+    PRO Plan ($29/month):
+    - Unlimited campaigns
+    - Advanced analytics and reporting
+    - AI Assistant access
+    - Priority support
+    - Market insights by region
+    - Creator recommendation engine
+
+
+### Why This Format Works Well for RAG
+
+- Q&A pairs closely match how users ask questions, so the embeddings will have
+  higher similarity scores during retrieval
+- One topic per document keeps chunks focused — when the system retrieves a chunk,
+  it gets relevant context, not a mix of unrelated info
+- TITLE/CATEGORY/TAGS at the top help with organization in the admin UI and can
+  be used for filtering
+- Short, direct answers — the AI can use these as-is or rephrase naturally
+- Multiple related Q&As in one doc — they'll be chunked together, giving the AI
+  fuller context on the topic
+- Short paragraphs work best — the chunker splits on double newlines, so each
+  section naturally becomes its own retrievable chunk

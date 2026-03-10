@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import MainLayout from '@/components/MainLayout'
 import ApplicationStatus from '@/components/applications/ApplicationStatus'
@@ -291,13 +291,38 @@ export default function CampaignApplicationsPage() {
                 </div>
 
                 {/* View Profile Link */}
-                <Link
-                  href={`/influencer/${selectedApplication.influencer.id}`}
-                  className="text-primary-600 hover:underline text-sm mb-6 inline-block"
-                  target="_blank"
-                >
-                  {t.brand.applications.viewFullProfile} →
-                </Link>
+                <div className="flex items-center gap-4 mb-6">
+                  <Link
+                    href={`/influencer/${selectedApplication.influencer.id}`}
+                    className="text-primary-600 hover:underline text-sm"
+                    target="_blank"
+                  >
+                    {t.brand.applications.viewFullProfile} →
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/messages/start', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ applicationId: selectedApplication.id }),
+                        })
+                        if (res.ok) {
+                          const data = await res.json()
+                          router.push(`/dashboard/messages?conv=${data.conversationId}`)
+                        }
+                      } catch (error) {
+                        console.error('Error starting conversation:', error)
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    {t.messages?.messageButton || 'Message'}
+                  </button>
+                </div>
 
                 {/* Actions */}
                 <div className="pt-6 border-t">

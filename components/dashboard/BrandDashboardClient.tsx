@@ -173,6 +173,12 @@ export default function BrandDashboardClient({
                 {t.brand.dashboard.companyProfile}
               </Link>
               <Link
+                href="/dashboard/messages"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition"
+              >
+                {t.messages?.title || 'Messages'}
+              </Link>
+              <Link
                 href="/ai-assistant"
                 className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition"
               >

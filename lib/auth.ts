@@ -123,6 +123,51 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Auto-link OAuth accounts to existing users with the same email
+      if (account?.provider && account.provider !== 'credentials' && user.email) {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+        })
+        if (existingUser) {
+          // Check if this OAuth account is already linked
+          const existingAccount = await prisma.account.findUnique({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+          })
+          if (!existingAccount) {
+            // Link the OAuth account to the existing user
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                refresh_token: account.refresh_token,
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                session_state: account.session_state as string | undefined,
+              },
+            })
+          }
+          // Update user image/name from OAuth if missing
+          if (!existingUser.image && (user as any).image) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { image: (user as any).image },
+            })
+          }
+        }
+      }
+      return true
+    },
     async jwt({ token, user, account, trigger }) {
       if (user) {
         token.id = user.id

@@ -146,6 +146,12 @@ export default function InfluencerDashboardClient({
               >
                 <span>{t.influencer.dashboard.manageSocialAccounts} ({influencerProfile.socialAccounts.length})</span>
               </Link>
+              <Link
+                href="/dashboard/messages"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-50 transition"
+              >
+                <span>{t.messages?.title || 'Messages'}</span>
+              </Link>
             </nav>
           </div>
 

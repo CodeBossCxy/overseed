@@ -439,11 +439,60 @@ model Application {
   campaign      Campaign                 @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   influencer    InfluencerProfile        @relation(fields: [influencerId], references: [id], onDelete: Cascade)
   socialAccount InfluencerSocialAccount? @relation(fields: [socialAccountId], references: [id])
+  conversation  Conversation?
 
   @@unique([campaignId, influencerId])
   @@index([influencerId, status])
   @@index([campaignId, status])
   @@map("applications")
+}
+
+// ===========================================
+// MESSAGING
+// ===========================================
+
+model Conversation {
+  id            String   @id @default(cuid())
+  applicationId String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  messages      Message[]
+  participants  ConversationParticipant[]
+
+  @@index([updatedAt])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversationId String
+  userId         String
+  lastReadAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  conversationId  String
+  senderId        String
+  content         String   @db.Text
+  messageType     String   @default("text")
+  isSystemMessage Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("messages")
 }
 
 // ===========================================
