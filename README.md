@@ -247,6 +247,50 @@ const postInEnglish = await getPostWithTranslation(postId, 'en')
 - `lib/db/types.ts` - TypeScript types
 - `prisma/schema.prisma` - Translation table schema
 
+## Admin SQL Queries (Neon SQL Editor)
+
+### AI Token Usage — Per user this month
+```sql
+SELECT u.email, u.name,
+  SUM(a."promptTokens") as prompt_tokens,
+  SUM(a."completionTokens") as completion_tokens,
+  SUM(a."totalTokens") as total_tokens,
+  COUNT(*) as total_requests
+FROM ai_token_usage a
+JOIN users u ON u.id = a."userId"
+WHERE a."createdAt" >= date_trunc('month', NOW())
+GROUP BY u.email, u.name
+ORDER BY total_tokens DESC;
+```
+
+### AI Token Usage — All time per user
+```sql
+SELECT u.email, u.name,
+  SUM(a."totalTokens") as total_tokens,
+  COUNT(*) as requests
+FROM ai_token_usage a
+JOIN users u ON u.id = a."userId"
+GROUP BY u.email, u.name
+ORDER BY total_tokens DESC;
+```
+
+### AI Token Usage — Detailed log (last 50 requests)
+```sql
+SELECT u.email, a."promptTokens", a."completionTokens",
+  a."totalTokens", a.model, a."createdAt"
+FROM ai_token_usage a
+JOIN users u ON u.id = a."userId"
+ORDER BY a."createdAt" DESC
+LIMIT 50;
+```
+
+### All users overview
+```sql
+SELECT email, name, "userType", "subscriptionTier", "isActive", "createdAt"
+FROM users
+ORDER BY "createdAt" DESC;
+```
+
 ## Development Tips
 
 - Run `npm run lint` to check for code issues
