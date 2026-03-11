@@ -113,6 +113,7 @@ model User {
   influencerProfile InfluencerProfile?
   brandProfile      BrandProfile?
   agencyProfile     AgencyProfile?
+  aiTokenUsage      AiTokenUsage[]
 
   @@map("users")
 }
@@ -493,6 +494,25 @@ model Message {
   @@index([conversationId, createdAt])
   @@index([senderId])
   @@map("messages")
+}
+
+// ===========================================
+// AI TOKEN USAGE
+// ===========================================
+
+model AiTokenUsage {
+  id               String   @id @default(cuid())
+  userId           String
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  model            String
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("ai_token_usage")
 }
 
 // ===========================================
