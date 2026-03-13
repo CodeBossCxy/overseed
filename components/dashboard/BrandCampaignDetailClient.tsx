@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 import CompensationBadge from '@/components/campaigns/CompensationBadge'
 
 interface FollowerRequirement {
@@ -60,17 +61,12 @@ const statusColors: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 }
 
-const formatDate = (date: string | null) => {
-  if (!date) return 'Not set'
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
 export default function BrandCampaignDetailClient({ campaign, stats }: BrandCampaignDetailClientProps) {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
+  const fmtDate = (date: string | null) => {
+    if (!date) return locale === 'zh' ? '未设置' : 'Not set'
+    return formatDate(date, locale)
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -226,7 +222,7 @@ export default function BrandCampaignDetailClient({ campaign, stats }: BrandCamp
 
               <div>
                 <span className="text-sm text-gray-500">{t.brand.campaignDetail.applicationDeadline}</span>
-                <div className="font-medium">{formatDate(campaign.deadline)}</div>
+                <div className="font-medium">{fmtDate(campaign.deadline)}</div>
               </div>
 
               <div>
@@ -234,7 +230,7 @@ export default function BrandCampaignDetailClient({ campaign, stats }: BrandCamp
                 <div className="font-medium">
                   {campaign.campaignStartDate || campaign.campaignEndDate ? (
                     <>
-                      {formatDate(campaign.campaignStartDate)} - {formatDate(campaign.campaignEndDate)}
+                      {fmtDate(campaign.campaignStartDate)} - {fmtDate(campaign.campaignEndDate)}
                     </>
                   ) : (
                     t.brand.campaignDetail.notSet
@@ -244,7 +240,7 @@ export default function BrandCampaignDetailClient({ campaign, stats }: BrandCamp
 
               <div>
                 <span className="text-sm text-gray-500">{t.brand.campaignDetail.created}</span>
-                <div className="font-medium">{formatDate(campaign.createdAt)}</div>
+                <div className="font-medium">{fmtDate(campaign.createdAt)}</div>
               </div>
             </div>
           </div>

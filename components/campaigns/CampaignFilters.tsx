@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface Category {
   id: number
@@ -23,6 +24,8 @@ interface CampaignFiltersProps {
 export default function CampaignFilters({ categories = [], platforms = [] }: CampaignFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useLanguage()
+  const ft = t.campaignFilters
 
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
@@ -52,15 +55,15 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
   }
 
   const compensationTypes = [
-    { value: 'PAID', label: 'Paid' },
-    { value: 'GIFTED', label: 'Gifted (Product Only)' },
-    { value: 'PAID_PLUS_GIFT', label: 'Paid + Gift' },
-    { value: 'AFFILIATE', label: 'Affiliate/Commission' },
-    { value: 'NEGOTIABLE', label: 'Negotiable' },
+    { value: 'PAID', label: ft.paid },
+    { value: 'GIFTED', label: ft.gifted },
+    { value: 'PAID_PLUS_GIFT', label: ft.paidPlusGift },
+    { value: 'AFFILIATE', label: ft.affiliate },
+    { value: 'NEGOTIABLE', label: ft.negotiable },
   ]
 
   const followerRanges = [
-    { value: '', label: 'Any' },
+    { value: '', label: ft.any },
     { value: '1000', label: '1K+' },
     { value: '5000', label: '5K+' },
     { value: '10000', label: '10K+' },
@@ -74,24 +77,24 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
     <aside className="w-full lg:w-64 flex-shrink-0">
       <div className="bg-white rounded-lg shadow-sm p-6 sticky top-20">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold">Filters</h2>
+          <h2 className="text-lg font-semibold">{ft.filters}</h2>
           <button
             onClick={clearFilters}
             className="text-sm text-primary-600 hover:underline"
           >
-            Clear all
+            {ft.clearAll}
           </button>
         </div>
 
         {/* Category Filter */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Category</label>
+          <label className="block text-sm font-medium mb-2">{ft.category}</label>
           <select
             value={filters.category}
             onChange={(e) => setFilters({ ...filters, category: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="">All Categories</option>
+            <option value="">{ft.allCategories}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.slug}>
                 {cat.name}
@@ -102,13 +105,13 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
 
         {/* Platform Filter */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Platform</label>
+          <label className="block text-sm font-medium mb-2">{ft.platform}</label>
           <select
             value={filters.platform}
             onChange={(e) => setFilters({ ...filters, platform: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="">All Platforms</option>
+            <option value="">{ft.allPlatforms}</option>
             {platforms.map((plat) => (
               <option key={plat.id} value={plat.slug}>
                 {plat.name}
@@ -119,7 +122,7 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
 
         {/* Compensation Type Filter */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Compensation</label>
+          <label className="block text-sm font-medium mb-2">{ft.compensation}</label>
           <div className="space-y-2">
             <label className="flex items-center">
               <input
@@ -130,7 +133,7 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
                 onChange={(e) => setFilters({ ...filters, compensation: e.target.value })}
                 className="mr-2 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm">All Types</span>
+              <span className="text-sm">{ft.allTypes}</span>
             </label>
             {compensationTypes.map((type) => (
               <label key={type.value} className="flex items-center">
@@ -150,7 +153,7 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
 
         {/* Follower Range Filter */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Min Followers Required</label>
+          <label className="block text-sm font-medium mb-2">{ft.minFollowersRequired}</label>
           <select
             value={filters.minFollowers}
             onChange={(e) => setFilters({ ...filters, minFollowers: e.target.value })}
@@ -169,12 +172,12 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
           onClick={applyFilters}
           className="w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
         >
-          Apply Filters
+          {ft.applyFilters}
         </button>
 
         {/* Save Search Button */}
         <button className="w-full mt-3 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
-          Save Search
+          {ft.saveSearch}
         </button>
       </div>
     </aside>

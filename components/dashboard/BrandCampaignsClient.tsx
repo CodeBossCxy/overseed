@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 
 interface Campaign {
   id: string
@@ -39,7 +40,7 @@ const getStatusColor = (status: string) => {
 }
 
 export default function BrandCampaignsClient({ campaigns }: BrandCampaignsClientProps) {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -125,7 +126,7 @@ export default function BrandCampaignsClient({ campaigns }: BrandCampaignsClient
                   </td>
                   <td className="px-6 py-4 text-gray-500">
                     {campaign.deadline
-                      ? new Date(campaign.deadline).toLocaleDateString()
+                      ? formatDate(campaign.deadline, locale)
                       : t.brand.campaigns.noDeadline}
                   </td>
                   <td className="px-6 py-4 text-right space-x-4">

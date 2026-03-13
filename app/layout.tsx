@@ -42,7 +42,7 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions)
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning style={{ colorScheme: 'light' }}>
       <head>
         <link rel="icon" type="image/png" href="/icon-pink.png" />
       </head>

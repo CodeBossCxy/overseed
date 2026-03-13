@@ -1,6 +1,7 @@
 import MainLayout from '@/components/MainLayout'
 import ApplicationForm from '@/components/applications/ApplicationForm'
 import CompensationBadge from '@/components/campaigns/CompensationBadge'
+import { LocaleDate } from '@/components/LocaleDate'
 import UpgradePrompt from '@/components/UpgradePrompt'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
@@ -261,7 +262,7 @@ export default async function ApplyPage({ params }: { params: Promise<{ id: stri
                 <div>
                   <p className="text-xs font-medium text-gray-500 mb-1">Deadline</p>
                   <p className="text-sm text-orange-600 font-medium">
-                    {new Date(campaign.deadline).toLocaleDateString()}
+                    <LocaleDate date={campaign.deadline} />
                   </p>
                 </div>
               )}

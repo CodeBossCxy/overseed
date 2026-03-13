@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface Category {
   id: number
@@ -29,6 +30,8 @@ export default function CampaignForm({
   isEditing = false,
 }: CampaignFormProps) {
   const router = useRouter()
+  const { t } = useLanguage()
+  const cf = t.campaignForm
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState(1)
@@ -96,7 +99,7 @@ export default function CampaignForm({
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.message || 'Failed to save campaign')
+        throw new Error(data.message || cf.failedToSave)
       }
 
       const campaign = await response.json()
@@ -124,7 +127,7 @@ export default function CampaignForm({
 
     const remaining = maxTotal - formData.images.length
     if (remaining <= 0) {
-      setUploadError('Maximum 8 images allowed')
+      setUploadError(cf.maxImages)
       return
     }
 
@@ -132,11 +135,11 @@ export default function CampaignForm({
 
     for (const f of filesToUpload) {
       if (!allowed.includes(f.type)) {
-        setUploadError(`"${f.name}" is not a supported image type (JPEG, PNG, WebP, GIF)`)
+        setUploadError(`"${f.name}" ${cf.unsupportedType}`)
         return
       }
       if (f.size > maxSize) {
-        setUploadError(`"${f.name}" exceeds the 5 MB limit`)
+        setUploadError(`"${f.name}" ${cf.fileTooLarge}`)
         return
       }
     }
@@ -240,33 +243,33 @@ export default function CampaignForm({
 
   const renderStep1 = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Basic Information</h2>
+      <h2 className="text-xl font-semibold">{cf.basicInfo}</h2>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Campaign Title *</label>
+        <label className="block text-sm font-medium mb-1">{cf.campaignTitle}</label>
         <input
           type="text"
           required
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-          placeholder="e.g., Summer Beauty Campaign"
+          placeholder={cf.campaignTitlePlaceholder}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Description</label>
+        <label className="block text-sm font-medium mb-1">{cf.description}</label>
         <textarea
           rows={6}
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-          placeholder="Describe your campaign, what you're looking for, and any important details..."
+          placeholder={cf.descriptionPlaceholder}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Categories *</label>
+        <label className="block text-sm font-medium mb-2">{cf.categories}</label>
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
@@ -287,7 +290,7 @@ export default function CampaignForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Application Deadline</label>
+          <label className="block text-sm font-medium mb-1">{cf.applicationDeadline}</label>
           <input
             type="date"
             value={formData.deadline}
@@ -296,7 +299,7 @@ export default function CampaignForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Number of Spots</label>
+          <label className="block text-sm font-medium mb-1">{cf.numberOfSpots}</label>
           <input
             type="number"
             min="1"
@@ -309,7 +312,7 @@ export default function CampaignForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Campaign Start Date</label>
+          <label className="block text-sm font-medium mb-1">{cf.campaignStartDate}</label>
           <input
             type="date"
             value={formData.campaignStartDate}
@@ -318,7 +321,7 @@ export default function CampaignForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Campaign End Date</label>
+          <label className="block text-sm font-medium mb-1">{cf.campaignEndDate}</label>
           <input
             type="date"
             value={formData.campaignEndDate}
@@ -330,10 +333,8 @@ export default function CampaignForm({
 
       {/* Campaign Images */}
       <div>
-        <label className="block text-sm font-medium mb-2">Campaign Images</label>
-        <p className="text-sm text-gray-500 mb-3">
-          Upload up to 8 images to showcase your products or campaign visuals (JPEG, PNG, WebP, GIF — max 5 MB each)
-        </p>
+        <label className="block text-sm font-medium mb-2">{cf.campaignImages}</label>
+        <p className="text-sm text-gray-500 mb-3">{cf.campaignImagesDesc}</p>
 
         {/* Upload error */}
         {uploadError && (
@@ -392,7 +393,7 @@ export default function CampaignForm({
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                <p className="text-sm text-gray-500">Uploading...</p>
+                <p className="text-sm text-gray-500">{cf.uploading}</p>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
@@ -400,10 +401,10 @@ export default function CampaignForm({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 16v-8m0 0l-3 3m3-3l3 3M2 16.5V18a2 2 0 002 2h16a2 2 0 002-2v-1.5M6 12l-2 2M18 12l2 2" />
                 </svg>
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium text-primary-600">Click to upload</span> or drag and drop
+                  <span className="font-medium text-primary-600">{cf.clickToUpload}</span> {cf.orDragDrop}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {formData.images.length}/8 images added
+                  {formData.images.length}/8 {cf.imagesAdded}
                 </p>
               </div>
             )}
@@ -415,17 +416,17 @@ export default function CampaignForm({
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Compensation</h2>
+      <h2 className="text-xl font-semibold">{cf.compensation}</h2>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Compensation Type *</label>
+        <label className="block text-sm font-medium mb-2">{cf.compensationType}</label>
         <div className="space-y-2">
           {[
-            { value: 'PAID', label: 'Paid', desc: 'Monetary compensation' },
-            { value: 'GIFTED', label: 'Gifted', desc: 'Product/service only' },
-            { value: 'PAID_PLUS_GIFT', label: 'Paid + Gift', desc: 'Both payment and product' },
-            { value: 'AFFILIATE', label: 'Affiliate', desc: 'Commission-based' },
-            { value: 'NEGOTIABLE', label: 'Negotiable', desc: 'Open to discussion' },
+            { value: 'PAID', label: cf.paid, desc: cf.paidDesc },
+            { value: 'GIFTED', label: cf.gifted, desc: cf.giftedDesc },
+            { value: 'PAID_PLUS_GIFT', label: cf.paidPlusGift, desc: cf.paidPlusGiftDesc },
+            { value: 'AFFILIATE', label: cf.affiliate, desc: cf.affiliateDesc },
+            { value: 'NEGOTIABLE', label: cf.negotiable, desc: cf.negotiableDesc },
           ].map((option) => (
             <label key={option.value} className="flex items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-gray-50">
               <input
@@ -448,7 +449,7 @@ export default function CampaignForm({
       {['PAID', 'PAID_PLUS_GIFT', 'NEGOTIABLE'].includes(formData.compensationType) && (
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Payment Min ($)</label>
+            <label className="block text-sm font-medium mb-1">{cf.paymentMin}</label>
             <input
               type="number"
               min="0"
@@ -459,7 +460,7 @@ export default function CampaignForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Payment Max ($)</label>
+            <label className="block text-sm font-medium mb-1">{cf.paymentMax}</label>
             <input
               type="number"
               min="0"
@@ -475,17 +476,17 @@ export default function CampaignForm({
       {['GIFTED', 'PAID_PLUS_GIFT'].includes(formData.compensationType) && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Gift Description</label>
+            <label className="block text-sm font-medium mb-1">{cf.giftDescription}</label>
             <input
               type="text"
               value={formData.giftDescription}
               onChange={(e) => setFormData({ ...formData, giftDescription: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-              placeholder="e.g., Full skincare set"
+              placeholder={cf.giftDescPlaceholder}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Gift Value ($)</label>
+            <label className="block text-sm font-medium mb-1">{cf.giftValue}</label>
             <input
               type="number"
               min="0"
@@ -506,12 +507,12 @@ export default function CampaignForm({
             onChange={(e) => setFormData({ ...formData, requiresProductPurchase: e.target.checked })}
             className="rounded"
           />
-          <span className="text-sm font-medium">Requires product purchase</span>
+          <span className="text-sm font-medium">{cf.requiresProductPurchase}</span>
         </label>
         {formData.requiresProductPurchase && (
           <>
             <div>
-              <label className="block text-sm font-medium mb-1">Purchase Amount ($)</label>
+              <label className="block text-sm font-medium mb-1">{cf.purchaseAmount}</label>
               <input
                 type="number"
                 min="0"
@@ -527,7 +528,7 @@ export default function CampaignForm({
                 onChange={(e) => setFormData({ ...formData, isProductReimbursed: e.target.checked })}
                 className="rounded"
               />
-              <span className="text-sm">Purchase will be reimbursed</span>
+              <span className="text-sm">{cf.purchaseReimbursed}</span>
             </label>
           </>
         )}
@@ -537,10 +538,10 @@ export default function CampaignForm({
 
   const renderStep3 = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Platform & Requirements</h2>
+      <h2 className="text-xl font-semibold">{cf.platformRequirements}</h2>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Target Platforms *</label>
+        <label className="block text-sm font-medium mb-2">{cf.targetPlatforms}</label>
         <div className="flex flex-wrap gap-2">
           {platforms.map((plat) => (
             <button
@@ -561,7 +562,7 @@ export default function CampaignForm({
 
       {formData.followerRequirements.length > 0 && (
         <div className="space-y-4">
-          <label className="block text-sm font-medium">Follower Requirements by Platform</label>
+          <label className="block text-sm font-medium">{cf.followerRequirements}</label>
           {formData.followerRequirements.map((req: any) => {
             const platform = platforms.find((p) => p.id === req.platformId)
             return (
@@ -569,7 +570,7 @@ export default function CampaignForm({
                 <span className="w-24 font-medium">{platform?.name}</span>
                 <div className="flex-1 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Min Followers</label>
+                    <label className="block text-xs text-gray-500 mb-1">{cf.minFollowers}</label>
                     <input
                       type="number"
                       min="0"
@@ -579,14 +580,14 @@ export default function CampaignForm({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Max Followers (optional)</label>
+                    <label className="block text-xs text-gray-500 mb-1">{cf.maxFollowersOptional}</label>
                     <input
                       type="number"
                       min="0"
                       value={req.maxFollowers || ''}
                       onChange={(e) => updateFollowerRequirement(req.platformId, 'maxFollowers', e.target.value ? parseInt(e.target.value) : null)}
                       className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm"
-                      placeholder="No limit"
+                      placeholder={cf.noLimit}
                     />
                   </div>
                 </div>
@@ -597,75 +598,75 @@ export default function CampaignForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-1">Content Type</label>
+        <label className="block text-sm font-medium mb-1">{cf.contentType}</label>
         <select
           value={formData.contentType}
           onChange={(e) => setFormData({ ...formData, contentType: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
         >
-          <option value="ANY">Any Format</option>
-          <option value="IMAGE_POST">Image Post</option>
-          <option value="VIDEO">Video</option>
-          <option value="STORY">Story</option>
-          <option value="REEL">Reel</option>
+          <option value="ANY">{cf.anyFormat}</option>
+          <option value="IMAGE_POST">{cf.imagePost}</option>
+          <option value="VIDEO">{cf.video}</option>
+          <option value="STORY">{cf.story}</option>
+          <option value="REEL">{cf.reel}</option>
         </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Content Guidelines</label>
+        <label className="block text-sm font-medium mb-1">{cf.contentGuidelines}</label>
         <textarea
           rows={4}
           value={formData.contentGuidelines}
           onChange={(e) => setFormData({ ...formData, contentGuidelines: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-          placeholder="Describe your content requirements, do's and don'ts..."
+          placeholder={cf.contentGuidelinesPlaceholder}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Required Hashtags</label>
+          <label className="block text-sm font-medium mb-1">{cf.requiredHashtags}</label>
           <input
             type="text"
             value={formData.hashtagsRequired}
             onChange={(e) => setFormData({ ...formData, hashtagsRequired: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-            placeholder="#brand #campaign"
+            placeholder={cf.hashtagsPlaceholder}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Required Mentions</label>
+          <label className="block text-sm font-medium mb-1">{cf.requiredMentions}</label>
           <input
             type="text"
             value={formData.mentionsRequired}
             onChange={(e) => setFormData({ ...formData, mentionsRequired: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-            placeholder="@brandname"
+            placeholder={cf.mentionsPlaceholder}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Min Word Count</label>
+          <label className="block text-sm font-medium mb-1">{cf.minWordCount}</label>
           <input
             type="number"
             min="0"
             value={formData.wordCountMin}
             onChange={(e) => setFormData({ ...formData, wordCountMin: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-            placeholder="No minimum"
+            placeholder={cf.noMinimum}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Max Word Count</label>
+          <label className="block text-sm font-medium mb-1">{cf.maxWordCount}</label>
           <input
             type="number"
             min="0"
             value={formData.wordCountMax}
             onChange={(e) => setFormData({ ...formData, wordCountMax: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
-            placeholder="No maximum"
+            placeholder={cf.noMaximum}
           />
         </div>
       </div>
@@ -699,9 +700,9 @@ export default function CampaignForm({
           ))}
         </div>
         <div className="flex justify-between mt-2 text-sm text-gray-600">
-          <span>Basic Info</span>
-          <span>Compensation</span>
-          <span>Requirements</span>
+          <span>{cf.stepBasicInfo}</span>
+          <span>{cf.stepCompensation}</span>
+          <span>{cf.stepRequirements}</span>
         </div>
       </div>
 
@@ -727,7 +728,7 @@ export default function CampaignForm({
               onClick={() => setStep(step - 1)}
               className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
             >
-              Back
+              {cf.back}
             </button>
           )}
         </div>
@@ -738,7 +739,7 @@ export default function CampaignForm({
             disabled={isSubmitting}
             className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition disabled:opacity-50"
           >
-            Save as Draft
+            {cf.saveAsDraft}
           </button>
           {step < 3 ? (
             <button
@@ -746,7 +747,7 @@ export default function CampaignForm({
               onClick={() => setStep(step + 1)}
               className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
             >
-              Next
+              {cf.next}
             </button>
           ) : (
             <button
@@ -754,7 +755,7 @@ export default function CampaignForm({
               disabled={isSubmitting}
               className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition disabled:opacity-50"
             >
-              {isSubmitting ? 'Saving...' : isEditing ? 'Update Campaign' : 'Submit for Review'}
+              {isSubmitting ? cf.saving : isEditing ? cf.updateCampaign : cf.submitForReview}
             </button>
           )}
         </div>

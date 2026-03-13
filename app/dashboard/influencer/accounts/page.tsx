@@ -68,7 +68,7 @@ export default function SocialAccountsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this account?')) {
+    if (!confirm(t.confirmDialogs.removeAccount)) {
       return
     }
 

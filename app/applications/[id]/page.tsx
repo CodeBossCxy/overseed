@@ -6,6 +6,7 @@ import MainLayout from '@/components/MainLayout'
 import ApplicationStatus from '@/components/applications/ApplicationStatus'
 import Link from 'next/link'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 
 interface ApplicationDetail {
   id: string
@@ -49,7 +50,7 @@ export default function ApplicationDetailPage() {
   const params = useParams()
   const router = useRouter()
   const applicationId = params.id as string
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
   const [application, setApplication] = useState<ApplicationDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -219,11 +220,7 @@ export default function ApplicationDetailPage() {
             <div className="mb-4">
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Applied</p>
               <p className="text-sm text-gray-800">
-                {new Date(application.appliedAt).toLocaleDateString(undefined, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatDate(application.appliedAt, locale)}
               </p>
             </div>
 
@@ -265,11 +262,7 @@ export default function ApplicationDetailPage() {
               <div className="mb-4">
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Reviewed</p>
                 <p className="text-sm text-gray-800">
-                  {new Date(application.reviewedAt).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDate(application.reviewedAt, locale)}
                 </p>
               </div>
             )}
@@ -350,11 +343,7 @@ export default function ApplicationDetailPage() {
               <div className="mb-4">
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Application Deadline</p>
                 <p className="text-sm text-gray-800">
-                  {new Date(application.campaign.deadline).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDate(application.campaign.deadline, locale)}
                 </p>
               </div>
             )}
@@ -365,10 +354,10 @@ export default function ApplicationDetailPage() {
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Campaign Period</p>
                 <p className="text-sm text-gray-800">
                   {application.campaign.campaignStartDate &&
-                    new Date(application.campaign.campaignStartDate).toLocaleDateString()}
+                    formatDate(application.campaign.campaignStartDate, locale)}
                   {application.campaign.campaignStartDate && application.campaign.campaignEndDate && ' — '}
                   {application.campaign.campaignEndDate &&
-                    new Date(application.campaign.campaignEndDate).toLocaleDateString()}
+                    formatDate(application.campaign.campaignEndDate, locale)}
                 </p>
               </div>
             )}

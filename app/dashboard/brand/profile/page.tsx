@@ -23,7 +23,7 @@ export default function BrandProfilePage() {
     contactPhone: '',
   })
 
-  const industries = [
+  const industryKeys = [
     'Beauty & Cosmetics',
     'Fashion & Apparel',
     'Food & Beverage',
@@ -37,12 +37,7 @@ export default function BrandProfilePage() {
     'Other',
   ]
 
-  const companySizes = [
-    { value: 'startup', label: 'Startup (1-10 employees)' },
-    { value: 'small', label: 'Small (11-50 employees)' },
-    { value: 'medium', label: 'Medium (51-200 employees)' },
-    { value: 'enterprise', label: 'Enterprise (200+ employees)' },
-  ]
+  const companySizeKeys = ['startup', 'small', 'medium', 'enterprise']
 
   useEffect(() => {
     fetchProfile()
@@ -205,9 +200,9 @@ export default function BrandProfilePage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="">{t.brand.profile.selectIndustry}</option>
-                {industries.map((industry) => (
+                {industryKeys.map((industry) => (
                   <option key={industry} value={industry}>
-                    {industry}
+                    {t.industries[industry] || industry}
                   </option>
                 ))}
               </select>
@@ -220,9 +215,9 @@ export default function BrandProfilePage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="">{t.brand.profile.selectSize}</option>
-                {companySizes.map((size) => (
-                  <option key={size.value} value={size.value}>
-                    {size.label}
+                {companySizeKeys.map((key) => (
+                  <option key={key} value={key}>
+                    {t.companySizes[key] || key}
                   </option>
                 ))}
               </select>

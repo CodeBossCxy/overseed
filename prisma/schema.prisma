@@ -101,6 +101,7 @@ model User {
   password      String?
   userType         UserType         @default(INFLUENCER)
   subscriptionTier SubscriptionTier @default(FREE)
+  preferredLanguage String   @default("en")
   isVerified    Boolean   @default(false)
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())

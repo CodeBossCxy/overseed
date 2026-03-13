@@ -7,6 +7,7 @@ import Image from 'next/image'
 import CompensationBadge from './CompensationBadge'
 import CampaignStats from './CampaignStats'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 
 interface CampaignDetailProps {
   campaign: {
@@ -98,7 +99,7 @@ export default function CampaignDetail({
   subscriptionTier,
 }: CampaignDetailProps) {
   const router = useRouter()
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -161,10 +162,10 @@ export default function CampaignDetail({
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">{campaign.title}</h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                   <span>{campaign.viewCount.toLocaleString()} {t.campaign.views_count}</span>
-                  <span>{t.campaign.posted} {new Date(campaign.createdAt).toLocaleDateString()}</span>
+                  <span>{t.campaign.posted} {formatDate(campaign.createdAt, locale)}</span>
                   {campaign.deadline && (
                     <span className={isDeadlinePassed ? 'text-red-600' : 'text-orange-600'}>
-                      {isDeadlinePassed ? t.campaign.deadlinePassedLabel : `${t.campaign.deadline} ${new Date(campaign.deadline).toLocaleDateString()}`}
+                      {isDeadlinePassed ? t.campaign.deadlinePassedLabel : `${t.campaign.deadline} ${formatDate(campaign.deadline, locale)}`}
                     </span>
                   )}
                 </div>
@@ -295,13 +296,13 @@ export default function CampaignDetail({
                 {campaign.campaignStartDate && (
                   <div>
                     <span className="text-sm font-medium text-gray-500">{t.campaign.startDate} </span>
-                    <span className="text-sm">{new Date(campaign.campaignStartDate).toLocaleDateString()}</span>
+                    <span className="text-sm">{formatDate(campaign.campaignStartDate, locale)}</span>
                   </div>
                 )}
                 {campaign.campaignEndDate && (
                   <div>
                     <span className="text-sm font-medium text-gray-500">{t.campaign.endDate} </span>
-                    <span className="text-sm">{new Date(campaign.campaignEndDate).toLocaleDateString()}</span>
+                    <span className="text-sm">{formatDate(campaign.campaignEndDate, locale)}</span>
                   </div>
                 )}
               </div>

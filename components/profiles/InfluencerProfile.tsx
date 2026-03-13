@@ -1,6 +1,8 @@
 'use client'
 
 import SocialAccountList from './SocialAccountList'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatMonthYear } from '@/lib/i18n/formatDate'
 
 interface InfluencerProfileProps {
   influencer: {
@@ -38,6 +40,7 @@ interface InfluencerProfileProps {
 }
 
 export default function InfluencerProfile({ influencer }: InfluencerProfileProps) {
+  const { locale } = useLanguage()
   const displayName = influencer.displayName || influencer.user.name || 'Unknown'
   const avatar = influencer.avatarUrl || influencer.user.image
 
@@ -91,7 +94,7 @@ export default function InfluencerProfile({ influencer }: InfluencerProfileProps
               </span>
             )}
             <span>
-              Member since {new Date(influencer.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              {locale === 'zh' ? '加入于 ' : 'Member since '}{formatMonthYear(influencer.user.createdAt, locale)}
             </span>
           </div>
 

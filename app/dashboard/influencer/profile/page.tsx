@@ -24,7 +24,7 @@ export default function InfluencerProfilePage() {
     languages: [] as string[],
   })
 
-  const niches = [
+  const nicheKeys = [
     'Food & Beverage',
     'Beauty & Skincare',
     'Fashion',
@@ -39,7 +39,7 @@ export default function InfluencerProfilePage() {
     'Entertainment',
   ]
 
-  const languages = ['English', 'Spanish', 'Chinese', 'French', 'German', 'Japanese', 'Korean', 'Portuguese', 'Arabic', 'Hindi']
+  const languageKeys = ['English', 'Spanish', 'Chinese', 'French', 'German', 'Japanese', 'Korean', 'Portuguese', 'Arabic', 'Hindi']
 
   useEffect(() => {
     fetchProfile()
@@ -215,9 +215,9 @@ export default function InfluencerProfilePage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="">{t.influencer.profile.selectNiche}</option>
-              {niches.map((niche) => (
+              {nicheKeys.map((niche) => (
                 <option key={niche} value={niche}>
-                  {niche}
+                  {t.niches[niche] || niche}
                 </option>
               ))}
             </select>
@@ -227,7 +227,7 @@ export default function InfluencerProfilePage() {
           <div>
             <label className="block text-sm font-medium mb-2">{t.influencer.profile.secondaryNiches}</label>
             <div className="flex flex-wrap gap-2">
-              {niches
+              {nicheKeys
                 .filter((n) => n !== formData.primaryNiche)
                 .map((niche) => (
                   <button
@@ -240,7 +240,7 @@ export default function InfluencerProfilePage() {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {niche}
+                    {t.niches[niche] || niche}
                   </button>
                 ))}
             </div>
@@ -250,7 +250,7 @@ export default function InfluencerProfilePage() {
           <div>
             <label className="block text-sm font-medium mb-2">{t.influencer.profile.languages}</label>
             <div className="flex flex-wrap gap-2">
-              {languages.map((lang) => (
+              {languageKeys.map((lang) => (
                 <button
                   key={lang}
                   type="button"
@@ -261,7 +261,7 @@ export default function InfluencerProfilePage() {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {lang}
+                  {t.spokenLanguages[lang] || lang}
                 </button>
               ))}
             </div>

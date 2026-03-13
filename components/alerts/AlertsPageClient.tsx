@@ -1,6 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 import Link from 'next/link'
 
 interface SavedSearch {
@@ -13,7 +14,7 @@ interface SavedSearch {
 }
 
 export default function AlertsPageClient({ savedSearches }: { savedSearches: SavedSearch[] }) {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -82,7 +83,7 @@ export default function AlertsPageClient({ savedSearches }: { savedSearches: Sav
                         ))}
                       </div>
                       <p className="text-sm text-gray-600">
-                        {t.alerts.created} {new Date(search.createdAt).toLocaleDateString()}
+                        {t.alerts.created} {formatDate(search.createdAt, locale)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">

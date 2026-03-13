@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ApplicationStatus from './ApplicationStatus'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 
 interface ApplicationCardProps {
   application: {
@@ -53,6 +55,7 @@ export default function ApplicationCard({
   onWithdraw,
 }: ApplicationCardProps) {
   const router = useRouter()
+  const { locale } = useLanguage()
   const canWithdraw = ['PENDING', 'UNDER_REVIEW'].includes(application.status)
   const canMessage = ['PENDING', 'UNDER_REVIEW', 'APPROVED', 'COMPLETED'].includes(application.status)
 
@@ -115,7 +118,7 @@ export default function ApplicationCard({
 
             {/* Meta info */}
             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-sm text-gray-500">
-              <span>Applied {new Date(application.appliedAt).toLocaleDateString()}</span>
+              <span>Applied {formatDate(application.appliedAt, locale)}</span>
               {application.socialAccount && (
                 <span>
                   via {application.socialAccount.platform.name} (@{application.socialAccount.username})

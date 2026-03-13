@@ -7,6 +7,7 @@ import ApplicationStatus from '@/components/applications/ApplicationStatus'
 import ApplicationActions from '@/components/applications/ApplicationActions'
 import Link from 'next/link'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 
 interface Application {
   id: string
@@ -45,7 +46,7 @@ export default function CampaignApplicationsPage() {
   const params = useParams()
   const router = useRouter()
   const campaignId = params.id as string
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
   const [campaign, setCampaign] = useState<any>(null)
   const [applications, setApplications] = useState<Application[]>([])
@@ -284,9 +285,9 @@ export default function CampaignApplicationsPage() {
 
                 {/* Applied Date */}
                 <div className="mb-6 text-sm text-gray-500">
-                  {t.brand.applications.appliedOn} {new Date(selectedApplication.appliedAt).toLocaleDateString()}
+                  {t.brand.applications.appliedOn} {formatDate(selectedApplication.appliedAt, locale)}
                   {selectedApplication.reviewedAt && (
-                    <span> &bull; {t.brand.applications.reviewedOn} {new Date(selectedApplication.reviewedAt).toLocaleDateString()}</span>
+                    <span> &bull; {t.brand.applications.reviewedOn} {formatDate(selectedApplication.reviewedAt, locale)}</span>
                   )}
                 </div>
 

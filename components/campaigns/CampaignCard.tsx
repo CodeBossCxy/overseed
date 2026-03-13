@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import CompensationBadge from './CompensationBadge'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate } from '@/lib/i18n/formatDate'
 
 interface CampaignCardProps {
   campaign: {
@@ -49,7 +50,7 @@ interface CampaignCardProps {
 }
 
 export default function CampaignCard({ campaign }: CampaignCardProps) {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const spotsLeft = campaign.totalSlots - campaign.filledSlots
   const isUrgent = campaign.deadline && new Date(campaign.deadline) <= new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
 
@@ -163,7 +164,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           />
           {campaign.deadline && (
             <span className={`text-xs ${isUrgent ? 'text-red-600' : 'text-gray-500'}`}>
-              {t.campaignCard.due} {new Date(campaign.deadline).toLocaleDateString()}
+              {t.campaignCard.due} {formatDate(campaign.deadline, locale)}
             </span>
           )}
         </div>

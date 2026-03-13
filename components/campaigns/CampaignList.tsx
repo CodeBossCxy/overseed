@@ -61,7 +61,7 @@ interface CampaignListProps {
 }
 
 export default function CampaignList({ initialCampaigns, filters }: CampaignListProps) {
-  const { locale } = useLanguage()
+  const { locale, t } = useLanguage()
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -107,9 +107,9 @@ export default function CampaignList({ initialCampaigns, filters }: CampaignList
   if (campaigns.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-        <p className="text-gray-500 text-lg mb-4">No campaigns match your filters</p>
+        <p className="text-gray-500 text-lg mb-4">{t.campaignList.noResults}</p>
         <a href="/browse" className="text-primary-600 hover:underline">
-          Clear all filters
+          {t.campaignList.clearFilters}
         </a>
       </div>
     )

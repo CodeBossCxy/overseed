@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import MainLayout from '@/components/MainLayout'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatDate, formatDateTime } from '@/lib/i18n/formatDate'
 
 interface Overview {
   totalUsers: number
@@ -45,6 +47,7 @@ interface AiLog {
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { locale } = useLanguage()
   const [overview, setOverview] = useState<Overview | null>(null)
   const [users, setUsers] = useState<UserData[]>([])
   const [recentAiLogs, setRecentAiLogs] = useState<AiLog[]>([])
@@ -203,7 +206,7 @@ export default function AdminDashboard() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-gray-500 text-xs">
-                        {new Date(u.createdAt).toLocaleDateString()}
+                        {formatDate(u.createdAt, locale)}
                       </td>
                     </tr>
                   ))}
@@ -336,7 +339,7 @@ export default function AdminDashboard() {
                         {log.totalTokens.toLocaleString()}
                       </td>
                       <td className="px-4 py-3 text-gray-500 text-xs">
-                        {new Date(log.createdAt).toLocaleString()}
+                        {formatDateTime(log.createdAt, locale)}
                       </td>
                     </tr>
                   ))}

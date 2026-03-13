@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import CampaignCard from '../campaigns/CampaignCard'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { formatMonthYear } from '@/lib/i18n/formatDate'
 
 interface BrandProfileProps {
   brand: {
@@ -26,6 +28,7 @@ interface BrandProfileProps {
 }
 
 export default function BrandProfile({ brand }: BrandProfileProps) {
+  const { locale } = useLanguage()
   const companySizeLabels: Record<string, string> = {
     startup: 'Startup',
     small: 'Small Business',
@@ -78,7 +81,7 @@ export default function BrandProfile({ brand }: BrandProfileProps) {
               <span>{companySizeLabels[brand.companySize] || brand.companySize}</span>
             )}
             <span>
-              On platform since {new Date(brand.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              {locale === 'zh' ? '入驻于 ' : 'On platform since '}{formatMonthYear(brand.user.createdAt, locale)}
             </span>
           </div>
 

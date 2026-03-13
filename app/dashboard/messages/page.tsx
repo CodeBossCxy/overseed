@@ -289,6 +289,8 @@ export default function MessagesPage() {
     }
   }
 
+  const localeTag = locale === 'zh' ? 'zh-CN' : 'en-US'
+
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr)
     const now = new Date()
@@ -297,18 +299,18 @@ export default function MessagesPage() {
     )
 
     if (diffDays === 0) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      return date.toLocaleTimeString(localeTag, { hour: '2-digit', minute: '2-digit' })
     } else if (diffDays === 1) {
       return t.messages?.yesterday || 'Yesterday'
     } else if (diffDays < 7) {
-      return date.toLocaleDateString([], { weekday: 'short' })
+      return date.toLocaleDateString(localeTag, { weekday: 'short' })
     }
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
+    return date.toLocaleDateString(localeTag, { month: 'short', day: 'numeric' })
   }
 
   const formatMessageTime = (dateStr: string) => {
     const date = new Date(dateStr)
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleTimeString(localeTag, { hour: '2-digit', minute: '2-digit' })
   }
 
   if (!session) {

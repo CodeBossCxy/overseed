@@ -35,7 +35,7 @@ export default function InfluencerApplicationsPage() {
   }
 
   const handleWithdraw = async (applicationId: string) => {
-    if (!confirm('Are you sure you want to withdraw this application?')) {
+    if (!confirm(t.confirmDialogs.withdrawApplication)) {
       return
     }
 
