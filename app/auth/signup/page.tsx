@@ -181,11 +181,43 @@ export default function SignUpPage() {
     }
   }
 
-  const handleGoogleSignIn = () => {
+  const validateInviteCode = async (): Promise<boolean> => {
+    if (!inviteCode.trim()) {
+      setError(t.beta?.inviteRequired || 'An invite code is required to join the beta')
+      return false
+    }
+    try {
+      const res = await fetch('/api/beta/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inviteCode: inviteCode.trim() }),
+      })
+      const data = await res.json()
+      if (!data.valid) {
+        setError(data.error || 'Invalid invite code')
+        return false
+      }
+      return true
+    } catch {
+      setError('Failed to validate invite code')
+      return false
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setError('')
+    const valid = await validateInviteCode()
+    if (!valid) return
+    // Store invite code in sessionStorage so we can record usage after OAuth callback
+    sessionStorage.setItem('betaInviteCode', inviteCode.trim().toUpperCase())
     signIn('google', { callbackUrl: userType === 'brand' ? '/brand' : '/creator' })
   }
 
-  const handleWeChatSignIn = () => {
+  const handleWeChatSignIn = async () => {
+    setError('')
+    const valid = await validateInviteCode()
+    if (!valid) return
+    sessionStorage.setItem('betaInviteCode', inviteCode.trim().toUpperCase())
     setShowWeChatPopup(true)
   }
 
@@ -306,6 +338,36 @@ export default function SignUpPage() {
                 </div>
               )}
 
+              {/* Beta Invite Code — required for all signup methods */}
+              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-amber-800 font-medium">{t.beta?.inviteRequired || 'Beta Access — Invite code required to sign up'}</p>
+                </div>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md">
+                  {error}
+                </div>
+              )}
+
+              <div className="mb-4">
+                <label htmlFor="inviteCodeTop" className="block text-sm font-medium text-gray-700">
+                  {t.beta?.inviteCode || 'Invite Code'}
+                </label>
+                <input
+                  id="inviteCodeTop"
+                  type="text"
+                  value={inviteCode}
+                  onChange={(e) => { setInviteCode(e.target.value.toUpperCase()); setError('') }}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 font-mono tracking-wider"
+                  placeholder="BETA-XXXXXXXX"
+                />
+              </div>
+
               {/* OAuth Providers */}
               <div className="space-y-3">
                 <button
@@ -355,38 +417,7 @@ export default function SignUpPage() {
                 </div>
               </div>
 
-              {/* Beta Invite Code Notice */}
-              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-sm text-amber-800 font-medium">{t.beta?.inviteRequired || 'Beta Access — Invite code required to sign up'}</p>
-                </div>
-              </div>
-
               <form onSubmit={handleSignup} className="mt-6 space-y-4">
-                {error && (
-                  <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
-                    {error}
-                  </div>
-                )}
-
-                <div>
-                  <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700">
-                    {t.beta?.inviteCode || 'Invite Code'}
-                  </label>
-                  <input
-                    id="inviteCode"
-                    type="text"
-                    value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 font-mono tracking-wider"
-                    placeholder="BETA-XXXXXXXX"
-                  />
-                </div>
-
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                     {t.auth.signup.fullName}

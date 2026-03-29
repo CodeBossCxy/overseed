@@ -123,7 +123,7 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, profile, credentials }) {
       // Auto-link OAuth accounts to existing users with the same email
       if (account?.provider && account.provider !== 'credentials' && user.email) {
         const existingUser = await prisma.user.findUnique({
@@ -194,6 +194,17 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).subscriptionTier = token.subscriptionTier || 'FREE'
       }
       return session
+    },
+  },
+  events: {
+    async createUser({ user }) {
+      // New OAuth users get PRO tier (beta invite code was validated client-side before OAuth)
+      if (user.id) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { subscriptionTier: 'PRO' },
+        })
+      }
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
