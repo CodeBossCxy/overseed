@@ -17,10 +17,13 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { preferredLanguage: true },
+    select: { preferredLanguage: true, autoTranslateUGC: true },
   })
 
-  return NextResponse.json({ language: user?.preferredLanguage || 'en' })
+  return NextResponse.json({
+    language: user?.preferredLanguage || 'en',
+    autoTranslateUGC: user?.autoTranslateUGC ?? true,
+  })
 }
 
 export async function PUT(request: Request) {
@@ -36,19 +39,32 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json()
-  const { language } = body
+  const { language, autoTranslateUGC } = body
 
-  if (language !== 'en' && language !== 'zh') {
-    return NextResponse.json(
-      { error: 'Invalid language. Must be "en" or "zh"' },
-      { status: 400 }
-    )
+  const updateData: Record<string, any> = {}
+
+  if (language !== undefined) {
+    if (language !== 'en' && language !== 'zh') {
+      return NextResponse.json(
+        { error: 'Invalid language. Must be "en" or "zh"' },
+        { status: 400 }
+      )
+    }
+    updateData.preferredLanguage = language
+  }
+
+  if (autoTranslateUGC !== undefined) {
+    updateData.autoTranslateUGC = Boolean(autoTranslateUGC)
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
   }
 
   await prisma.user.update({
     where: { id: userId },
-    data: { preferredLanguage: language },
+    data: updateData,
   })
 
-  return NextResponse.json({ success: true, language })
+  return NextResponse.json({ success: true, ...updateData })
 }

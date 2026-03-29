@@ -44,6 +44,28 @@ interface AiLog {
   user: { email: string; name: string | null }
 }
 
+interface BetaCode {
+  id: string
+  code: string
+  note: string | null
+  maxUses: number
+  usedCount: number
+  isActive: boolean
+  createdAt: string
+  expiresAt: string | null
+  usedBy: { userId: string; usedAt: string }[]
+}
+
+interface BetaFeedbackItem {
+  id: string
+  type: string
+  content: string
+  page: string | null
+  status: string
+  createdAt: string
+  user: { name: string | null; email: string }
+}
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -52,7 +74,15 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<UserData[]>([])
   const [recentAiLogs, setRecentAiLogs] = useState<AiLog[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'ai-usage'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'ai-usage' | 'beta-codes' | 'beta-feedback'>('overview')
+
+  // Beta state
+  const [betaCodes, setBetaCodes] = useState<BetaCode[]>([])
+  const [betaFeedback, setBetaFeedback] = useState<BetaFeedbackItem[]>([])
+  const [generateCount, setGenerateCount] = useState(5)
+  const [generateMaxUses, setGenerateMaxUses] = useState(1)
+  const [generateNote, setGenerateNote] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -77,7 +107,65 @@ export default function AdminDashboard() {
       }
     }
     fetchData()
+    fetchBetaCodes()
+    fetchBetaFeedback()
   }, [session, status, router])
+
+  const fetchBetaCodes = async () => {
+    try {
+      const res = await fetch('/api/admin/beta/codes')
+      if (res.ok) setBetaCodes(await res.json())
+    } catch {}
+  }
+
+  const fetchBetaFeedback = async () => {
+    try {
+      const res = await fetch('/api/admin/beta/feedback')
+      if (res.ok) setBetaFeedback(await res.json())
+    } catch {}
+  }
+
+  const handleGenerateCodes = async () => {
+    setIsGenerating(true)
+    try {
+      const res = await fetch('/api/admin/beta/codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          count: generateCount,
+          maxUses: generateMaxUses,
+          note: generateNote || undefined,
+        }),
+      })
+      if (res.ok) {
+        setGenerateNote('')
+        fetchBetaCodes()
+      }
+    } catch {}
+    setIsGenerating(false)
+  }
+
+  const handleToggleCode = async (id: string, isActive: boolean) => {
+    try {
+      await fetch('/api/admin/beta/codes', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isActive: !isActive }),
+      })
+      fetchBetaCodes()
+    } catch {}
+  }
+
+  const handleUpdateFeedbackStatus = async (id: string, status: string) => {
+    try {
+      await fetch('/api/admin/beta/feedback', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      })
+      fetchBetaFeedback()
+    } catch {}
+  }
 
   if (status === 'loading' || isLoading) {
     return (
@@ -104,8 +192,8 @@ export default function AdminDashboard() {
         <p className="text-sm text-gray-500 mb-8">Platform overview and monitoring</p>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit">
-          {(['overview', 'users', 'ai-usage'] as const).map((tab) => (
+        <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit flex-wrap">
+          {(['overview', 'users', 'ai-usage', 'beta-codes', 'beta-feedback'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -115,7 +203,7 @@ export default function AdminDashboard() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'users' ? 'Users' : 'AI Usage'}
+              {tab === 'overview' ? 'Overview' : tab === 'users' ? 'Users' : tab === 'ai-usage' ? 'AI Usage' : tab === 'beta-codes' ? 'Beta Codes' : 'Beta Feedback'}
             </button>
           ))}
         </div>
@@ -352,6 +440,196 @@ export default function AdminDashboard() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Beta Codes Tab */}
+        {activeTab === 'beta-codes' && (
+          <div>
+            {/* Generate codes form */}
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">Generate Invite Codes</h3>
+              <div className="flex flex-wrap gap-4 items-end">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Count</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={generateCount}
+                    onChange={(e) => setGenerateCount(Number(e.target.value))}
+                    className="w-20 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Max uses each</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={generateMaxUses}
+                    onChange={(e) => setGenerateMaxUses(Number(e.target.value))}
+                    className="w-20 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-xs text-gray-500 mb-1">Note (optional)</label>
+                  <input
+                    type="text"
+                    value={generateNote}
+                    onChange={(e) => setGenerateNote(e.target.value)}
+                    placeholder="e.g. For WeChat group testers"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+                <button
+                  onClick={handleGenerateCodes}
+                  disabled={isGenerating}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-sm font-medium transition disabled:opacity-50"
+                >
+                  {isGenerating ? 'Generating...' : `Generate ${generateCount} Code${generateCount > 1 ? 's' : ''}`}
+                </button>
+              </div>
+            </div>
+
+            {/* Codes table */}
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="px-4 py-3 border-b flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-700">
+                  All Invite Codes ({betaCodes.length})
+                </h3>
+                <div className="text-xs text-gray-500">
+                  Active: {betaCodes.filter(c => c.isActive).length} | Used: {betaCodes.filter(c => c.usedCount > 0).length}
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-left">
+                    <tr>
+                      <th className="px-4 py-3 font-medium text-gray-600">Code</th>
+                      <th className="px-4 py-3 font-medium text-gray-600">Note</th>
+                      <th className="px-4 py-3 font-medium text-gray-600">Usage</th>
+                      <th className="px-4 py-3 font-medium text-gray-600">Status</th>
+                      <th className="px-4 py-3 font-medium text-gray-600">Created</th>
+                      <th className="px-4 py-3 font-medium text-gray-600">Expires</th>
+                      <th className="px-4 py-3 font-medium text-gray-600">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {betaCodes.map((code) => (
+                      <tr key={code.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-mono text-xs font-medium">{code.code}</td>
+                        <td className="px-4 py-3 text-xs text-gray-500">{code.note || '—'}</td>
+                        <td className="px-4 py-3 text-xs">
+                          {code.usedCount}/{code.maxUses}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                            !code.isActive
+                              ? 'bg-gray-100 text-gray-500'
+                              : code.usedCount >= code.maxUses
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {!code.isActive ? 'Disabled' : code.usedCount >= code.maxUses ? 'Exhausted' : 'Active'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-gray-500">
+                          {formatDate(code.createdAt, locale)}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-gray-500">
+                          {code.expiresAt ? formatDate(code.expiresAt, locale) : 'Never'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => handleToggleCode(code.id, code.isActive)}
+                            className={`text-xs font-medium ${
+                              code.isActive
+                                ? 'text-red-600 hover:text-red-700'
+                                : 'text-green-600 hover:text-green-700'
+                            }`}
+                          >
+                            {code.isActive ? 'Disable' : 'Enable'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {betaCodes.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                          No invite codes yet — generate some above
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Beta Feedback Tab */}
+        {activeTab === 'beta-feedback' && (
+          <div>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <StatCard label="Total Feedback" value={betaFeedback.length} />
+              <StatCard label="New / Unreviewed" value={betaFeedback.filter(f => f.status === 'new').length} accent="text-amber-600" />
+              <StatCard label="Resolved" value={betaFeedback.filter(f => f.status === 'resolved').length} accent="text-green-600" />
+            </div>
+
+            <div className="space-y-4">
+              {betaFeedback.map((fb) => (
+                <div key={fb.id} className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        fb.type === 'bug' ? 'bg-red-100 text-red-700' :
+                        fb.type === 'feature' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {fb.type === 'bug' ? '🐛 Bug' : fb.type === 'feature' ? '💡 Feature' : '💬 General'}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        fb.status === 'new' ? 'bg-amber-100 text-amber-700' :
+                        fb.status === 'reviewed' ? 'bg-blue-100 text-blue-700' :
+                        'bg-green-100 text-green-700'
+                      }`}>
+                        {fb.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {fb.status !== 'reviewed' && (
+                        <button
+                          onClick={() => handleUpdateFeedbackStatus(fb.id, 'reviewed')}
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          Mark Reviewed
+                        </button>
+                      )}
+                      {fb.status !== 'resolved' && (
+                        <button
+                          onClick={() => handleUpdateFeedbackStatus(fb.id, 'resolved')}
+                          className="text-xs text-green-600 hover:text-green-700 font-medium"
+                        >
+                          Resolve
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-900 mb-2 whitespace-pre-wrap">{fb.content}</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span>{fb.user.name || fb.user.email}</span>
+                    {fb.page && <span>Page: {fb.page}</span>}
+                    <span>{formatDateTime(fb.createdAt, locale)}</span>
+                  </div>
+                </div>
+              ))}
+              {betaFeedback.length === 0 && (
+                <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-400">
+                  No feedback received yet
+                </div>
+              )}
             </div>
           </div>
         )}

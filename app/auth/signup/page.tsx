@@ -21,6 +21,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -55,7 +56,7 @@ export default function SignUpPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, userType, locale }),
+        body: JSON.stringify({ name, email, password, userType, locale, inviteCode: inviteCode.trim() }),
       })
 
       const data = await res.json()
@@ -354,12 +355,37 @@ export default function SignUpPage() {
                 </div>
               </div>
 
+              {/* Beta Invite Code Notice */}
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-amber-800 font-medium">{t.beta?.inviteRequired || 'Beta Access — Invite code required to sign up'}</p>
+                </div>
+              </div>
+
               <form onSubmit={handleSignup} className="mt-6 space-y-4">
                 {error && (
                   <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
                     {error}
                   </div>
                 )}
+
+                <div>
+                  <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700">
+                    {t.beta?.inviteCode || 'Invite Code'}
+                  </label>
+                  <input
+                    id="inviteCode"
+                    type="text"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 font-mono tracking-wider"
+                    placeholder="BETA-XXXXXXXX"
+                  />
+                </div>
 
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">

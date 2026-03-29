@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import CampaignDetail from './CampaignDetail'
+import UGCTranslateToggle from '../UGCTranslateToggle'
 
 interface CampaignDetailWrapperProps {
   initialCampaign: any
@@ -23,11 +24,16 @@ export default function CampaignDetailWrapper({
   userType,
   subscriptionTier,
 }: CampaignDetailWrapperProps) {
-  const { locale } = useLanguage()
+  const { locale, isUGCTranslated } = useLanguage()
   const [campaign, setCampaign] = useState(initialCampaign)
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    if (!isUGCTranslated) {
+      setCampaign(initialCampaign)
+      return
+    }
+
     async function fetchTranslatedCampaign() {
       setIsLoading(true)
       try {
@@ -44,7 +50,7 @@ export default function CampaignDetailWrapper({
     }
 
     fetchTranslatedCampaign()
-  }, [locale, initialCampaign.id])
+  }, [locale, isUGCTranslated, initialCampaign])
 
   if (isLoading) {
     return (
@@ -63,14 +69,19 @@ export default function CampaignDetailWrapper({
   }
 
   return (
-    <CampaignDetail
-      campaign={campaign}
-      isOwner={isOwner}
-      hasApplied={hasApplied}
-      isSaved={isSaved}
-      isAuthenticated={isAuthenticated}
-      userType={userType}
-      subscriptionTier={subscriptionTier}
-    />
+    <div>
+      <div className="flex justify-end mb-4">
+        <UGCTranslateToggle isLoading={isLoading} />
+      </div>
+      <CampaignDetail
+        campaign={campaign}
+        isOwner={isOwner}
+        hasApplied={hasApplied}
+        isSaved={isSaved}
+        isAuthenticated={isAuthenticated}
+        userType={userType}
+        subscriptionTier={subscriptionTier}
+      />
+    </div>
   )
 }

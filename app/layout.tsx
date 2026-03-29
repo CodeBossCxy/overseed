@@ -29,8 +29,8 @@ export const metadata: Metadata = {
     description: 'AI-powered cross-border creator collaboration platform.',
   },
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
   },
 }
 

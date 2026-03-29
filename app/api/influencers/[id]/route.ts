@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isSupportedLanguage } from '@/lib/db/translations'
+import { getTranslatedEntity } from '@/lib/translation-service'
 
 // GET: Public influencer profile
 export async function GET(
@@ -45,10 +47,14 @@ export async function GET(
       },
     })
 
-    return NextResponse.json({
-      ...influencer,
-      completedCampaigns: completedCount,
-    })
+    const lang = req.nextUrl.searchParams.get('lang')
+    let result: any = { ...influencer, completedCampaigns: completedCount }
+
+    if (lang && isSupportedLanguage(lang)) {
+      result = await getTranslatedEntity('InfluencerProfile', result, lang)
+    }
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error fetching influencer profile:', error)
     return NextResponse.json(

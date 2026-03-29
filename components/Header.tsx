@@ -180,6 +180,7 @@ export default function Header() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto" />
             <span className="text-2xl font-bold text-primary-600">OVERSEED</span>
+            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-400 text-amber-900 rounded uppercase tracking-wider">Beta</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -101,7 +101,8 @@ model User {
   password      String?
   userType         UserType         @default(INFLUENCER)
   subscriptionTier SubscriptionTier @default(FREE)
-  preferredLanguage String   @default("en")
+  preferredLanguage  String   @default("en")
+  autoTranslateUGC   Boolean  @default(true)
   isVerified    Boolean   @default(false)
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
@@ -115,6 +116,8 @@ model User {
   brandProfile      BrandProfile?
   agencyProfile     AgencyProfile?
   aiTokenUsage      AiTokenUsage[]
+  betaFeedback      BetaFeedback[]
+  aiChats           AiChat[]
 
   @@map("users")
 }
@@ -514,6 +517,87 @@ model AiTokenUsage {
 
   @@index([userId, createdAt])
   @@map("ai_token_usage")
+}
+
+// ===========================================
+// BETA TEST
+// ===========================================
+
+model BetaInviteCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  note      String?  // Admin note about who this code is for
+  maxUses   Int      @default(1)
+  usedCount Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  usedBy    BetaInviteUsage[]
+
+  @@index([code])
+  @@map("beta_invite_codes")
+}
+
+model BetaInviteUsage {
+  id           String   @id @default(cuid())
+  inviteCodeId String
+  userId       String
+  usedAt       DateTime @default(now())
+
+  inviteCode BetaInviteCode @relation(fields: [inviteCodeId], references: [id], onDelete: Cascade)
+
+  @@unique([inviteCodeId, userId])
+  @@map("beta_invite_usage")
+}
+
+model BetaFeedback {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "bug", "feature", "general"
+  content   String   @db.Text
+  page      String?  // URL where feedback was submitted
+  status    String   @default("new") // "new", "reviewed", "resolved"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("beta_feedback")
+}
+
+// ===========================================
+// AI CHAT HISTORY
+// ===========================================
+
+model AiChat {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   @default("New Chat")
+  provider  String   @default("openai") // "openai" or "claude"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiChatMessage[]
+
+  @@index([userId])
+  @@map("ai_chats")
+}
+
+model AiChatMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  role      String   // "user" or "assistant"
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  chat AiChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId])
+  @@map("ai_chat_messages")
 }
 
 // ===========================================

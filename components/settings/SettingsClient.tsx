@@ -17,7 +17,7 @@ interface SettingsUser {
 }
 
 export default function SettingsClient({ user }: { user: SettingsUser }) {
-  const { locale, setLocale, t } = useLanguage()
+  const { locale, setLocale, t, autoTranslateUGC, setAutoTranslateUGC } = useLanguage()
   const st = t.settings
 
   // Name editing
@@ -189,6 +189,36 @@ export default function SettingsClient({ user }: { user: SettingsUser }) {
             }`}
           >
             中文
+          </button>
+        </div>
+      </section>
+
+      {/* Content Translation Section */}
+      <section className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4">{st.autoTranslateUGC || 'Content Translation'}</h2>
+        <p className="text-sm text-gray-500 mb-3">
+          {st.autoTranslateUGCDescription || 'Automatically translate user-generated content (campaign descriptions, bios, etc.) to your preferred language.'}
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setAutoTranslateUGC(true)}
+            className={`px-4 py-2 rounded-md border text-sm font-medium transition ${
+              autoTranslateUGC
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {st.autoTranslateUGCOn || 'Auto-translate'}
+          </button>
+          <button
+            onClick={() => setAutoTranslateUGC(false)}
+            className={`px-4 py-2 rounded-md border text-sm font-medium transition ${
+              !autoTranslateUGC
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {st.autoTranslateUGCOff || 'Show Original'}
           </button>
         </div>
       </section>

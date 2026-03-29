@@ -1,5 +1,5 @@
 import MainLayout from '@/components/MainLayout'
-import InfluencerProfile from '@/components/profiles/InfluencerProfile'
+import InfluencerProfileWrapper from '@/components/profiles/InfluencerProfileWrapper'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
@@ -41,8 +41,8 @@ export default async function InfluencerProfilePage({ params }: { params: Promis
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <InfluencerProfile
-          influencer={{
+        <InfluencerProfileWrapper
+          initialInfluencer={{
             ...influencer,
             completedCampaigns,
           } as any}

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isSupportedLanguage } from '@/lib/db/translations'
+import { getTranslatedEntity, getTranslatedEntities } from '@/lib/translation-service'
 
 // GET: Public brand profile
 export async function GET(
@@ -64,10 +66,17 @@ export async function GET(
       },
     })
 
-    return NextResponse.json({
-      ...brand,
-      completedCollaborations,
-    })
+    const lang = req.nextUrl.searchParams.get('lang')
+    let result: any = { ...brand, completedCollaborations }
+
+    if (lang && isSupportedLanguage(lang)) {
+      result = await getTranslatedEntity('BrandProfile', result, lang)
+      if (result.campaigns?.length > 0) {
+        result.campaigns = await getTranslatedEntities('Campaign', result.campaigns, lang)
+      }
+    }
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error fetching brand profile:', error)
     return NextResponse.json(

@@ -8,24 +8,36 @@ interface LanguageContextType {
   locale: Locale
   setLocale: (locale: Locale) => void
   t: (typeof translations)[Locale]
+  autoTranslateUGC: boolean
+  setAutoTranslateUGC: (value: boolean) => void
+  isUGCTranslated: boolean
+  setIsUGCTranslated: (value: boolean) => void
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('en')
+  const [autoTranslateUGC, setAutoTranslateUGCState] = useState(true)
+  const [isUGCTranslated, setIsUGCTranslated] = useState(true)
   const { data: session, status } = useSession()
   const hasFetchedRef = useRef(false)
 
-  // Load locale from localStorage immediately, then override with DB value if logged in
+  // Load locale and autoTranslateUGC from localStorage immediately
   useEffect(() => {
     const savedLocale = localStorage.getItem('locale') as Locale
     if (savedLocale && (savedLocale === 'en' || savedLocale === 'zh')) {
       setLocaleState(savedLocale)
     }
+    const savedAutoTranslate = localStorage.getItem('autoTranslateUGC')
+    if (savedAutoTranslate !== null) {
+      const val = savedAutoTranslate === 'true'
+      setAutoTranslateUGCState(val)
+      setIsUGCTranslated(val)
+    }
   }, [])
 
-  // When user is logged in, fetch their preferred language from the database
+  // When user is logged in, fetch their preferences from the database
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user || hasFetchedRef.current) return
     hasFetchedRef.current = true
@@ -37,6 +49,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           setLocaleState(data.language)
           localStorage.setItem('locale', data.language)
         }
+        if (data.autoTranslateUGC !== undefined) {
+          const val = Boolean(data.autoTranslateUGC)
+          setAutoTranslateUGCState(val)
+          setIsUGCTranslated(val)
+          localStorage.setItem('autoTranslateUGC', String(val))
+        }
       })
       .catch(() => {
         // Silently fall back to localStorage value
@@ -47,21 +65,39 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLocaleState(newLocale)
     localStorage.setItem('locale', newLocale)
 
+    // Reset UGC toggle to the user's default preference when switching language
+    setIsUGCTranslated(autoTranslateUGC)
+
     // If logged in, persist to database
     fetch('/api/user/language', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ language: newLocale }),
-    }).catch(() => {
-      // Silently fail — localStorage is the fallback
-    })
+    }).catch(() => {})
+  }, [autoTranslateUGC])
+
+  const setAutoTranslateUGC = useCallback((value: boolean) => {
+    setAutoTranslateUGCState(value)
+    setIsUGCTranslated(value)
+    localStorage.setItem('autoTranslateUGC', String(value))
+
+    // If logged in, persist to database
+    fetch('/api/user/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ autoTranslateUGC: value }),
+    }).catch(() => {})
   }, [])
 
   const value = useMemo(() => ({
     locale,
     setLocale,
     t: translations[locale],
-  }), [locale, setLocale])
+    autoTranslateUGC,
+    setAutoTranslateUGC,
+    isUGCTranslated,
+    setIsUGCTranslated,
+  }), [locale, setLocale, autoTranslateUGC, setAutoTranslateUGC, isUGCTranslated])
 
   return (
     <LanguageContext.Provider value={value}>

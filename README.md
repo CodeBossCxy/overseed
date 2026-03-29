@@ -318,4 +318,4 @@ For issues and questions:
 
 ## License
 
-Copyright © 2024 Overseed. All rights reserved.
+Copyright © 2026 Overseed. All rights reserved.

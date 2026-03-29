@@ -5,12 +5,45 @@ import { sendOTPEmail } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, userType, locale } = await request.json()
+    const { name, email, password, userType, locale, inviteCode } = await request.json()
 
     // Validate inputs
     if (!email || !password || !name) {
       return NextResponse.json(
         { error: 'Name, email, and password are required' },
+        { status: 400 }
+      )
+    }
+
+    // Beta invite code validation
+    if (!inviteCode) {
+      return NextResponse.json(
+        { error: 'An invite code is required to join the beta' },
+        { status: 400 }
+      )
+    }
+
+    const betaCode = await prisma.betaInviteCode.findUnique({
+      where: { code: inviteCode.trim().toUpperCase() },
+    })
+
+    if (!betaCode || !betaCode.isActive) {
+      return NextResponse.json(
+        { error: 'Invalid invite code' },
+        { status: 400 }
+      )
+    }
+
+    if (betaCode.expiresAt && betaCode.expiresAt < new Date()) {
+      return NextResponse.json(
+        { error: 'This invite code has expired' },
+        { status: 400 }
+      )
+    }
+
+    if (betaCode.usedCount >= betaCode.maxUses) {
+      return NextResponse.json(
+        { error: 'This invite code has reached its usage limit' },
         { status: 400 }
       )
     }
@@ -45,15 +78,30 @@ export async function POST(request: Request) {
     // Hash password and create user
     const hashedPassword = await hash(password, 12)
 
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
         userType: userType === 'brand' ? 'BRAND' : 'INFLUENCER',
+        subscriptionTier: 'PRO',
         emailVerified: null,
       },
     })
+
+    // Record invite code usage
+    await prisma.$transaction([
+      prisma.betaInviteCode.update({
+        where: { id: betaCode.id },
+        data: { usedCount: { increment: 1 } },
+      }),
+      prisma.betaInviteUsage.create({
+        data: {
+          inviteCodeId: betaCode.id,
+          userId: newUser.id,
+        },
+      }),
+    ])
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
