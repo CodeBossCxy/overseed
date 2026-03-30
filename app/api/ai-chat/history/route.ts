@@ -76,3 +76,30 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal error' }, { status: 500 })
   }
 }
+
+// PATCH: rename a chat
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = (session.user as any).id
+    const { chatId, title } = await req.json()
+
+    if (!chatId || !title?.trim()) {
+      return NextResponse.json({ error: 'Chat ID and title are required' }, { status: 400 })
+    }
+
+    await prisma.aiChat.updateMany({
+      where: { id: chatId, userId },
+      data: { title: title.trim() },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error('Chat history PATCH error:', error)
+    return NextResponse.json({ error: error.message || 'Internal error' }, { status: 500 })
+  }
+}

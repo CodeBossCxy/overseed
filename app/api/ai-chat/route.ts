@@ -29,12 +29,23 @@ When the user's request is a deliverable (not just a question), you should gener
 - The content is a deliverable meant to be saved, shared, or printed — not just read in chat
 
 When you detect a document request, you MUST start your VERY FIRST LINE with exactly this format (no text before it):
-[DOC:TITLE_HERE]
-where TITLE_HERE is a short descriptive title. Then write the full document content in markdown starting from the next line. Do NOT add any text before [DOC:...]. Do NOT explain that you are generating a document.
+[DOC:FORMAT:TITLE_HERE]
+where FORMAT is one of: docx, xlsx, pdf — and TITLE_HERE is a short descriptive title.
+
+Choose the format based on the content:
+- **docx** (Word): reports, whitepapers, guides, contracts, articles, plans — any long-form text document
+- **xlsx** (Excel): data tables, comparisons, pricing lists, product catalogs, financial data, any content that is primarily structured/tabular
+- **pdf** (PDF): when user explicitly asks for PDF, or for polished read-only documents
+
+If the user explicitly requests a format (e.g. "Excel表格", "Word文档", "PDF"), use that format.
+
+Then write the full document content in markdown starting from the next line. Do NOT add any text before [DOC:...]. Do NOT explain that you are generating a document.
+
+For Excel documents specifically: structure your content using markdown tables. Each major table should have a heading (## or ###) above it that becomes the sheet name.
 
 When the request is conversational, exploratory ("你觉得...", "解释一下...", "帮我分析一下", "tell me about", "what do you think"), or the user just wants to read the answer — respond normally WITHOUT the [DOC:] marker.
 
-Simple rule: content is an answer → respond directly | content is a product/deliverable → start with [DOC:title] marker.
+Simple rule: content is an answer → respond directly | content is a product/deliverable → start with [DOC:format:title] marker.
 
 IMPORTANT: When generating a document, after the full document content, add a line with exactly [/DOC] to mark the end of the document. Then on the next lines, write a brief friendly summary in proper markdown format:
 - Start with a 1-2 sentence overview of what the document covers
@@ -94,8 +105,27 @@ export async function POST(req: NextRequest) {
         data: { chatId: activeChatId, role: 'user', content: lastUserMessage.content },
       })
       if (messages.filter((m: any) => m.role === 'user').length === 1) {
-        const title = lastUserMessage.content.slice(0, 80) + (lastUserMessage.content.length > 80 ? '...' : '')
-        await prisma.aiChat.update({ where: { id: activeChatId }, data: { title } })
+        // Quick fallback title immediately
+        const fallbackTitle = lastUserMessage.content.slice(0, 50) + (lastUserMessage.content.length > 50 ? '...' : '')
+        await prisma.aiChat.update({ where: { id: activeChatId }, data: { title: fallbackTitle } })
+
+        // Generate smart title in background (non-blocking)
+        const chatIdForTitle = activeChatId
+        const msgForTitle = lastUserMessage.content
+        setTimeout(async () => {
+          try {
+            const client = new Anthropic({ apiKey: process.env.CLAUDE_API })
+            const resp = await client.messages.create({
+              model: 'claude-sonnet-4-20250514',
+              max_tokens: 30,
+              messages: [{ role: 'user', content: `Generate a short title (max 6 words, no quotes) summarizing this chat topic. Reply with ONLY the title, nothing else. If the message is in Chinese, reply in Chinese.\n\nMessage: ${msgForTitle.slice(0, 200)}` }],
+            })
+            const smartTitle = resp.content[0]?.type === 'text' ? resp.content[0].text.trim().slice(0, 60) : null
+            if (smartTitle) {
+              await prisma.aiChat.update({ where: { id: chatIdForTitle }, data: { title: smartTitle } })
+            }
+          } catch {}
+        }, 100)
       }
     }
 

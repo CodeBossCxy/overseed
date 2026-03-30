@@ -7,6 +7,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { useTheme } from '@/components/ThemeProvider'
 
 interface Message {
   id: string
@@ -27,6 +28,8 @@ export default function AIAssistantPage() {
   const { t } = useLanguage()
   const subscriptionTier = (session?.user as any)?.subscriptionTier || 'FREE'
   const isProUser = subscriptionTier === 'PRO'
+  const { themeMode } = useTheme()
+  const themeIcon = themeMode === 'brand' ? '/icon-blue.png' : '/icon-pink.png'
 
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -37,6 +40,8 @@ export default function AIAssistantPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [progress, setProgress] = useState(0)
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [editingChatId, setEditingChatId] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState('')
 
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -117,6 +122,30 @@ export default function AIAssistantPage() {
       setChatList((prev) => prev.filter((c) => c.id !== id))
       if (chatId === id) startNewChat()
     } catch {}
+  }
+
+  const startRename = (id: string, currentTitle: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingChatId(id)
+    setEditingTitle(currentTitle)
+  }
+
+  const submitRename = async () => {
+    if (!editingChatId || !editingTitle.trim()) {
+      setEditingChatId(null)
+      return
+    }
+    try {
+      await fetch('/api/ai-chat/history', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId: editingChatId, title: editingTitle.trim() }),
+      })
+      setChatList((prev) =>
+        prev.map((c) => (c.id === editingChatId ? { ...c, title: editingTitle.trim() } : c))
+      )
+    } catch {}
+    setEditingChatId(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -211,7 +240,7 @@ export default function AIAssistantPage() {
             // Buffer initial tokens to detect [DOC:] marker
             if (!decided) {
               // Check if we have enough to decide
-              if (contentSoFar.trimStart().startsWith('[DOC:')) {
+              if (/^\s*\[DOC:/.test(contentSoFar)) {
                 decided = true
                 isDocMode = true
                 // For doc mode: add message immediately with whatever we have
@@ -303,40 +332,52 @@ export default function AIAssistantPage() {
   }
 
   const parseDocMarker = (content: string) => {
-    // Match [DOC:title] at the start
-    const match = content.match(/^\s*\[DOC:(.+?)\]\s*\n?/)
+    // Match [DOC:format:title] or [DOC:title] at the start
+    const match = content.match(/^\s*\[DOC:(?:(docx|xlsx|pdf):)?(.+?)\]\s*\n?/)
     // Also match <!--doc:title-->
     const match2 = !match ? content.match(/^\s*<!--\s*doc:(.+?)-->\s*\n?/) : null
-    const m = match || match2
-    if (m) {
-      const afterMarker = content.slice(m[0].length)
-      // Split on [/DOC] to separate document content from summary
+
+    if (match) {
+      const format = (match[1] || 'docx') as 'docx' | 'xlsx' | 'pdf'
+      const title = match[2].trim()
+      const afterMarker = content.slice(match[0].length)
       const endMatch = afterMarker.split(/\[\/DOC\]\s*\n?/)
       const docContent = endMatch[0]
       const summary = endMatch.length > 1 ? endMatch.slice(1).join('').trim() : ''
-      return { isDoc: true, title: m[1].trim(), docContent, summary }
+      return { isDoc: true, format, title, docContent, summary }
     }
-    return { isDoc: false, title: '', docContent: content, summary: '' }
+    if (match2) {
+      const afterMarker = content.slice(match2[0].length)
+      const endMatch = afterMarker.split(/\[\/DOC\]\s*\n?/)
+      return { isDoc: true, format: 'docx' as const, title: match2[1].trim(), docContent: endMatch[0], summary: endMatch.length > 1 ? endMatch.slice(1).join('').trim() : '' }
+    }
+    return { isDoc: false, format: 'docx' as const, title: '', docContent: content, summary: '' }
   }
 
-  const handleDownloadDoc = async (content: string, title: string) => {
+  const handleDownloadDoc = async (content: string, title: string, format: 'docx' | 'xlsx' | 'pdf' = 'docx') => {
     try {
       const res = await fetch('/api/ai-chat/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, title }),
+        body: JSON.stringify({ content, title, format, theme: themeMode }),
       })
       if (!res.ok) throw new Error('Export failed')
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${title}.docx`
+      a.download = `${title}.${format}`
       a.click()
       URL.revokeObjectURL(url)
     } catch {
       alert('Failed to generate document. Please try again.')
     }
+  }
+
+  const formatLabels: Record<string, { label: string; ext: string; icon: string }> = {
+    docx: { label: 'Word Document', ext: '.docx', icon: 'W' },
+    xlsx: { label: 'Excel Spreadsheet', ext: '.xlsx', icon: 'X' },
+    pdf: { label: 'PDF Document', ext: '.pdf', icon: 'P' },
   }
 
   const formatDate = (dateStr: string) => {
@@ -391,26 +432,55 @@ export default function AIAssistantPage() {
                   {chatList.map((chat) => (
                     <div
                       key={chat.id}
-                      onClick={() => loadChat(chat.id)}
+                      onClick={() => editingChatId !== chat.id && loadChat(chat.id)}
                       className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
                         chatId === chat.id
                           ? 'bg-primary-100/60 text-primary-900'
                           : 'hover:bg-gray-100 text-gray-700'
                       }`}
                     >
-                      <img src="/icon-pink.png" alt="Overseed" className="w-7 h-7 rounded-lg flex-shrink-0" />
+                      <img src={themeIcon} alt="Overseed" className="w-7 h-7 rounded-lg flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate leading-tight">{chat.title}</p>
+                        {editingChatId === chat.id ? (
+                          <input
+                            autoFocus
+                            value={editingTitle}
+                            onChange={(e) => setEditingTitle(e.target.value)}
+                            onBlur={submitRename}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') submitRename()
+                              if (e.key === 'Escape') setEditingChatId(null)
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-full text-sm font-medium bg-white border border-primary-300 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                          />
+                        ) : (
+                          <p className="text-sm font-medium truncate leading-tight">{chat.title}</p>
+                        )}
                         <p className="text-[11px] text-gray-400 mt-0.5">{formatDate(chat.updatedAt)}</p>
                       </div>
-                      <button
-                        onClick={(e) => deleteChat(chat.id, e)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-50 transition text-gray-300 hover:text-red-500 flex-shrink-0"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                      {editingChatId !== chat.id && (
+                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
+                          <button
+                            onClick={(e) => startRename(chat.id, chat.title, e)}
+                            className="p-1 rounded-md hover:bg-gray-200 transition text-gray-300 hover:text-gray-600"
+                            title="Rename"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={(e) => deleteChat(chat.id, e)}
+                            className="p-1 rounded-md hover:bg-red-50 transition text-gray-300 hover:text-red-500"
+                            title="Delete"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -521,7 +591,7 @@ export default function AIAssistantPage() {
               {messages.map((message) => (
                 <div key={message.id} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : ''}`}>
                   {message.role === 'assistant' && (
-                    <img src="/icon-pink.png" alt="Overseed" className="w-7 h-7 rounded-lg flex-shrink-0 mt-0.5" />
+                    <img src={themeIcon} alt="Overseed" className="w-7 h-7 rounded-lg flex-shrink-0 mt-0.5" />
                   )}
                   <div
                     className={`rounded-2xl px-4 py-3 ${
@@ -531,29 +601,33 @@ export default function AIAssistantPage() {
                     }`}
                   >
                     {message.role === 'assistant' ? (() => {
-                      const { isDoc, title: docTitle, docContent, summary } = parseDocMarker(message.content)
+                      const { isDoc, format: docFormat, title: docTitle, docContent, summary } = parseDocMarker(message.content)
                       const isStillStreaming = isLoading && message.id === messages[messages.length - 1]?.id
+                      const fl = formatLabels[docFormat] || formatLabels.docx
+                      const formatColors: Record<string, string> = {
+                        docx: 'bg-blue-100 text-blue-600',
+                        xlsx: 'bg-emerald-100 text-emerald-600',
+                        pdf: 'bg-red-100 text-red-600',
+                      }
                       if (isDoc && docContent.length > 50) {
                         return (
                           <>
                             <div className="p-4 bg-gradient-to-br from-primary-50 to-white border border-primary-200 rounded-xl">
                               <div className="flex items-center gap-3 mb-3">
-                                <div className="w-11 h-11 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isStillStreaming ? 'bg-primary-100' : formatColors[docFormat] || 'bg-primary-100'}`}>
                                   {isStillStreaming ? (
                                     <svg className="w-5 h-5 text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
                                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
                                   ) : (
-                                    <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                    </svg>
+                                    <span className="text-sm font-bold">{fl.icon}</span>
                                   )}
                                 </div>
                                 <div>
                                   <p className="text-sm font-semibold text-gray-900">{docTitle}</p>
                                   <p className="text-xs text-gray-500">
-                                    {isStillStreaming ? `Generating document... ${progress}%` : 'Word Document (.docx)'}
+                                    {isStillStreaming ? `Generating document... ${progress}%` : `${fl.label} (${fl.ext})`}
                                   </p>
                                 </div>
                               </div>
@@ -568,13 +642,13 @@ export default function AIAssistantPage() {
                                 </div>
                               ) : (
                                 <button
-                                  onClick={() => handleDownloadDoc(docContent, docTitle)}
+                                  onClick={() => handleDownloadDoc(docContent, docTitle, docFormat)}
                                   className="w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition flex items-center justify-center gap-2"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                   </svg>
-                                  Download Document
+                                  Download {fl.label}
                                 </button>
                               )}
                             </div>
@@ -601,7 +675,7 @@ export default function AIAssistantPage() {
               {/* Loading */}
               {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
                 <div className="flex gap-3">
-                  <img src="/icon-pink.png" alt="Overseed" className="w-7 h-7 rounded-lg flex-shrink-0" />
+                  <img src={themeIcon} alt="Overseed" className="w-7 h-7 rounded-lg flex-shrink-0" />
                   <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3">
                     <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
