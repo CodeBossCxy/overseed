@@ -430,7 +430,7 @@ async function generateExcel(content: string, title: string, theme: string = 'cr
 async function generatePDF(content: string, title: string, theme: string = 'creator'): Promise<Buffer> {
   const PDFDocument = (await import('pdfkit')).default
   const brandHex = theme === 'brand' ? '#2563EB' : '#E6296B'
-  const logoFile = theme === 'brand' ? 'icon-blue.png' : 'icon-pink.png'
+  const logoFile = theme === 'brand' ? 'blue_logo_with_txt.png' : 'pink_logo_with_txt.png'
   const logoPath = path.join(process.cwd(), 'public', logoFile)
   let hasLogo = false
   try { fs.accessSync(logoPath); hasLogo = true } catch {}
@@ -450,7 +450,7 @@ async function generatePDF(content: string, title: string, theme: string = 'crea
     // Cover page
     doc.moveDown(6)
     if (hasLogo) {
-      try { doc.image(logoPath, 72, 200, { width: 40 }) } catch {}
+      try { doc.image(logoPath, 72, 180, { width: 150 }) } catch {}
     }
     doc.fontSize(28).fillColor(brandHex).text(title, 72, 260, { width: 450 })
     doc.moveDown(1)
@@ -537,22 +537,20 @@ async function generatePDF(content: string, title: string, theme: string = 'crea
 // --- Word generation (existing) ---
 function generateWord(content: string, title: string, theme: string = 'creator') {
   const elements = markdownToDocxElements(content)
-  const logoFile = theme === 'brand' ? 'icon-blue.png' : 'icon-pink.png'
+  const headerLogoFile = theme === 'brand' ? 'blue_logo_with_txt.png' : 'pink_logo_with_txt.png'
 
-  let logoBuffer: Buffer | null = null
+  let headerLogoBuffer: Buffer | null = null
   try {
-    const logoPath = path.join(process.cwd(), 'public', logoFile)
-    logoBuffer = fs.readFileSync(logoPath)
+    headerLogoBuffer = fs.readFileSync(path.join(process.cwd(), 'public', headerLogoFile))
   } catch {}
 
   const headerContent: Paragraph[] = []
-  if (logoBuffer) {
+  if (headerLogoBuffer) {
     headerContent.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
-          new ImageRun({ data: logoBuffer, transformation: { width: 30, height: 30 }, type: 'png' }),
-          new TextRun({ text: '  OVERSEED', font: 'Arial', size: 16, color: 'D4D4D4', bold: true }),
+          new ImageRun({ data: headerLogoBuffer, transformation: { width: 120, height: 80 }, type: 'png' }),
         ],
         spacing: { after: 100 },
       })
