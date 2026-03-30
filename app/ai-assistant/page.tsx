@@ -158,6 +158,18 @@ export default function AIAssistantPage() {
       }
 
       let buffer = ''
+      let contentSoFar = ''
+      let pendingUpdate = false
+
+      const flushContent = () => {
+        pendingUpdate = false
+        const snapshot = contentSoFar
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, content: snapshot } : m
+          )
+        )
+      }
 
       while (true) {
         const { done, value } = await reader.read()
@@ -174,23 +186,21 @@ export default function AIAssistantPage() {
             if (event.type === 'meta' && event.chatId && !chatId) {
               setChatId(event.chatId)
             } else if (event.type === 'text') {
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantId ? { ...m, content: m.content + event.text } : m
-                )
-              )
+              contentSoFar += event.text
+              if (!pendingUpdate) {
+                pendingUpdate = true
+                requestAnimationFrame(flushContent)
+              }
             } else if (event.type === 'error') {
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantId
-                    ? { ...m, content: m.content || event.error || 'Something went wrong.' }
-                    : m
-                )
-              )
+              contentSoFar = contentSoFar || event.error || 'Something went wrong.'
+              flushContent()
             }
           } catch {}
         }
       }
+
+      // Final flush to make sure all content is rendered
+      flushContent()
 
       loadChatList()
     } catch {
