@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 
+// Allow streaming responses to run longer on Vercel
+export const maxDuration = 60
+
 const MONTHLY_TOKEN_LIMIT = 150_000
 
 const SYSTEM_PROMPT =
