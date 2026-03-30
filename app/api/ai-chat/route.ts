@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     let totalTokens = 0
     let promptTokens = 0
     let completionTokens = 0
-    const model = useProvider === 'claude' ? 'claude-sonnet-4-6-20250620' : 'gpt-5.4'
+    const model = useProvider === 'claude' ? 'claude-sonnet-4-20250514' : 'gpt-5.4'
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
           if (useProvider === 'claude') {
             const client = new Anthropic({ apiKey: process.env.CLAUDE_API })
             const response = await client.messages.create({
-              model: 'claude-sonnet-4-6-20250620',
+              model: 'claude-sonnet-4-20250514',
               max_tokens: 16384,
               system: SYSTEM_PROMPT,
               stream: true,
