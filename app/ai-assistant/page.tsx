@@ -35,9 +35,30 @@ export default function AIAssistantPage() {
   const [chatId, setChatId] = useState<string | null>(null)
   const [chatList, setChatList] = useState<ChatSummary[]>([])
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [progress, setProgress] = useState(0)
+  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  const startProgress = () => {
+    setProgress(0)
+    const start = Date.now()
+    if (progressRef.current) clearInterval(progressRef.current)
+    progressRef.current = setInterval(() => {
+      const elapsed = (Date.now() - start) / 1000
+      // Fast start, then slow asymptotic approach to 90%
+      const p = Math.min(90, 90 * (1 - Math.exp(-elapsed / 15)))
+      setProgress(Math.round(p))
+    }, 200)
+  }
+
+  const stopProgress = () => {
+    if (progressRef.current) clearInterval(progressRef.current)
+    progressRef.current = null
+    setProgress(100)
+    setTimeout(() => setProgress(0), 800)
+  }
 
   const scrollToBottom = () => {
     const container = messagesContainerRef.current
@@ -112,14 +133,9 @@ export default function AIAssistantPage() {
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
+    startProgress()
 
     const assistantId = (Date.now() + 1).toString()
-
-    // Add empty assistant message that will be filled by stream
-    setMessages((prev) => [
-      ...prev,
-      { id: assistantId, role: 'assistant', content: '', timestamp: new Date() },
-    ])
 
     try {
       const chatHistory = [...messages, userMessage].map((m) => ({
@@ -135,12 +151,12 @@ export default function AIAssistantPage() {
 
       if (!res.ok) {
         const data = await res.json()
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, content: data.error || 'Something went wrong.' } : m
-          )
-        )
+        setMessages((prev) => [
+          ...prev,
+          { id: assistantId, role: 'assistant', content: data.error || 'Something went wrong.', timestamp: new Date() },
+        ])
         setIsLoading(false)
+        stopProgress()
         return
       }
 
@@ -148,71 +164,134 @@ export default function AIAssistantPage() {
       const decoder = new TextDecoder()
 
       if (!reader) {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, content: 'Failed to read response.' } : m
-          )
-        )
+        setMessages((prev) => [
+          ...prev,
+          { id: assistantId, role: 'assistant', content: 'Failed to read response.', timestamp: new Date() },
+        ])
         setIsLoading(false)
+        stopProgress()
         return
       }
 
-      let buffer = ''
+      let sseBuffer = ''
       let contentSoFar = ''
       let pendingUpdate = false
+      let decided = false // have we decided doc vs direct?
+      let isDocMode = false
+      let messageAdded = false
 
       const flushContent = () => {
         pendingUpdate = false
         const snapshot = contentSoFar
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId ? { ...m, content: snapshot } : m
+        if (!messageAdded) {
+          // First flush — add the message
+          messageAdded = true
+          setMessages((prev) => [
+            ...prev,
+            { id: assistantId, role: 'assistant', content: snapshot, timestamp: new Date() },
+          ])
+        } else {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, content: snapshot } : m
+            )
           )
-        )
+        }
+      }
+
+      const processEvents = (line: string) => {
+        if (!line.startsWith('data: ')) return
+        try {
+          const event = JSON.parse(line.slice(6))
+          if (event.type === 'meta' && event.chatId && !chatId) {
+            setChatId(event.chatId)
+          } else if (event.type === 'text') {
+            contentSoFar += event.text
+
+            // Buffer initial tokens to detect [DOC:] marker
+            if (!decided) {
+              // Check if we have enough to decide
+              if (contentSoFar.trimStart().startsWith('[DOC:')) {
+                decided = true
+                isDocMode = true
+                // For doc mode: add message immediately with whatever we have
+                // but DON'T stream content visually — the card UI handles it
+                if (!pendingUpdate) {
+                  pendingUpdate = true
+                  requestAnimationFrame(flushContent)
+                }
+              } else if (contentSoFar.length > 10 || !contentSoFar.trimStart().startsWith('[')) {
+                // Not a doc — it's a direct answer. Flush buffered content and stream normally.
+                decided = true
+                isDocMode = false
+                if (!pendingUpdate) {
+                  pendingUpdate = true
+                  requestAnimationFrame(flushContent)
+                }
+              }
+              // Still undecided — keep buffering (don't render yet)
+              return
+            }
+
+            if (!isDocMode) {
+              // Direct answer — stream to UI
+              if (!pendingUpdate) {
+                pendingUpdate = true
+                requestAnimationFrame(flushContent)
+              }
+            } else {
+              // Doc mode — update content silently for the card (less frequent updates)
+              if (!pendingUpdate) {
+                pendingUpdate = true
+                requestAnimationFrame(flushContent)
+              }
+            }
+          } else if (event.type === 'error') {
+            contentSoFar = contentSoFar || event.error || 'Something went wrong.'
+            decided = true
+            flushContent()
+          }
+        } catch {}
       }
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
+        sseBuffer += decoder.decode(value, { stream: true })
+        const lines = sseBuffer.split('\n')
+        sseBuffer = lines.pop() || ''
 
         for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          try {
-            const event = JSON.parse(line.slice(6))
-            if (event.type === 'meta' && event.chatId && !chatId) {
-              setChatId(event.chatId)
-            } else if (event.type === 'text') {
-              contentSoFar += event.text
-              if (!pendingUpdate) {
-                pendingUpdate = true
-                requestAnimationFrame(flushContent)
-              }
-            } else if (event.type === 'error') {
-              contentSoFar = contentSoFar || event.error || 'Something went wrong.'
-              flushContent()
-            }
-          } catch {}
+          processEvents(line)
         }
       }
 
-      // Final flush to make sure all content is rendered
+      // Final flush
+      if (!decided) {
+        decided = true
+      }
       flushContent()
 
       loadChatList()
     } catch {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantId
-            ? { ...m, content: m.content || 'Sorry, something went wrong. Please try again.' }
-            : m
-        )
-      )
+      setMessages((prev) => {
+        const exists = prev.some((m) => m.id === assistantId)
+        if (exists) {
+          return prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: m.content || 'Sorry, something went wrong. Please try again.' }
+              : m
+          )
+        }
+        return [
+          ...prev,
+          { id: assistantId, role: 'assistant', content: 'Sorry, something went wrong. Please try again.', timestamp: new Date() },
+        ]
+      })
     } finally {
       setIsLoading(false)
+      stopProgress()
     }
   }
 
@@ -220,6 +299,43 @@ export default function AIAssistantPage() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit(e)
+    }
+  }
+
+  const parseDocMarker = (content: string) => {
+    // Match [DOC:title] at the start
+    const match = content.match(/^\s*\[DOC:(.+?)\]\s*\n?/)
+    // Also match <!--doc:title-->
+    const match2 = !match ? content.match(/^\s*<!--\s*doc:(.+?)-->\s*\n?/) : null
+    const m = match || match2
+    if (m) {
+      const afterMarker = content.slice(m[0].length)
+      // Split on [/DOC] to separate document content from summary
+      const endMatch = afterMarker.split(/\[\/DOC\]\s*\n?/)
+      const docContent = endMatch[0]
+      const summary = endMatch.length > 1 ? endMatch.slice(1).join('').trim() : ''
+      return { isDoc: true, title: m[1].trim(), docContent, summary }
+    }
+    return { isDoc: false, title: '', docContent: content, summary: '' }
+  }
+
+  const handleDownloadDoc = async (content: string, title: string) => {
+    try {
+      const res = await fetch('/api/ai-chat/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, title }),
+      })
+      if (!res.ok) throw new Error('Export failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${title}.docx`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      alert('Failed to generate document. Please try again.')
     }
   }
 
@@ -356,6 +472,23 @@ export default function AIAssistantPage() {
             )}
           </div>
 
+          {/* Progress bar */}
+          {progress > 0 && (
+            <div className="flex-shrink-0 px-4 py-1.5 bg-gray-50 border-b border-gray-100">
+              <div className="max-w-3xl mx-auto flex items-center gap-3">
+                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary-500 to-primary-400 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <span className="text-xs text-gray-400 font-medium tabular-nums w-8 text-right">
+                  {progress}%
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Messages */}
           <div ref={messagesContainerRef} className="flex-1 overflow-y-auto">
             <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -397,11 +530,68 @@ export default function AIAssistantPage() {
                         : 'bg-gray-50 text-gray-800 max-w-[85%] border border-gray-100'
                     }`}
                   >
-                    {message.role === 'assistant' ? (
-                      <div className="ai-markdown">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-                      </div>
-                    ) : (
+                    {message.role === 'assistant' ? (() => {
+                      const { isDoc, title: docTitle, docContent, summary } = parseDocMarker(message.content)
+                      const isStillStreaming = isLoading && message.id === messages[messages.length - 1]?.id
+                      if (isDoc && docContent.length > 50) {
+                        return (
+                          <>
+                            <div className="p-4 bg-gradient-to-br from-primary-50 to-white border border-primary-200 rounded-xl">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-11 h-11 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                  {isStillStreaming ? (
+                                    <svg className="w-5 h-5 text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                  ) : (
+                                    <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-900">{docTitle}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {isStillStreaming ? `Generating document... ${progress}%` : 'Word Document (.docx)'}
+                                  </p>
+                                </div>
+                              </div>
+                              {isStillStreaming ? (
+                                <div className="w-full py-2.5 bg-gray-200 text-gray-500 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
+                                  <div className="flex gap-1">
+                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                  </div>
+                                  Generating...
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => handleDownloadDoc(docContent, docTitle)}
+                                  className="w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition flex items-center justify-center gap-2"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                  </svg>
+                                  Download Document
+                                </button>
+                              )}
+                            </div>
+                            {!isStillStreaming && summary && (
+                              <div className="ai-markdown mt-4 pt-3 border-t border-gray-100">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
+                              </div>
+                            )}
+                          </>
+                        )
+                      }
+                      return (
+                        <div className="ai-markdown">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{docContent}</ReactMarkdown>
+                        </div>
+                      )
+                    })() : (
                       <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     )}
                   </div>

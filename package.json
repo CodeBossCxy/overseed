@@ -21,6 +21,8 @@
     "@prisma/client": "^5.20.0",
     "@tailwindcss/typography": "^0.5.19",
     "bcryptjs": "^2.4.3",
+    "docx": "^9.6.1",
+    "file-saver": "^2.0.5",
     "next": "^15.5.12",
     "next-auth": "^4.24.5",
     "nodemailer": "^6.10.1",
