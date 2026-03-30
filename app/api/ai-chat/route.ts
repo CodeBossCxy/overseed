@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     let totalTokens = 0
     let promptTokens = 0
     let completionTokens = 0
-    const model = useProvider === 'claude' ? 'claude-sonnet-4-20250514' : 'gpt-4o-mini'
+    const model = useProvider === 'claude' ? 'claude-sonnet-4-6-20250620' : 'gpt-5.4'
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -83,8 +83,8 @@ export async function POST(req: NextRequest) {
           if (useProvider === 'claude') {
             const client = new Anthropic({ apiKey: process.env.CLAUDE_API })
             const response = await client.messages.create({
-              model: 'claude-sonnet-4-20250514',
-              max_tokens: 4096,
+              model: 'claude-sonnet-4-6-20250620',
+              max_tokens: 16384,
               system: SYSTEM_PROMPT,
               stream: true,
               messages: messages.map((m: any) => ({
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
           } else {
             const client = new OpenAI({ apiKey: process.env.CHAT_API })
             const response = await client.chat.completions.create({
-              model: 'gpt-4o-mini',
+              model: 'gpt-5.4',
               messages: [
                 { role: 'system' as const, content: SYSTEM_PROMPT },
                 ...messages.map((m: any) => ({
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
                   content: m.content,
                 })),
               ],
-              max_tokens: 4096,
+              max_tokens: 16384,
               stream: true,
               stream_options: { include_usage: true },
             })
