@@ -156,8 +156,12 @@ export async function POST(req: NextRequest) {
           controller.close()
         } catch (error: any) {
           console.error('AI stream error:', error?.message || error)
+          const isAuthError = error?.message?.includes('authentication') || error?.message?.includes('apiKey') || error?.message?.includes('API key')
+          const userMessage = isAuthError
+            ? 'AI service is temporarily unavailable. Please try a different model or try again later.'
+            : 'Something went wrong. Please try again.'
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ type: 'error', error: error?.message || 'Failed to generate response' })}\n\n`)
+            encoder.encode(`data: ${JSON.stringify({ type: 'error', error: userMessage })}\n\n`)
           )
           controller.close()
         }
