@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     let totalTokens = 0
     let promptTokens = 0
     let completionTokens = 0
-    const model = useProvider === 'claude' ? 'claude-sonnet-4-20250514' : 'gpt-5.4'
+    const model = useProvider === 'claude' ? 'claude-sonnet-4-20250514' : 'gpt-4o'
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
           } else {
             const client = new OpenAI({ apiKey: process.env.CHAT_API })
             const response = await client.chat.completions.create({
-              model: 'gpt-5.4',
+              model: 'gpt-4o',
               messages: [
                 { role: 'system' as const, content: SYSTEM_PROMPT },
                 ...messages.map((m: any) => ({
