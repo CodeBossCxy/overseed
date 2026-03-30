@@ -329,7 +329,7 @@ export default function AIAssistantPage() {
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${provider === 'openai' ? 'bg-emerald-500' : 'bg-gray-300'}`} />
-                  GPT-4o
+                  GPT-5.4
                 </button>
                 <button
                   onClick={() => setProvider('claude')}
@@ -461,7 +461,7 @@ export default function AIAssistantPage() {
                 </button>
               </form>
               <p className="text-[10px] text-gray-400 text-center mt-2">
-                {provider === 'claude' ? 'Claude by Anthropic' : 'GPT-4o by OpenAI'} — responses may not always be accurate
+                {provider === 'claude' ? 'Claude by Anthropic' : 'GPT-5.4 by OpenAI'} — responses may not always be accurate
               </p>
             </div>
           </div>

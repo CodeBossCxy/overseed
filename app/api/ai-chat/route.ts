@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     let totalTokens = 0
     let promptTokens = 0
     let completionTokens = 0
-    const model = useProvider === 'claude' ? 'claude-sonnet-4-20250514' : 'gpt-4o'
+    const model = useProvider === 'claude' ? 'claude-sonnet-4-20250514' : 'gpt-5.4'
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -111,31 +111,57 @@ export async function POST(req: NextRequest) {
             }
             totalTokens = promptTokens + completionTokens
           } else {
-            const client = new OpenAI({ apiKey: process.env.CHAT_API })
-            const response = await client.chat.completions.create({
-              model: 'gpt-4o',
-              messages: [
-                { role: 'system' as const, content: SYSTEM_PROMPT },
-                ...messages.map((m: any) => ({
+            // GPT-5.4 uses the Responses API with streaming
+            const res = await fetch('https://api.openai.com/v1/responses', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.CHAT_API}`,
+              },
+              body: JSON.stringify({
+                model: 'gpt-5.4',
+                instructions: SYSTEM_PROMPT,
+                input: messages.map((m: any) => ({
                   role: m.role as 'user' | 'assistant',
                   content: m.content,
                 })),
-              ],
-              max_tokens: 16384,
-              stream: true,
-              stream_options: { include_usage: true },
+                stream: true,
+              }),
             })
 
-            for await (const chunk of response) {
-              const text = chunk.choices[0]?.delta?.content
-              if (text) {
-                fullContent += text
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', text })}\n\n`))
-              }
-              if (chunk.usage) {
-                promptTokens = chunk.usage.prompt_tokens
-                completionTokens = chunk.usage.completion_tokens
-                totalTokens = chunk.usage.total_tokens
+            if (!res.ok) {
+              const errText = await res.text()
+              throw new Error(`OpenAI API error: ${res.status} ${errText}`)
+            }
+
+            const reader = res.body?.getReader()
+            const decoder = new TextDecoder()
+            let buffer = ''
+
+            if (reader) {
+              while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+
+                buffer += decoder.decode(value, { stream: true })
+                const lines = buffer.split('\n')
+                buffer = lines.pop() || ''
+
+                for (const line of lines) {
+                  if (!line.startsWith('data: ') || line === 'data: [DONE]') continue
+                  try {
+                    const event = JSON.parse(line.slice(6))
+                    if (event.type === 'response.output_text.delta' && event.delta) {
+                      fullContent += event.delta
+                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', text: event.delta })}\n\n`))
+                    }
+                    if (event.type === 'response.completed' && event.response?.usage) {
+                      promptTokens = event.response.usage.input_tokens || 0
+                      completionTokens = event.response.usage.output_tokens || 0
+                      totalTokens = promptTokens + completionTokens
+                    }
+                  } catch {}
+                }
               }
             }
           }
