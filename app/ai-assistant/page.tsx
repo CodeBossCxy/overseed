@@ -398,7 +398,7 @@ export default function AIAssistantPage() {
                     }`}
                   >
                     {message.role === 'assistant' ? (
-                      <div className="text-sm leading-relaxed prose prose-sm prose-gray max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-headings:my-2 prose-headings:text-gray-800 prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-800 prose-pre:text-gray-100 prose-table:w-full prose-th:bg-gray-100 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:text-xs prose-th:font-semibold prose-th:text-gray-700 prose-th:border prose-th:border-gray-200 prose-td:px-3 prose-td:py-2 prose-td:text-xs prose-td:border prose-td:border-gray-200">
+                      <div className="ai-markdown">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                       </div>
                     ) : (

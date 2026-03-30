@@ -44,3 +44,88 @@ body {
     text-wrap: balance;
   }
 }
+
+/* AI Chat markdown styles */
+.ai-markdown {
+  @apply text-sm leading-relaxed;
+}
+.ai-markdown > *:first-child {
+  @apply mt-0;
+}
+.ai-markdown > *:last-child {
+  @apply mb-0;
+}
+.ai-markdown p {
+  @apply my-2;
+}
+.ai-markdown h1 {
+  @apply text-lg font-bold text-gray-900 mt-5 mb-2 pb-1 border-b border-gray-200;
+}
+.ai-markdown h2 {
+  @apply text-base font-bold text-gray-900 mt-4 mb-2;
+}
+.ai-markdown h3 {
+  @apply text-sm font-bold text-gray-800 mt-3 mb-1.5;
+}
+.ai-markdown h4 {
+  @apply text-sm font-semibold text-gray-800 mt-2 mb-1;
+}
+.ai-markdown ul {
+  @apply my-2 pl-5 space-y-1;
+  list-style-type: disc;
+}
+.ai-markdown ol {
+  @apply my-2 pl-5 space-y-1;
+  list-style-type: decimal;
+}
+.ai-markdown li {
+  @apply text-sm leading-relaxed;
+}
+.ai-markdown li > ul,
+.ai-markdown li > ol {
+  @apply mt-1 mb-0;
+}
+.ai-markdown strong {
+  @apply font-semibold text-gray-900;
+}
+.ai-markdown em {
+  @apply italic text-gray-700;
+}
+.ai-markdown blockquote {
+  @apply my-3 pl-4 border-l-[3px] border-primary-300 text-gray-600 italic bg-gray-50/50 py-2 pr-3 rounded-r-lg;
+}
+.ai-markdown code {
+  @apply text-[13px] bg-gray-100 text-pink-600 px-1.5 py-0.5 rounded font-mono;
+}
+.ai-markdown pre {
+  @apply my-3 rounded-xl overflow-hidden;
+}
+.ai-markdown pre code {
+  @apply block bg-gray-900 text-gray-100 p-4 text-[13px] leading-relaxed overflow-x-auto;
+  color: #e2e8f0;
+  background: #1e293b;
+}
+.ai-markdown hr {
+  @apply my-4 border-gray-200;
+}
+.ai-markdown a {
+  @apply text-primary-600 underline underline-offset-2 hover:text-primary-700;
+}
+.ai-markdown table {
+  @apply w-full my-3 text-sm border-collapse rounded-lg overflow-hidden;
+}
+.ai-markdown thead {
+  @apply bg-gray-100;
+}
+.ai-markdown th {
+  @apply px-3 py-2 text-left text-xs font-semibold text-gray-700 border border-gray-200;
+}
+.ai-markdown td {
+  @apply px-3 py-2 text-xs text-gray-600 border border-gray-200;
+}
+.ai-markdown tbody tr:nth-child(even) {
+  @apply bg-gray-50/50;
+}
+.ai-markdown img {
+  @apply rounded-lg my-3 max-w-full;
+}
