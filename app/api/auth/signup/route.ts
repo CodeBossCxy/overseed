@@ -5,7 +5,7 @@ import { sendOTPEmail } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, userType, locale, inviteCode } = await request.json()
+    const { name, email, password, userType, locale, inviteCode, businessLegalName, businessRegistrationNo, businessCountry, businessWebsite } = await request.json()
 
     // Validate inputs
     if (!email || !password || !name) {
@@ -88,6 +88,22 @@ export async function POST(request: Request) {
         emailVerified: null,
       },
     })
+
+    // Create brand profile with verification info for brand signups
+    if (userType === 'brand') {
+      await prisma.brandProfile.create({
+        data: {
+          userId: newUser.id,
+          companyName: businessLegalName || name,
+          businessLegalName: businessLegalName || null,
+          businessRegistrationNo: businessRegistrationNo || null,
+          businessCountry: businessCountry || null,
+          businessWebsite: businessWebsite || null,
+          brandVerificationStatus: 'PENDING',
+          verificationSubmittedAt: new Date(),
+        },
+      })
+    }
 
     // Record invite code usage
     await prisma.$transaction([

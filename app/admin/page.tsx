@@ -74,7 +74,13 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<UserData[]>([])
   const [recentAiLogs, setRecentAiLogs] = useState<AiLog[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'ai-usage' | 'beta-codes' | 'beta-feedback'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'ai-usage' | 'beta-codes' | 'beta-feedback' | 'brand-verification'>('overview')
+
+  // Brand verification state
+  const [pendingBrands, setPendingBrands] = useState<any[]>([])
+  const [brandVerifFilter, setBrandVerifFilter] = useState<'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING')
+  const [rejectReason, setRejectReason] = useState('')
+  const [rejectingId, setRejectingId] = useState<string | null>(null)
 
   // Beta state
   const [betaCodes, setBetaCodes] = useState<BetaCode[]>([])
@@ -109,7 +115,33 @@ export default function AdminDashboard() {
     fetchData()
     fetchBetaCodes()
     fetchBetaFeedback()
+    fetchBrandVerifications('PENDING')
   }, [session, status, router])
+
+  const fetchBrandVerifications = async (filterStatus?: string) => {
+    try {
+      const res = await fetch(`/api/admin/brand-verification?status=${filterStatus || brandVerifFilter}`)
+      if (res.ok) {
+        const data = await res.json()
+        setPendingBrands(data.brands)
+      }
+    } catch {}
+  }
+
+  const handleBrandAction = async (brandProfileId: string, action: 'APPROVE' | 'REJECT', reason?: string) => {
+    try {
+      const res = await fetch('/api/admin/brand-verification', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brandProfileId, action, rejectionReason: reason }),
+      })
+      if (res.ok) {
+        setRejectingId(null)
+        setRejectReason('')
+        fetchBrandVerifications()
+      }
+    } catch {}
+  }
 
   const fetchBetaCodes = async () => {
     try {
@@ -193,17 +225,17 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit flex-wrap">
-          {(['overview', 'users', 'ai-usage', 'beta-codes', 'beta-feedback'] as const).map((tab) => (
+          {(['overview', 'users', 'ai-usage', 'brand-verification', 'beta-codes', 'beta-feedback'] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => { setActiveTab(tab); if (tab === 'brand-verification') fetchBrandVerifications() }}
               className={`px-4 py-2 rounded-md text-sm font-medium transition ${
                 activeTab === tab
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              {tab === 'overview' ? 'Overview' : tab === 'users' ? 'Users' : tab === 'ai-usage' ? 'AI Usage' : tab === 'beta-codes' ? 'Beta Codes' : 'Beta Feedback'}
+              {tab === 'overview' ? 'Overview' : tab === 'users' ? 'Users' : tab === 'ai-usage' ? 'AI Usage' : tab === 'brand-verification' ? 'Brand Verification' : tab === 'beta-codes' ? 'Beta Codes' : 'Beta Feedback'}
             </button>
           ))}
         </div>
@@ -445,6 +477,130 @@ export default function AdminDashboard() {
         )}
 
         {/* Beta Codes Tab */}
+        {/* Brand Verification Tab */}
+        {activeTab === 'brand-verification' && (
+          <div>
+            <div className="flex gap-2 mb-6">
+              {(['PENDING', 'APPROVED', 'REJECTED'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => { setBrandVerifFilter(s); fetchBrandVerifications(s) }}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                    brandVerifFilter === s ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {s.charAt(0) + s.slice(1).toLowerCase()}
+                </button>
+              ))}
+            </div>
+
+            {pendingBrands.length === 0 ? (
+              <p className="text-gray-500 text-sm">No {brandVerifFilter.toLowerCase()} brand applications.</p>
+            ) : (
+              <div className="space-y-4">
+                {pendingBrands.map((brand) => (
+                  <div key={brand.id} className="bg-white rounded-lg border border-gray-200 p-5">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{brand.businessLegalName || brand.companyName || 'Unnamed'}</h3>
+                        <p className="text-sm text-gray-500">{brand.user.email} &middot; {brand.user.name}</p>
+                      </div>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        brand.brandVerificationStatus === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                        brand.brandVerificationStatus === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {brand.brandVerificationStatus}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                      <div>
+                        <span className="text-gray-400 text-xs">Registration No.</span>
+                        <p className="text-gray-700">{brand.businessRegistrationNo || '—'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 text-xs">Country</span>
+                        <p className="text-gray-700">{brand.businessCountry || '—'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 text-xs">Website</span>
+                        <p className="text-gray-700">{brand.businessWebsite ? <a href={brand.businessWebsite} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">{brand.businessWebsite}</a> : '—'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 text-xs">Submitted</span>
+                        <p className="text-gray-700">{brand.verificationSubmittedAt ? formatDate(brand.verificationSubmittedAt, locale) : '—'}</p>
+                      </div>
+                    </div>
+
+                    {brand.businessDocuments && brand.businessDocuments.length > 0 && (
+                      <div className="mt-3">
+                        <span className="text-gray-400 text-xs">Documents</span>
+                        <div className="flex gap-2 mt-1">
+                          {brand.businessDocuments.map((doc: string, i: number) => (
+                            <a key={i} href={doc} target="_blank" rel="noopener noreferrer" className="text-xs text-primary-600 underline">
+                              Document {i + 1}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {brand.rejectionReason && (
+                      <div className="mt-3 p-2 bg-red-50 rounded text-sm text-red-700">
+                        <strong>Rejection reason:</strong> {brand.rejectionReason}
+                      </div>
+                    )}
+
+                    {brand.brandVerificationStatus === 'PENDING' && (
+                      <div className="mt-4 flex gap-2 items-center">
+                        <button
+                          onClick={() => handleBrandAction(brand.id, 'APPROVE')}
+                          className="px-4 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition"
+                        >
+                          Approve
+                        </button>
+
+                        {rejectingId === brand.id ? (
+                          <div className="flex gap-2 items-center flex-1">
+                            <input
+                              type="text"
+                              value={rejectReason}
+                              onChange={(e) => setRejectReason(e.target.value)}
+                              placeholder="Reason for rejection..."
+                              className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
+                            />
+                            <button
+                              onClick={() => handleBrandAction(brand.id, 'REJECT', rejectReason)}
+                              disabled={!rejectReason.trim()}
+                              className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition disabled:opacity-50"
+                            >
+                              Confirm Reject
+                            </button>
+                            <button
+                              onClick={() => { setRejectingId(null); setRejectReason('') }}
+                              className="text-sm text-gray-500 hover:text-gray-700"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setRejectingId(brand.id)}
+                            className="px-4 py-1.5 bg-red-100 text-red-700 text-sm rounded-md hover:bg-red-200 transition"
+                          >
+                            Reject
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'beta-codes' && (
           <div>
             {/* Generate codes form */}

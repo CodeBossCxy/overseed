@@ -1,0 +1,70 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+// GET: List brand profiles by verification status
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).userType !== 'ADMIN') {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const status = searchParams.get('status') || 'PENDING'
+
+    const brands = await prisma.brandProfile.findMany({
+      where: { brandVerificationStatus: status as any },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, createdAt: true },
+        },
+      },
+      orderBy: { verificationSubmittedAt: 'asc' },
+    })
+
+    return NextResponse.json({ brands })
+  } catch (error) {
+    console.error('Error fetching brand verifications:', error)
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// PATCH: Approve or reject a brand
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).userType !== 'ADMIN') {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+    }
+
+    const adminUserId = (session.user as any).id
+    const { brandProfileId, action, rejectionReason } = await req.json()
+
+    if (!brandProfileId || !['APPROVE', 'REJECT'].includes(action)) {
+      return NextResponse.json({ message: 'brandProfileId and action (APPROVE/REJECT) are required' }, { status: 400 })
+    }
+
+    if (action === 'REJECT' && !rejectionReason) {
+      return NextResponse.json({ message: 'A rejection reason is required' }, { status: 400 })
+    }
+
+    const updated = await prisma.brandProfile.update({
+      where: { id: brandProfileId },
+      data: {
+        brandVerificationStatus: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+        isVerified: action === 'APPROVE',
+        verificationDate: action === 'APPROVE' ? new Date() : undefined,
+        verificationReviewedAt: new Date(),
+        verificationReviewedBy: adminUserId,
+        rejectionReason: action === 'REJECT' ? rejectionReason : null,
+      },
+    })
+
+    return NextResponse.json({ success: true, status: updated.brandVerificationStatus })
+  } catch (error) {
+    console.error('Error updating brand verification:', error)
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+  }
+}

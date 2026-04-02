@@ -49,6 +49,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
     }
 
+    // Check brand verification if current user is the brand
+    if (userId === brandUserId) {
+      const brandProfile = await prisma.brandProfile.findUnique({
+        where: { userId: brandUserId },
+        select: { brandVerificationStatus: true },
+      })
+      if (brandProfile?.brandVerificationStatus !== 'APPROVED') {
+        return NextResponse.json(
+          { message: 'Your brand must be verified before you can start conversations.' },
+          { status: 403 }
+        )
+      }
+    }
+
     // Check if conversation already exists
     const existing = await prisma.conversation.findUnique({
       where: { applicationId },

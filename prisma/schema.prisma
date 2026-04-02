@@ -22,6 +22,12 @@ enum UserType {
   ADMIN
 }
 
+enum BrandVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum CampaignStatus {
   DRAFT
   PENDING_REVIEW
@@ -269,6 +275,21 @@ model BrandProfile {
   contactPhone     String?
   isVerified       Boolean   @default(false)
   verificationDate DateTime?
+
+  // Brand verification workflow
+  brandVerificationStatus BrandVerificationStatus @default(PENDING)
+  verificationSubmittedAt DateTime?
+  verificationReviewedAt  DateTime?
+  verificationReviewedBy  String?
+  rejectionReason         String?        @db.Text
+
+  // Business verification info
+  businessLegalName       String?
+  businessRegistrationNo  String?
+  businessCountry         String?
+  businessWebsite         String?
+  businessDocuments       String[]       @default([])
+
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -592,6 +613,7 @@ model AiChatMessage {
   chatId    String
   role      String   // "user" or "assistant"
   content   String   @db.Text
+  feedback  String?  // "like" or "dislike" — only for assistant messages
   createdAt DateTime @default(now())
 
   chat AiChat @relation(fields: [chatId], references: [id], onDelete: Cascade)

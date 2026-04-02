@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import MainLayout from '@/components/MainLayout'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export default function BrandProfilePage() {
   const { t } = useLanguage()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -112,6 +114,16 @@ export default function BrandProfilePage() {
     <MainLayout>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/brand')}
+            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            {t.common.backToDashboard}
+          </button>
           <h1 className="text-3xl font-bold">{t.brand.profile.title}</h1>
           <p className="text-gray-600 mt-1">{t.brand.profile.subtitle}</p>
         </div>

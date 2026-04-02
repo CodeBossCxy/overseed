@@ -188,8 +188,8 @@ export default function CampaignApplicationsPage() {
                         <div className="flex items-center gap-2">
                           <ApplicationStatus status={application.status} size="sm" />
                           {application.socialAccount && (
-                            <span className="text-xs text-gray-500">
-                              {application.socialAccount.followerCount.toLocaleString()}
+                            <span className="text-xs text-gray-500 truncate">
+                              {application.socialAccount.platform.name} @{application.socialAccount.username}
                             </span>
                           )}
                         </div>

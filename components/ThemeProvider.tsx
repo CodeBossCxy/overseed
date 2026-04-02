@@ -3,10 +3,13 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
 import { useViewMode } from '@/lib/hooks/useViewMode'
 import { useSession } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
+
+export type ThemeMode = 'creator' | 'brand' | 'global'
 
 interface ThemeContextType {
-  themeMode: 'creator' | 'brand'
-  setThemeMode: (mode: 'creator' | 'brand') => void
+  themeMode: ThemeMode
+  setThemeMode: (mode: ThemeMode) => void
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -21,25 +24,29 @@ export function useTheme() {
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const { isBrand } = useViewMode()
-  const [themeMode, setThemeModeState] = useState<'creator' | 'brand'>('creator')
+  const pathname = usePathname()
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('global')
 
-  const setThemeMode = useCallback((mode: 'creator' | 'brand') => {
+  const setThemeMode = useCallback((mode: ThemeMode) => {
     setThemeModeState(mode)
   }, [])
 
-  // Sync with session-based view mode when logged in
+  // Homepage → global (dark space theme)
+  // Other pages → sync with user's view mode (creator pink / brand blue)
   useEffect(() => {
-    if (session) {
-      setThemeModeState(isBrand ? 'brand' : 'creator')
+    const isHomePage = pathname === '/'
+
+    if (isHomePage) {
+      document.documentElement.setAttribute('data-theme', 'global')
+      setThemeModeState('global')
+    } else {
+      const viewTheme = session && isBrand ? 'brand' : 'creator'
+      document.documentElement.setAttribute('data-theme', viewTheme)
+      setThemeModeState(viewTheme)
     }
-  }, [session, isBrand])
 
-  // Apply theme to DOM
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', themeMode)
-
-    // Update favicon — find existing or create once, then just update href
-    const iconHref = themeMode === 'brand' ? '/icon-blue.png' : '/icon-pink.png'
+    // Update favicon
+    const iconHref = (!session || pathname === '/') ? '/icon-pink.png' : isBrand ? '/icon-blue.png' : '/icon-pink.png'
     let link = document.querySelector<HTMLLinkElement>('link[data-dynamic-icon]')
     if (!link) {
       link = document.createElement('link')
@@ -48,8 +55,8 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
       link.setAttribute('data-dynamic-icon', 'true')
       document.head.appendChild(link)
     }
-    link.href = iconHref + '?v=' + themeMode
-  }, [themeMode])
+    link.href = iconHref + '?v=' + (pathname === '/' ? 'global' : isBrand ? 'brand' : 'creator')
+  }, [pathname, session, isBrand])
 
   const value = useMemo(() => ({
     themeMode,

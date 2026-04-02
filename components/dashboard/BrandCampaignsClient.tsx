@@ -109,7 +109,7 @@ export default function BrandCampaignsClient({ campaigns }: BrandCampaignsClient
                             key={category.id}
                             className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded"
                           >
-                            {category.name}
+                            {t.categoryNames[category.name] || category.name}
                           </span>
                         ))}
                       </div>

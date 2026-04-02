@@ -14,7 +14,7 @@ interface DropdownItem {
   href: string
 }
 
-function NavDropdown({ label, items }: { label: string; items: DropdownItem[] }) {
+function NavDropdown({ label, items, isGlobal }: { label: string; items: DropdownItem[]; isGlobal?: boolean }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -32,7 +32,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-gray-700 hover:text-primary-600 transition text-sm font-medium"
+        className={`flex items-center gap-1 transition text-sm font-medium ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
       >
         {label}
         <svg className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,12 +40,12 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
         </svg>
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+        <div className={`absolute top-full left-0 mt-2 w-48 rounded-lg shadow-lg py-1 z-50 ${isGlobal ? 'bg-[#0a1527]/95 backdrop-blur-xl border border-[#d4e0fd]/10' : 'bg-white border border-gray-100'}`}>
           {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition"
+              className={`block px-4 py-2 text-sm transition ${isGlobal ? 'text-gray-300 hover:bg-[#456fa3]/15 hover:text-[#ff769f]' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'}`}
               onClick={() => setOpen(false)}
             >
               {item.label}
@@ -57,7 +57,7 @@ function NavDropdown({ label, items }: { label: string; items: DropdownItem[] })
   )
 }
 
-function MessageBadge() {
+function MessageBadge({ isGlobal }: { isGlobal?: boolean }) {
   const [unread, setUnread] = useState(0)
   const { data: session } = useSession()
   const badgeUserId = (session?.user as any)?.id
@@ -101,7 +101,7 @@ function MessageBadge() {
   return (
     <Link
       href="/dashboard/messages"
-      className="relative text-gray-700 hover:text-primary-600 transition"
+      className={`relative transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
       title="Messages"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,22 +171,30 @@ export default function Header() {
     },
   ]
 
+  const isGlobal = themeMode === 'global'
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className={`sticky top-0 z-50 ${isGlobal ? 'bg-[#0a1527]/70 backdrop-blur-xl border-b border-[#d4e0fd]/10' : 'bg-white shadow-sm'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto" />
-            <span className="text-2xl font-bold text-primary-600">OVERSEED</span>
+            {isGlobal ? (
+              <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-9 w-auto brightness-200" />
+            ) : (
+              <>
+                <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto" />
+                <span className="text-2xl font-bold text-primary-600">OVERSEED</span>
+              </>
+            )}
             <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-400 text-amber-900 rounded uppercase tracking-wider">Beta</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6">
             {navMenus.map((menu) => (
-              <NavDropdown key={menu.key} label={menu.label} items={menu.items} />
+              <NavDropdown key={menu.key} label={menu.label} items={menu.items} isGlobal={isGlobal} />
             ))}
           </nav>
 
@@ -195,7 +203,7 @@ export default function Header() {
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-50 transition text-sm"
+              className={`px-3 py-1 rounded-md border transition text-sm ${isGlobal ? 'border-[#d4e0fd]/15 text-gray-200 hover:bg-[#456fa3]/15' : 'border-gray-300 hover:bg-gray-50'}`}
             >
               {locale === 'en' ? '中文' : 'EN'}
             </button>
@@ -208,7 +216,7 @@ export default function Header() {
                   <button
                     onClick={() => switchView()}
                     disabled={isSwitching}
-                    className="px-3 py-1 rounded-md border border-primary-300 text-primary-600 hover:bg-primary-50 transition text-sm disabled:opacity-50"
+                    className={`px-3 py-1 rounded-md border transition text-sm disabled:opacity-50 ${isGlobal ? 'border-[#ff769f]/30 text-[#ff769f] hover:bg-[#ff769f]/10' : 'border-primary-300 text-primary-600 hover:bg-primary-50'}`}
                   >
                     {isSwitching
                       ? t.nav.switching
@@ -217,17 +225,17 @@ export default function Header() {
                         : t.nav.switchToBrand}
                   </button>
                 )}
-                <MessageBadge />
+                <MessageBadge isGlobal={isGlobal} />
                 <Link
                   href={dashboardLink}
-                  className="text-gray-700 hover:text-primary-600 text-sm font-medium"
+                  className={`text-sm font-medium ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
                 >
                   {t.nav.myCenter}
                 </Link>
                 {(session.user as any)?.userType === 'ADMIN' && (
                   <Link
                     href="/admin"
-                    className="relative text-gray-700 hover:text-primary-600 transition"
+                    className={`relative transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
                     title="Admin"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +245,7 @@ export default function Header() {
                 )}
                 <Link
                   href="/settings"
-                  className="relative text-gray-700 hover:text-primary-600 transition"
+                  className={`relative transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
                   title={t.nav.settings}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,7 +255,7 @@ export default function Header() {
                 </Link>
                 <button
                   onClick={() => signOut()}
-                  className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 transition text-sm"
+                  className={`px-4 py-2 rounded-md transition text-sm ${isGlobal ? 'bg-[#456fa3]/15 hover:bg-[#456fa3]/25 text-gray-200' : 'bg-gray-200 hover:bg-gray-300'}`}
                 >
                   {t.nav.logout}
                 </button>
@@ -256,7 +264,7 @@ export default function Header() {
               <div className="hidden lg:flex items-center space-x-2">
                 <Link
                   href="/auth/signin"
-                  className="px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 transition text-sm"
+                  className={`px-4 py-2 rounded-md transition text-sm ${isGlobal ? 'text-gray-200 hover:bg-[#456fa3]/15' : 'text-gray-700 hover:bg-gray-100'}`}
                 >
                   {t.nav.login}
                 </Link>
@@ -272,7 +280,7 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md hover:bg-gray-100"
+              className={`lg:hidden p-2 rounded-md ${isGlobal ? 'hover:bg-[#456fa3]/15 text-gray-200' : 'hover:bg-gray-100'}`}
               aria-label="Toggle menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -289,13 +297,13 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t">
+          <div className={`lg:hidden py-4 border-t ${isGlobal ? 'border-[#d4e0fd]/10' : ''}`}>
             <nav className="flex flex-col space-y-1">
               {navMenus.map((menu) => (
                 <div key={menu.key}>
                   <button
                     onClick={() => setMobileExpanded(mobileExpanded === menu.key ? null : menu.key)}
-                    className="flex items-center justify-between w-full py-2 text-gray-700 hover:text-primary-600 transition font-medium"
+                    className={`flex items-center justify-between w-full py-2 transition font-medium ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
                   >
                     {menu.label}
                     <svg className={`w-4 h-4 transition-transform ${mobileExpanded === menu.key ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,7 +316,7 @@ export default function Header() {
                         <Link
                           key={item.href}
                           href={item.href}
-                          className="block py-2 text-sm text-gray-600 hover:text-primary-600 transition"
+                          className={`block py-2 text-sm transition ${isGlobal ? 'text-gray-400 hover:text-[#ff769f]' : 'text-gray-600 hover:text-primary-600'}`}
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           {item.label}

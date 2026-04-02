@@ -147,6 +147,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (brandProfile.brandVerificationStatus !== 'APPROVED') {
+      return NextResponse.json(
+        { message: 'Your brand must be verified before you can create campaigns. Please wait for admin approval.' },
+        { status: 403 }
+      )
+    }
+
     const data = await req.json()
 
     // Validate required fields

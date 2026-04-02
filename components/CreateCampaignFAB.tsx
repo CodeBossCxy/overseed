@@ -10,6 +10,9 @@ export default function CreateCampaignFAB() {
 
   if (!session || !isBrand) return null
 
+  const verificationStatus = (session.user as any)?.brandVerificationStatus
+  if (verificationStatus !== 'APPROVED') return null
+
   return (
     <Link
       href="/dashboard/brand/campaigns/new"

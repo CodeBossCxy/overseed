@@ -97,7 +97,7 @@ export default function CampaignFilters({ categories = [], platforms = [] }: Cam
             <option value="">{ft.allCategories}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.slug}>
-                {cat.name}
+                {t.categoryNames[cat.name] || cat.name}
               </option>
             ))}
           </select>

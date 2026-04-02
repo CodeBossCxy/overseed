@@ -331,7 +331,7 @@ export default function ApplicationDetailPage() {
                       key={i}
                       className="text-xs bg-primary-50 text-primary-700 px-2 py-1 rounded"
                     >
-                      {c.category.name}
+                      {t.categoryNames[c.category.name] || c.category.name}
                     </span>
                   ))}
                 </div>

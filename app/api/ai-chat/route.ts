@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   const usedTokens = monthlyUsage._sum.totalTokens || 0
   if (usedTokens >= MONTHLY_TOKEN_LIMIT) {
     return NextResponse.json(
-      { error: 'Monthly AI token limit reached (150k tokens). Resets next month.' },
+      { error: 'Monthly AI usage limit reached. Your allowance resets next month.' },
       { status: 429 }
     )
   }
@@ -227,7 +227,7 @@ export async function POST(req: NextRequest) {
           }
 
           // Save assistant reply and update chat
-          await prisma.aiChatMessage.create({
+          const savedMessage = await prisma.aiChatMessage.create({
             data: { chatId: activeChatId, role: 'assistant', content: fullContent },
           })
           await prisma.aiChat.update({
@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
             })
           }
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', messageId: savedMessage.id })}\n\n`))
           controller.close()
         } catch (error: any) {
           console.error('AI stream error:', error?.message || error)

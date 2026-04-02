@@ -1,6 +1,7 @@
 import MainLayout from '@/components/MainLayout'
 import ApplicationForm from '@/components/applications/ApplicationForm'
 import CompensationBadge from '@/components/campaigns/CompensationBadge'
+import CategoryName from '@/components/campaigns/CategoryName'
 import { LocaleDate } from '@/components/LocaleDate'
 import UpgradePrompt from '@/components/UpgradePrompt'
 import { prisma } from '@/lib/prisma'
@@ -210,7 +211,7 @@ export default async function ApplyPage({ params }: { params: Promise<{ id: stri
                 <div className="flex flex-wrap gap-1.5">
                   {campaign.categories.map(({ category }) => (
                     <span key={category.id} className="text-xs font-medium text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
-                      {category.name}
+                      <CategoryName name={category.name} />
                     </span>
                   ))}
                 </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import LocaleDateInput from '@/components/LocaleDateInput'
 
 interface Category {
   id: number
@@ -72,6 +73,38 @@ export default function CampaignForm({
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
+
+    // Validate required fields when publishing (not drafts)
+    if (!asDraft) {
+      const missing: string[] = []
+      // Step 1
+      if (!formData.title.trim()) missing.push(cf.campaignTitle)
+      if (!formData.description.trim()) missing.push(cf.description)
+      if (formData.categoryIds.length === 0) missing.push(cf.categories)
+      if (!formData.deadline) missing.push(cf.applicationDeadline)
+      if (!formData.campaignStartDate) missing.push(cf.campaignStartDate)
+      if (!formData.campaignEndDate) missing.push(cf.campaignEndDate)
+      if (formData.images.length === 0) missing.push(cf.campaignImages)
+      // Step 2
+      if (['PAID', 'PAID_PLUS_GIFT', 'NEGOTIABLE'].includes(formData.compensationType)) {
+        if (!formData.paymentMin) missing.push(cf.paymentMin)
+        if (!formData.paymentMax) missing.push(cf.paymentMax)
+      }
+      if (['GIFTED', 'PAID_PLUS_GIFT'].includes(formData.compensationType)) {
+        if (!formData.giftDescription.trim()) missing.push(cf.giftDescription)
+        if (!formData.giftValue) missing.push(cf.giftValue)
+      }
+      // Step 3
+      if (formData.platformIds.length === 0) missing.push(cf.targetPlatforms)
+      if (!formData.contentGuidelines.trim()) missing.push(cf.contentGuidelines)
+      if (!formData.hashtagsRequired.trim()) missing.push(cf.requiredHashtags)
+      if (!formData.mentionsRequired.trim()) missing.push(cf.requiredMentions)
+      if (missing.length > 0) {
+        setError(`${cf.requiredFields}: ${missing.join(', ')}`)
+        setIsSubmitting(false)
+        return
+      }
+    }
 
     try {
       const submitData = {
@@ -258,9 +291,10 @@ export default function CampaignForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">{cf.description}</label>
+        <label className="block text-sm font-medium mb-1">{cf.description} *</label>
         <textarea
           rows={6}
+          required
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -269,7 +303,7 @@ export default function CampaignForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">{cf.categories}</label>
+        <label className="block text-sm font-medium mb-2">{cf.categories} *</label>
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
@@ -282,7 +316,7 @@ export default function CampaignForm({
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {cat.name}
+              {t.categoryNames[cat.name] || cat.name}
             </button>
           ))}
         </div>
@@ -290,19 +324,20 @@ export default function CampaignForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">{cf.applicationDeadline}</label>
-          <input
-            type="date"
+          <label className="block text-sm font-medium mb-1">{cf.applicationDeadline} *</label>
+          <LocaleDateInput
+            required
             value={formData.deadline}
-            onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+            onChange={(v) => setFormData({ ...formData, deadline: v })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">{cf.numberOfSpots}</label>
+          <label className="block text-sm font-medium mb-1">{cf.numberOfSpots} *</label>
           <input
             type="number"
             min="1"
+            required
             value={formData.totalSlots}
             onChange={(e) => setFormData({ ...formData, totalSlots: parseInt(e.target.value) || 1 })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -312,20 +347,20 @@ export default function CampaignForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">{cf.campaignStartDate}</label>
-          <input
-            type="date"
+          <label className="block text-sm font-medium mb-1">{cf.campaignStartDate} *</label>
+          <LocaleDateInput
+            required
             value={formData.campaignStartDate}
-            onChange={(e) => setFormData({ ...formData, campaignStartDate: e.target.value })}
+            onChange={(v) => setFormData({ ...formData, campaignStartDate: v })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">{cf.campaignEndDate}</label>
-          <input
-            type="date"
+          <label className="block text-sm font-medium mb-1">{cf.campaignEndDate} *</label>
+          <LocaleDateInput
+            required
             value={formData.campaignEndDate}
-            onChange={(e) => setFormData({ ...formData, campaignEndDate: e.target.value })}
+            onChange={(v) => setFormData({ ...formData, campaignEndDate: v })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
           />
         </div>
@@ -333,7 +368,7 @@ export default function CampaignForm({
 
       {/* Campaign Images */}
       <div>
-        <label className="block text-sm font-medium mb-2">{cf.campaignImages}</label>
+        <label className="block text-sm font-medium mb-2">{cf.campaignImages} *</label>
         <p className="text-sm text-gray-500 mb-3">{cf.campaignImagesDesc}</p>
 
         {/* Upload error */}
@@ -419,7 +454,7 @@ export default function CampaignForm({
       <h2 className="text-xl font-semibold">{cf.compensation}</h2>
 
       <div>
-        <label className="block text-sm font-medium mb-2">{cf.compensationType}</label>
+        <label className="block text-sm font-medium mb-2">{cf.compensationType} *</label>
         <div className="space-y-2">
           {[
             { value: 'PAID', label: cf.paid, desc: cf.paidDesc },
@@ -449,10 +484,11 @@ export default function CampaignForm({
       {['PAID', 'PAID_PLUS_GIFT', 'NEGOTIABLE'].includes(formData.compensationType) && (
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">{cf.paymentMin}</label>
+            <label className="block text-sm font-medium mb-1">{cf.paymentMin} *</label>
             <input
               type="number"
               min="0"
+              required
               value={formData.paymentMin}
               onChange={(e) => setFormData({ ...formData, paymentMin: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -460,10 +496,11 @@ export default function CampaignForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">{cf.paymentMax}</label>
+            <label className="block text-sm font-medium mb-1">{cf.paymentMax} *</label>
             <input
               type="number"
               min="0"
+              required
               value={formData.paymentMax}
               onChange={(e) => setFormData({ ...formData, paymentMax: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -476,9 +513,10 @@ export default function CampaignForm({
       {['GIFTED', 'PAID_PLUS_GIFT'].includes(formData.compensationType) && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">{cf.giftDescription}</label>
+            <label className="block text-sm font-medium mb-1">{cf.giftDescription} *</label>
             <input
               type="text"
+              required
               value={formData.giftDescription}
               onChange={(e) => setFormData({ ...formData, giftDescription: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -486,10 +524,11 @@ export default function CampaignForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">{cf.giftValue}</label>
+            <label className="block text-sm font-medium mb-1">{cf.giftValue} *</label>
             <input
               type="number"
               min="0"
+              required
               value={formData.giftValue}
               onChange={(e) => setFormData({ ...formData, giftValue: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -541,7 +580,7 @@ export default function CampaignForm({
       <h2 className="text-xl font-semibold">{cf.platformRequirements}</h2>
 
       <div>
-        <label className="block text-sm font-medium mb-2">{cf.targetPlatforms}</label>
+        <label className="block text-sm font-medium mb-2">{cf.targetPlatforms} *</label>
         <div className="flex flex-wrap gap-2">
           {platforms.map((plat) => (
             <button
@@ -598,8 +637,9 @@ export default function CampaignForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-1">{cf.contentType}</label>
+        <label className="block text-sm font-medium mb-1">{cf.contentType} *</label>
         <select
+          required
           value={formData.contentType}
           onChange={(e) => setFormData({ ...formData, contentType: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -613,9 +653,10 @@ export default function CampaignForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">{cf.contentGuidelines}</label>
+        <label className="block text-sm font-medium mb-1">{cf.contentGuidelines} *</label>
         <textarea
           rows={4}
+          required
           value={formData.contentGuidelines}
           onChange={(e) => setFormData({ ...formData, contentGuidelines: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -625,9 +666,10 @@ export default function CampaignForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1">{cf.requiredHashtags}</label>
+          <label className="block text-sm font-medium mb-1">{cf.requiredHashtags} *</label>
           <input
             type="text"
+            required
             value={formData.hashtagsRequired}
             onChange={(e) => setFormData({ ...formData, hashtagsRequired: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
@@ -635,9 +677,10 @@ export default function CampaignForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">{cf.requiredMentions}</label>
+          <label className="block text-sm font-medium mb-1">{cf.requiredMentions} *</label>
           <input
             type="text"
+            required
             value={formData.mentionsRequired}
             onChange={(e) => setFormData({ ...formData, mentionsRequired: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"

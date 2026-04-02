@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 
-type Step = 'form' | 'otp'
+type Step = 'form' | 'business-info' | 'otp'
 
 export default function SignUpPage() {
   const searchParams = useSearchParams()
@@ -24,6 +24,12 @@ export default function SignUpPage() {
   const [inviteCode, setInviteCode] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // Business info state (for brand signup)
+  const [businessLegalName, setBusinessLegalName] = useState('')
+  const [businessRegistrationNo, setBusinessRegistrationNo] = useState('')
+  const [businessCountry, setBusinessCountry] = useState('')
+  const [businessWebsite, setBusinessWebsite] = useState('')
 
   // OTP state
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -51,12 +57,29 @@ export default function SignUpPage() {
       return
     }
 
+    // For brand signups, collect business info first
+    if (userType === 'brand') {
+      setStep('business-info')
+      return
+    }
+
+    await submitSignup()
+  }
+
+  const submitSignup = async () => {
     setIsLoading(true)
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, userType, locale, inviteCode: inviteCode.trim() }),
+        body: JSON.stringify({
+          name, email, password, userType, locale,
+          inviteCode: inviteCode.trim(),
+          businessLegalName: businessLegalName || undefined,
+          businessRegistrationNo: businessRegistrationNo || undefined,
+          businessCountry: businessCountry || undefined,
+          businessWebsite: businessWebsite || undefined,
+        }),
       })
 
       const data = await res.json()
@@ -73,6 +96,22 @@ export default function SignUpPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleBusinessInfoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (!businessLegalName.trim()) {
+      setError('Business / Company name is required')
+      return
+    }
+    if (!businessCountry.trim()) {
+      setError('Country of registration is required')
+      return
+    }
+
+    await submitSignup()
   }
 
   const handleOtpChange = (index: number, value: string) => {
@@ -228,7 +267,7 @@ export default function SignUpPage() {
           <span className="text-4xl font-bold text-primary-600">Overseed</span>
         </Link>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          {step === 'otp' ? t.auth.otp.title : t.auth.signup.title}
+          {step === 'otp' ? t.auth.otp.title : step === 'business-info' ? 'Business Verification' : t.auth.signup.title}
         </h2>
         {step === 'otp' ? (
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -256,7 +295,123 @@ export default function SignUpPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {step === 'otp' ? (
+          {step === 'business-info' ? (
+            /* ===== BUSINESS INFO STEP (brand only) ===== */
+            <div>
+              <p className="text-sm text-gray-600 mb-4">
+                To verify your brand, please provide your business details. Your account will be reviewed before you can create campaigns or message creators.
+              </p>
+
+              {error && (
+                <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleBusinessInfoSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="businessLegalName" className="block text-sm font-medium text-gray-700">
+                    Business / Company Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="businessLegalName"
+                    type="text"
+                    value={businessLegalName}
+                    onChange={(e) => setBusinessLegalName(e.target.value)}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    placeholder="Acme Inc."
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="businessRegistrationNo" className="block text-sm font-medium text-gray-700">
+                    Business Registration Number
+                  </label>
+                  <input
+                    id="businessRegistrationNo"
+                    type="text"
+                    value={businessRegistrationNo}
+                    onChange={(e) => setBusinessRegistrationNo(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    placeholder="e.g. 12345678"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="businessCountry" className="block text-sm font-medium text-gray-700">
+                    Country of Registration <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="businessCountry"
+                    value={businessCountry}
+                    onChange={(e) => setBusinessCountry(e.target.value)}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">Select a country</option>
+                    <option value="US">United States</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="CA">Canada</option>
+                    <option value="AU">Australia</option>
+                    <option value="CN">China</option>
+                    <option value="JP">Japan</option>
+                    <option value="KR">South Korea</option>
+                    <option value="SG">Singapore</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                    <option value="NL">Netherlands</option>
+                    <option value="SE">Sweden</option>
+                    <option value="BR">Brazil</option>
+                    <option value="MX">Mexico</option>
+                    <option value="IN">India</option>
+                    <option value="AE">United Arab Emirates</option>
+                    <option value="NZ">New Zealand</option>
+                    <option value="IT">Italy</option>
+                    <option value="ES">Spain</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="businessWebsite" className="block text-sm font-medium text-gray-700">
+                    Business Website
+                  </label>
+                  <input
+                    id="businessWebsite"
+                    type="url"
+                    value={businessWebsite}
+                    onChange={(e) => setBusinessWebsite(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    placeholder="https://example.com"
+                  />
+                </div>
+
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-xs text-blue-700">
+                    You can upload supporting documents (business license, registration certificate) after signing in from your brand profile page.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {isLoading ? 'Creating account...' : 'Submit & Create Account'}
+                </button>
+              </form>
+
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => { setStep('form'); setError('') }}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Back
+                </button>
+              </div>
+            </div>
+          ) : step === 'otp' ? (
             /* ===== OTP VERIFICATION STEP ===== */
             <div>
               {error && (

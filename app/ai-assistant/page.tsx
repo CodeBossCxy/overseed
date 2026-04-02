@@ -11,9 +11,11 @@ import { useTheme } from '@/components/ThemeProvider'
 
 interface Message {
   id: string
+  dbId?: string // database ID for persisted messages
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  feedback?: 'like' | 'dislike' | null
 }
 
 interface ChatSummary {
@@ -42,6 +44,8 @@ export default function AIAssistantPage() {
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
+  const [usagePercent, setUsagePercent] = useState<number | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -83,9 +87,22 @@ export default function AIAssistantPage() {
     } catch {}
   }, [])
 
+  const loadUsage = useCallback(async () => {
+    try {
+      const res = await fetch('/api/ai-chat/usage')
+      if (res.ok) {
+        const data = await res.json()
+        setUsagePercent(data.percentage)
+      }
+    } catch {}
+  }, [])
+
   useEffect(() => {
-    if (isProUser) loadChatList()
-  }, [isProUser, loadChatList])
+    if (isProUser) {
+      loadChatList()
+      loadUsage()
+    }
+  }, [isProUser, loadChatList, loadUsage])
 
   const loadChat = async (id: string) => {
     try {
@@ -97,9 +114,11 @@ export default function AIAssistantPage() {
         setMessages(
           data.messages.map((m: any) => ({
             id: m.id,
+            dbId: m.id,
             role: m.role,
             content: m.content,
             timestamp: new Date(m.createdAt),
+            feedback: m.feedback || null,
           }))
         )
       }
@@ -275,6 +294,11 @@ export default function AIAssistantPage() {
                 requestAnimationFrame(flushContent)
               }
             }
+          } else if (event.type === 'done' && event.messageId) {
+            // Attach the DB message ID so feedback can be persisted
+            setMessages((prev) =>
+              prev.map((m) => (m.id === assistantId ? { ...m, dbId: event.messageId } : m))
+            )
           } else if (event.type === 'error') {
             contentSoFar = contentSoFar || event.error || 'Something went wrong.'
             decided = true
@@ -321,6 +345,7 @@ export default function AIAssistantPage() {
     } finally {
       setIsLoading(false)
       stopProgress()
+      loadUsage()
     }
   }
 
@@ -328,6 +353,41 @@ export default function AIAssistantPage() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit(e)
+    }
+  }
+
+  const handleCopy = (id: string, content: string) => {
+    navigator.clipboard.writeText(content)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const handleEditResend = (messageIndex: number) => {
+    const message = messages[messageIndex]
+    if (message.role !== 'user') return
+    setInput(message.content)
+    // Remove this message and everything after it
+    setMessages((prev) => prev.slice(0, messageIndex))
+    inputRef.current?.focus()
+  }
+
+  const handleFeedback = async (messageId: string, dbId: string | undefined, value: 'like' | 'dislike') => {
+    // Toggle: if same feedback clicked again, remove it
+    const currentMsg = messages.find((m) => m.id === messageId)
+    const newValue = currentMsg?.feedback === value ? null : value
+
+    setMessages((prev) =>
+      prev.map((m) => (m.id === messageId ? { ...m, feedback: newValue } : m))
+    )
+
+    if (dbId) {
+      try {
+        await fetch('/api/ai-chat/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageId: dbId, feedback: newValue }),
+        })
+      } catch {}
     }
   }
 
@@ -486,6 +546,39 @@ export default function AIAssistantPage() {
                 </div>
               )}
             </div>
+
+            {/* Usage tracker */}
+            {usagePercent !== null && (
+              <div className="p-4 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium text-gray-500">{t.aiAssistant.usage}</span>
+                  <span className="text-xs font-semibold text-gray-700">{usagePercent}%</span>
+                </div>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      usagePercent >= 100
+                        ? 'bg-red-500'
+                        : usagePercent >= 80
+                        ? 'bg-amber-500'
+                        : usagePercent >= 50
+                        ? 'bg-yellow-400'
+                        : 'bg-emerald-500'
+                    }`}
+                    style={{ width: `${usagePercent}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1.5">
+                  {usagePercent >= 100
+                    ? t.aiAssistant.usageExhausted
+                    : usagePercent >= 80
+                    ? t.aiAssistant.usageHigh
+                    : usagePercent >= 50
+                    ? t.aiAssistant.usageMedium
+                    : t.aiAssistant.usageLow}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -588,89 +681,160 @@ export default function AIAssistantPage() {
               )}
 
               {/* Message bubbles */}
-              {messages.map((message) => (
-                <div key={message.id} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : ''}`}>
+              {messages.map((message, msgIndex) => {
+                const isStillStreaming = isLoading && message.role === 'assistant' && message.id === messages[messages.length - 1]?.id
+                return (
+                <div key={message.id} className={`group/msg flex gap-3 ${message.role === 'user' ? 'justify-end' : ''}`}>
                   {message.role === 'assistant' && (
                     <img src={themeIcon} alt="Overseed" className="w-7 h-7 rounded-lg flex-shrink-0 mt-0.5" />
                   )}
-                  <div
-                    className={`rounded-2xl px-4 py-3 ${
-                      message.role === 'user'
-                        ? 'bg-primary-600 text-white max-w-[75%]'
-                        : 'bg-gray-50 text-gray-800 max-w-[85%] border border-gray-100'
-                    }`}
-                  >
-                    {message.role === 'assistant' ? (() => {
-                      const { isDoc, format: docFormat, title: docTitle, docContent, summary } = parseDocMarker(message.content)
-                      const isStillStreaming = isLoading && message.id === messages[messages.length - 1]?.id
-                      const fl = formatLabels[docFormat] || formatLabels.docx
-                      const formatColors: Record<string, string> = {
-                        docx: 'bg-blue-100 text-blue-600',
-                        xlsx: 'bg-emerald-100 text-emerald-600',
-                        pdf: 'bg-red-100 text-red-600',
-                      }
-                      if (isDoc && docContent.length > 50) {
-                        return (
-                          <>
-                            <div className="p-4 bg-gradient-to-br from-primary-50 to-white border border-primary-200 rounded-xl">
-                              <div className="flex items-center gap-3 mb-3">
-                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isStillStreaming ? 'bg-primary-100' : formatColors[docFormat] || 'bg-primary-100'}`}>
-                                  {isStillStreaming ? (
-                                    <svg className="w-5 h-5 text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
-                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                    </svg>
-                                  ) : (
-                                    <span className="text-sm font-bold">{fl.icon}</span>
-                                  )}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-gray-900">{docTitle}</p>
-                                  <p className="text-xs text-gray-500">
-                                    {isStillStreaming ? `Generating document... ${progress}%` : `${fl.label} (${fl.ext})`}
-                                  </p>
-                                </div>
-                              </div>
-                              {isStillStreaming ? (
-                                <div className="w-full py-2.5 bg-gray-200 text-gray-500 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
-                                  <div className="flex gap-1">
-                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className={`min-w-0 ${message.role === 'user' ? 'max-w-[75%]' : 'max-w-[85%]'}`}>
+                    <div
+                      className={`rounded-2xl px-4 py-3 ${
+                        message.role === 'user'
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-gray-50 text-gray-800 border border-gray-100'
+                      }`}
+                    >
+                      {message.role === 'assistant' ? (() => {
+                        const { isDoc, format: docFormat, title: docTitle, docContent, summary } = parseDocMarker(message.content)
+                        const fl = formatLabels[docFormat] || formatLabels.docx
+                        const formatColors: Record<string, string> = {
+                          docx: 'bg-blue-100 text-blue-600',
+                          xlsx: 'bg-emerald-100 text-emerald-600',
+                          pdf: 'bg-red-100 text-red-600',
+                        }
+                        if (isDoc && docContent.length > 50) {
+                          return (
+                            <>
+                              <div className="p-4 bg-gradient-to-br from-primary-50 to-white border border-primary-200 rounded-xl">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isStillStreaming ? 'bg-primary-100' : formatColors[docFormat] || 'bg-primary-100'}`}>
+                                    {isStillStreaming ? (
+                                      <svg className="w-5 h-5 text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                      </svg>
+                                    ) : (
+                                      <span className="text-sm font-bold">{fl.icon}</span>
+                                    )}
                                   </div>
-                                  Generating...
+                                  <div>
+                                    <p className="text-sm font-semibold text-gray-900">{docTitle}</p>
+                                    <p className="text-xs text-gray-500">
+                                      {isStillStreaming ? `Generating document... ${progress}%` : `${fl.label} (${fl.ext})`}
+                                    </p>
+                                  </div>
                                 </div>
-                              ) : (
-                                <button
-                                  onClick={() => handleDownloadDoc(docContent, docTitle, docFormat)}
-                                  className="w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition flex items-center justify-center gap-2"
-                                >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                  </svg>
-                                  Download {fl.label}
-                                </button>
-                              )}
-                            </div>
-                            {!isStillStreaming && summary && (
-                              <div className="ai-markdown mt-4 pt-3 border-t border-gray-100">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
+                                {isStillStreaming ? (
+                                  <div className="w-full py-2.5 bg-gray-200 text-gray-500 text-sm font-medium rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
+                                    <div className="flex gap-1">
+                                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    </div>
+                                    Generating...
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => handleDownloadDoc(docContent, docTitle, docFormat)}
+                                    className="w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition flex items-center justify-center gap-2"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Download {fl.label}
+                                  </button>
+                                )}
                               </div>
-                            )}
-                          </>
+                              {!isStillStreaming && summary && (
+                                <div className="ai-markdown mt-4 pt-3 border-t border-gray-100">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
+                                </div>
+                              )}
+                            </>
+                          )
+                        }
+                        return (
+                          <div className="ai-markdown">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{docContent}</ReactMarkdown>
+                          </div>
                         )
-                      }
-                      return (
-                        <div className="ai-markdown">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{docContent}</ReactMarkdown>
-                        </div>
-                      )
-                    })() : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                      })() : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                      )}
+                    </div>
+
+                    {/* Action buttons */}
+                    {!isStillStreaming && (
+                      <div className={`flex items-center gap-1 mt-1 ${message.role === 'user' ? 'justify-end' : ''} opacity-0 group-hover/msg:opacity-100 transition-opacity`}>
+                        {/* Copy */}
+                        <button
+                          onClick={() => handleCopy(message.id, message.content)}
+                          className="p-1 rounded-md hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
+                          title="Copy"
+                        >
+                          {copiedId === message.id ? (
+                            <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          )}
+                        </button>
+
+                        {/* Edit & Resend (user messages only) */}
+                        {message.role === 'user' && !isLoading && (
+                          <button
+                            onClick={() => handleEditResend(msgIndex)}
+                            className="p-1 rounded-md hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
+                            title="Edit & resend"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        )}
+
+                        {/* Feedback (assistant messages only) */}
+                        {message.role === 'assistant' && (
+                          <>
+                            <button
+                              onClick={() => handleFeedback(message.id, message.dbId, 'like')}
+                              className={`p-1 rounded-md transition ${
+                                message.feedback === 'like'
+                                  ? 'text-emerald-500 bg-emerald-50'
+                                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                              }`}
+                              title="Good response"
+                            >
+                              <svg className="w-3.5 h-3.5" fill={message.feedback === 'like' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14zm-10 11H7V10H4a2 2 0 00-2 2v7a2 2 0 002 2z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleFeedback(message.id, message.dbId, 'dislike')}
+                              className={`p-1 rounded-md transition ${
+                                message.feedback === 'dislike'
+                                  ? 'text-red-500 bg-red-50'
+                                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                              }`}
+                              title="Bad response"
+                            >
+                              <svg className="w-3.5 h-3.5" fill={message.feedback === 'dislike' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10zm10-11h-3v11h1a2 2 0 002-2V6a2 2 0 00-2-2z" />
+                              </svg>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
-              ))}
+              )})}
+
 
               {/* Loading */}
               {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (

@@ -21,6 +21,7 @@ interface InfluencerCardProps {
         name: string
         slug: string
       }
+      username: string
       followerCount: number
     }>
     completedCampaigns?: number
@@ -92,32 +93,33 @@ export default function InfluencerCard({ influencer }: InfluencerCardProps) {
           <p className="text-sm text-gray-600 mt-3 line-clamp-2">{influencer.bio}</p>
         )}
 
-        {/* Stats */}
-        <div className="flex items-center gap-4 mt-4 pt-3 border-t text-sm">
-          {primaryPlatform && (
-            <div>
-              <span className="text-gray-500">{primaryPlatform.platform.name}</span>
-              <span className="ml-1 font-medium">
-                {primaryPlatform.followerCount >= 1000000
-                  ? `${(primaryPlatform.followerCount / 1000000).toFixed(1)}M`
-                  : primaryPlatform.followerCount >= 1000
-                    ? `${(primaryPlatform.followerCount / 1000).toFixed(1)}K`
-                    : primaryPlatform.followerCount}
-              </span>
-            </div>
-          )}
-          {influencer.completedCampaigns !== undefined && (
-            <div>
-              <span className="text-gray-500">Completed</span>
-              <span className="ml-1 font-medium">{influencer.completedCampaigns}</span>
-            </div>
-          )}
-          {influencer.socialAccounts.length > 1 && (
-            <span className="text-gray-400">
-              +{influencer.socialAccounts.length - 1} platforms
-            </span>
-          )}
-        </div>
+        {/* Platforms */}
+        {influencer.socialAccounts.length > 0 && (
+          <div className="mt-4 pt-3 border-t space-y-1.5">
+            {influencer.socialAccounts
+              .sort((a, b) => b.followerCount - a.followerCount)
+              .map((acc) => (
+              <div key={acc.platform.slug} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-gray-500 flex-shrink-0">{acc.platform.name}</span>
+                  <span className="text-gray-400 truncate">@{acc.username}</span>
+                </div>
+                <span className="font-medium text-gray-700 flex-shrink-0 ml-2">
+                  {acc.followerCount >= 1000000
+                    ? `${(acc.followerCount / 1000000).toFixed(1)}M`
+                    : acc.followerCount >= 1000
+                      ? `${(acc.followerCount / 1000).toFixed(1)}K`
+                      : acc.followerCount}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {influencer.completedCampaigns !== undefined && influencer.completedCampaigns > 0 && (
+          <div className="mt-2 text-xs text-gray-400">
+            {influencer.completedCampaigns} completed
+          </div>
+        )}
       </div>
     </Link>
   )

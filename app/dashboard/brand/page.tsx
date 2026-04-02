@@ -17,9 +17,10 @@ export default async function BrandDashboardPage() {
   // Read userType from DB (not JWT session) to avoid stale-token redirects
   const dbUser = await prisma.user.findUnique({
     where: { id: userId },
-    select: { userType: true },
+    select: { userType: true, subscriptionTier: true },
   })
   const userType = dbUser?.userType || 'INFLUENCER'
+  const subscriptionTier = dbUser?.subscriptionTier || 'FREE'
 
   if (userType === 'INFLUENCER') {
     redirect('/dashboard/influencer')
@@ -35,6 +36,8 @@ export default async function BrandDashboardPage() {
       data: {
         userId,
         companyName: session.user.name,
+        brandVerificationStatus: 'PENDING',
+        verificationSubmittedAt: new Date(),
       },
     })
   }
@@ -81,8 +84,9 @@ export default async function BrandDashboardPage() {
       <BrandDashboardClient
         stats={stats}
         campaigns={JSON.parse(JSON.stringify(campaigns))}
-        brandProfile={{ companyName: brandProfile.companyName, description: brandProfile.description, logoUrl: brandProfile.logoUrl }}
+        brandProfile={{ companyName: brandProfile.companyName, description: brandProfile.description, logoUrl: brandProfile.logoUrl, brandVerificationStatus: brandProfile.brandVerificationStatus, rejectionReason: brandProfile.rejectionReason }}
         userName={session.user?.name || 'Brand'}
+        subscriptionTier={subscriptionTier}
       />
     </MainLayout>
   )

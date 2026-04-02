@@ -32,6 +32,133 @@
   --primary-900: #1e3a8a;
 }
 
+[data-theme='global'] {
+  --background: #081120;
+  --foreground: #d4e0fd;
+
+  /* Navy/blue palette — San Marino + Black Pearl + Hawkes Blue */
+  --primary-50: #eef3fc;
+  --primary-100: #d4e0fd;
+  --primary-200: #a8c1f0;
+  --primary-300: #7da2e3;
+  --primary-400: #5683c3;
+  --primary-500: #456fa3;
+  --primary-600: #365a87;
+  --primary-700: #28456a;
+  --primary-800: #1a304e;
+  --primary-900: #0a1527;
+}
+
+[data-theme='global'] body {
+  background: var(--background) url('/background_2.jpg') no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* ── Global theme: text color overrides ── */
+[data-theme='global'] .text-gray-900 { color: #ffffff !important; text-shadow: 0 1px 3px rgba(8,17,32,0.5); }
+[data-theme='global'] .text-gray-800 { color: #edf2fc !important; text-shadow: 0 1px 3px rgba(8,17,32,0.5); }
+[data-theme='global'] .text-gray-700 { color: #d4e0fd !important; text-shadow: 0 1px 2px rgba(8,17,32,0.4); }
+[data-theme='global'] .text-gray-600 { color: #b8c9ed !important; text-shadow: 0 1px 2px rgba(8,17,32,0.4); }
+[data-theme='global'] .text-gray-500 { color: #9ab0d8 !important; text-shadow: 0 1px 2px rgba(8,17,32,0.3); }
+[data-theme='global'] .text-gray-400 { color: #7d97c2 !important; }
+[data-theme='global'] .text-gray-300 { color: #b8c9ed !important; }
+
+/* ── Global theme: background overrides ── */
+[data-theme='global'] .bg-white {
+  background-color: rgba(10, 21, 39, 0.65) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+[data-theme='global'] .bg-gray-50 {
+  background-color: rgba(8, 17, 32, 0.55) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-theme='global'] .bg-gray-100 {
+  background-color: rgba(10, 21, 39, 0.4) !important;
+}
+[data-theme='global'] .bg-gray-200 {
+  background-color: rgba(26, 48, 78, 0.4) !important;
+}
+[data-theme='global'] .bg-gray-900 {
+  background-color: rgba(8, 17, 32, 0.9) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Global theme: border overrides ── */
+[data-theme='global'] .border-gray-100 { border-color: rgba(212, 224, 253, 0.08) !important; }
+[data-theme='global'] .border-gray-200 { border-color: rgba(212, 224, 253, 0.12) !important; }
+[data-theme='global'] .border-gray-300 { border-color: rgba(212, 224, 253, 0.15) !important; }
+[data-theme='global'] .border-gray-800 { border-color: rgba(212, 224, 253, 0.08) !important; }
+
+/* ── Global theme: hover overrides ── */
+[data-theme='global'] .hover\:bg-gray-50:hover { background-color: rgba(10, 21, 39, 0.7) !important; }
+[data-theme='global'] .hover\:bg-gray-100:hover { background-color: rgba(26, 48, 78, 0.5) !important; }
+[data-theme='global'] .hover\:bg-gray-300:hover { background-color: rgba(40, 69, 106, 0.4) !important; }
+
+/* ── Global theme: shadow overrides ── */
+[data-theme='global'] .shadow-sm { box-shadow: 0 1px 3px rgba(8, 17, 32, 0.5), 0 0 0 1px rgba(212, 224, 253, 0.05) !important; }
+[data-theme='global'] .shadow-lg { box-shadow: 0 10px 30px rgba(8, 17, 32, 0.6), 0 0 0 1px rgba(212, 224, 253, 0.05) !important; }
+
+/* ── Global theme: section-specific overrides ── */
+[data-theme='global'] .bg-white\/80 {
+  background-color: rgba(10, 21, 39, 0.55) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-theme='global'] .bg-white\/10 {
+  background-color: rgba(212, 224, 253, 0.06) !important;
+}
+
+/* Global theme: gradient section overrides */
+[data-theme='global'] .from-primary-50\/50 { --tw-gradient-from: rgba(69, 111, 163, 0.1) !important; }
+[data-theme='global'] .from-blue-50\/80 { --tw-gradient-from: rgba(10, 21, 39, 0.7) !important; }
+[data-theme='global'] .from-pink-50\/80 { --tw-gradient-from: rgba(10, 21, 39, 0.7) !important; }
+[data-theme='global'] .via-white { --tw-gradient-via: rgba(8, 17, 32, 0.3) !important; }
+[data-theme='global'] .to-white { --tw-gradient-to: rgba(8, 17, 32, 0.2) !important; }
+[data-theme='global'] .via-blue-50\/40 { --tw-gradient-via: rgba(10, 21, 39, 0.4) !important; }
+[data-theme='global'] .via-rose-50\/40 { --tw-gradient-via: rgba(10, 21, 39, 0.4) !important; }
+
+/* Global theme: colored accents adapt to palette */
+[data-theme='global'] .bg-blue-50 { background-color: rgba(69, 111, 163, 0.15) !important; }
+[data-theme='global'] .bg-blue-100 { background-color: rgba(69, 111, 163, 0.12) !important; }
+[data-theme='global'] .border-blue-100 { border-color: rgba(69, 111, 163, 0.25) !important; }
+[data-theme='global'] .bg-pink-50 { background-color: rgba(255, 118, 159, 0.1) !important; }
+[data-theme='global'] .bg-pink-100 { background-color: rgba(255, 118, 159, 0.12) !important; }
+[data-theme='global'] .border-pink-100 { border-color: rgba(255, 118, 159, 0.2) !important; }
+[data-theme='global'] .border-pink-100\/50 { border-color: rgba(255, 118, 159, 0.1) !important; }
+[data-theme='global'] .border-blue-100\/50 { border-color: rgba(69, 111, 163, 0.12) !important; }
+
+/* Global theme: blur blobs — tone down */
+[data-theme='global'] .bg-primary-100\/20 { background-color: rgba(69, 111, 163, 0.08) !important; }
+[data-theme='global'] .bg-primary-50\/30 { background-color: rgba(212, 224, 253, 0.04) !important; }
+[data-theme='global'] .bg-blue-100\/20 { background-color: rgba(69, 111, 163, 0.06) !important; }
+[data-theme='global'] .bg-blue-50\/30 { background-color: rgba(69, 111, 163, 0.04) !important; }
+[data-theme='global'] .bg-pink-100\/20 { background-color: rgba(255, 118, 159, 0.06) !important; }
+[data-theme='global'] .bg-rose-50\/30 { background-color: rgba(255, 118, 159, 0.04) !important; }
+
+/* Global theme: preserve dark text in form inputs */
+[data-theme='global'] input,
+[data-theme='global'] select,
+[data-theme='global'] textarea {
+  color: #1a1a2e !important;
+  text-shadow: none !important;
+}
+[data-theme='global'] input::placeholder,
+[data-theme='global'] select::placeholder,
+[data-theme='global'] textarea::placeholder {
+  color: #9ca3af !important;
+  text-shadow: none !important;
+}
+
+
+/* Global theme: pink/blue text accents */
+[data-theme='global'] .text-blue-600 { color: #456fa3 !important; }
+[data-theme='global'] .text-blue-700 { color: #5683c3 !important; }
+[data-theme='global'] .text-pink-600 { color: #ff769f !important; }
+[data-theme='global'] .text-pink-700 { color: #ff769f !important; }
+
 
 body {
   color: var(--foreground);

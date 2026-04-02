@@ -251,7 +251,7 @@ export default function BrandCampaignDetailClient({ campaign, stats }: BrandCamp
             <div className="flex flex-wrap gap-2">
               {campaign.categories.map((c) => (
                 <span key={c.categoryId} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                  {c.category.name}
+                  {t.categoryNames[c.category.name] || c.category.name}
                 </span>
               ))}
               {campaign.categories.length === 0 && (

@@ -173,16 +173,25 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.userType = (user as any).userType
         token.subscriptionTier = (user as any).subscriptionTier || 'FREE'
+        // Load brand verification status for brand users
+        if ((user as any).userType === 'BRAND') {
+          const bp = await prisma.brandProfile.findUnique({
+            where: { userId: user.id },
+            select: { brandVerificationStatus: true },
+          })
+          token.brandVerificationStatus = bp?.brandVerificationStatus || 'PENDING'
+        }
       }
       // Re-read userType from DB when session.update() is called client-side
       if (trigger === 'update' && token.sub) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
-          select: { userType: true, subscriptionTier: true },
+          select: { userType: true, subscriptionTier: true, brandProfile: { select: { brandVerificationStatus: true } } },
         })
         if (dbUser) {
           token.userType = dbUser.userType
           token.subscriptionTier = dbUser.subscriptionTier
+          token.brandVerificationStatus = dbUser.brandProfile?.brandVerificationStatus || null
         }
       }
       return token
@@ -191,7 +200,8 @@ export const authOptions: NextAuthOptions = {
       if (session?.user && token) {
         (session.user as any).id = `${token.sub || token.id || ''}`;
         (session.user as any).userType = token.userType;
-        (session.user as any).subscriptionTier = token.subscriptionTier || 'FREE'
+        (session.user as any).subscriptionTier = token.subscriptionTier || 'FREE';
+        (session.user as any).brandVerificationStatus = token.brandVerificationStatus || null
       }
       return session
     },

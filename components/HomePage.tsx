@@ -14,6 +14,7 @@ export default function HomePage() {
   const router = useRouter()
   const { themeMode, setThemeMode } = useTheme()
 
+  const isGlobal = themeMode === 'global'
   const showBrandView = themeMode === 'brand'
   const signupLink = showBrandView ? '/auth/signup?type=brand' : '/auth/signup?type=influencer'
 
@@ -32,61 +33,44 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-white to-white" />
-        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-primary-100/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-primary-50/30 rounded-full blur-3xl" />
+      <section className={`relative overflow-hidden ${isGlobal ? 'bg-transparent' : 'bg-white'}`}>
+        {isGlobal ? (
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a1527]/40 via-[#081120]/20 to-transparent" />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-white to-white" />
+            <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-primary-100/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-primary-50/30 rounded-full blur-3xl" />
+          </>
+        )}
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 md:pt-24 md:pb-28">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 border border-primary-100 text-primary-700 rounded-full text-sm font-medium mb-8">
-                <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse" />
+              <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8 ${isGlobal ? 'bg-[#ff769f]/10 border border-[#ff769f]/25 text-[#ff769f] backdrop-blur-sm' : 'bg-primary-50 border border-primary-100 text-primary-700'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isGlobal ? 'bg-[#ff769f]' : 'bg-primary-500'}`} />
                 {t.home.hero.badge}
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.08] tracking-tight mb-6">
+              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.08] tracking-tight mb-6 ${isGlobal ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]' : 'text-gray-900'}`}>
                 {t.home.hero.title}
               </h1>
 
-              <p className="text-lg text-gray-600 leading-relaxed mb-8 max-w-lg">
+              <p className={`text-lg leading-relaxed mb-8 max-w-lg ${isGlobal ? 'text-gray-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]' : 'text-gray-600'}`}>
                 {t.home.hero.description}
               </p>
 
               <div className="space-y-3 mb-10">
                 {[t.home.hero.check1, t.home.hero.check2, t.home.hero.check3].map((text, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <span className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${isGlobal ? 'bg-[#ff769f]/25' : 'bg-primary-100'}`}>
+                      <svg className={`w-3 h-3 ${isGlobal ? 'text-[#ff769f]' : 'text-primary-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </span>
-                    <span className="text-gray-700 text-sm md:text-base">{text}</span>
+                    <span className={`text-sm md:text-base ${isGlobal ? 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]' : 'text-gray-700'}`}>{text}</span>
                   </div>
                 ))}
-              </div>
-
-              <div className="inline-flex rounded-full bg-gray-100 p-1 mb-6">
-                <button
-                  onClick={() => setThemeMode('creator')}
-                  className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                    !showBrandView
-                      ? 'bg-primary-600 text-white shadow-md'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {t.home.toggle.creator}
-                </button>
-                <button
-                  onClick={() => setThemeMode('brand')}
-                  className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                    showBrandView
-                      ? 'bg-primary-600 text-white shadow-md'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {t.home.toggle.brand}
-                </button>
               </div>
 
               <div className="flex items-center gap-4">
@@ -98,16 +82,16 @@ export default function HomePage() {
                 </button>
                 <Link
                   href="/contact"
-                  className="px-6 py-3.5 border border-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition"
+                  className={`px-6 py-3.5 border rounded-full font-medium transition ${isGlobal ? 'border-[#d4e0fd]/15 text-gray-200 hover:bg-[#0a1527]/45' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
                 >
                   {t.home.hero.requestDemo}
                 </Link>
               </div>
             </div>
 
-            <div className="hidden lg:block">
+            <div className={`hidden ${isGlobal ? '' : 'lg:block'}`}>
               <div className="relative">
-                <div className="bg-gradient-to-br from-primary-50 to-primary-100/50 rounded-3xl p-8 aspect-square flex items-center justify-center">
+                <div className={`rounded-3xl p-8 aspect-square flex items-center justify-center ${isGlobal ? 'bg-white/5 backdrop-blur-sm border border-white/10' : 'bg-gradient-to-br from-primary-50 to-primary-100/50'}`}>
                   <div className="relative w-full h-full">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <svg className="w-52 h-52 drop-shadow-lg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -178,7 +162,7 @@ export default function HomePage() {
       </section>
 
       {/* Platform Section */}
-      <section className="py-24 bg-white">
+      <section className={`py-24 ${isGlobal ? 'bg-[#081120]/20 backdrop-blur-[2px]' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-5">
@@ -207,7 +191,7 @@ export default function HomePage() {
                 </svg>
               )},
             ].map((card, i) => (
-              <div key={i} className="group bg-white rounded-2xl p-8 border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all duration-300">
+              <div key={i} className={`group rounded-2xl p-8 border transition-all duration-300 ${isGlobal ? 'bg-[#0a1527]/30 backdrop-blur-[2px] border-[#d4e0fd]/10 hover:border-[#456fa3]/50 hover:bg-[#0a1527]/45' : 'bg-white border-gray-100 hover:border-primary-200 hover:shadow-lg'}`}>
                 <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary-200 transition-colors">
                   {card.icon}
                 </div>
@@ -221,9 +205,15 @@ export default function HomePage() {
 
       {/* Brand Value Section - Blue */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-blue-50/40 to-white" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/20 rounded-full blur-3xl -translate-y-1/2" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-50/30 rounded-full blur-3xl translate-y-1/3" />
+        {isGlobal ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0a1527]/30 via-[#081120]/15 to-transparent" />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-blue-50/40 to-white" />
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/20 rounded-full blur-3xl -translate-y-1/2" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-50/30 rounded-full blur-3xl translate-y-1/3" />
+          </>
+        )}
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
@@ -258,7 +248,7 @@ export default function HomePage() {
               </ul>
 
               {/* AI Assistant callout */}
-              <div className="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+              <div className={`rounded-2xl p-6 border shadow-sm ${isGlobal ? 'bg-[#0a1527]/30 backdrop-blur-[2px] border-[#d4e0fd]/10' : 'bg-white border-blue-100'}`}>
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg className="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,9 +299,15 @@ export default function HomePage() {
 
       {/* Creator Value Section - Pink */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-bl from-pink-50/80 via-rose-50/40 to-white" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-pink-100/20 rounded-full blur-3xl translate-y-1/3" />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-rose-50/30 rounded-full blur-3xl -translate-y-1/3" />
+        {isGlobal ? (
+          <div className="absolute inset-0 bg-gradient-to-bl from-[#0a1527]/30 via-[#081120]/15 to-transparent" />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-bl from-pink-50/80 via-rose-50/40 to-white" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-pink-100/20 rounded-full blur-3xl translate-y-1/3" />
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-rose-50/30 rounded-full blur-3xl -translate-y-1/3" />
+          </>
+        )}
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
@@ -381,7 +377,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Flow */}
-      <section className="py-24 bg-gray-50">
+      <section className={`py-24 ${isGlobal ? 'bg-[#081120]/20 backdrop-blur-[2px]' : 'bg-gray-50'}`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
@@ -418,7 +414,7 @@ export default function HomePage() {
                 )},
               ].map((step, i) => (
                 <div key={i} className="text-center relative">
-                  <div className="w-16 h-16 bg-white border-2 border-primary-200 text-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-5 relative z-10 shadow-sm">
+                  <div className={`w-16 h-16 border-2 text-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-5 relative z-10 shadow-sm ${isGlobal ? 'bg-[#0a1527]/35 backdrop-blur-[2px] border-[#456fa3]/40' : 'bg-white border-primary-200'}`}>
                     {step.icon}
                   </div>
                   <h3 className="text-base font-semibold text-gray-900 mb-2">{step.title}</h3>
@@ -431,7 +427,7 @@ export default function HomePage() {
       </section>
 
       {/* Platform Features */}
-      <section className="py-24 bg-white">
+      <section className={`py-24 ${isGlobal ? 'bg-transparent' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-5">
@@ -457,7 +453,7 @@ export default function HomePage() {
                 </svg>
               )},
             ].map((feature, i) => (
-              <div key={i} className="group bg-gray-50 rounded-2xl p-8 hover:bg-white hover:shadow-lg hover:border-primary-100 border border-transparent transition-all duration-300">
+              <div key={i} className={`group rounded-2xl p-8 border transition-all duration-300 ${isGlobal ? 'bg-[#0a1527]/30 backdrop-blur-[2px] border-[#d4e0fd]/10 hover:bg-[#0a1527]/45 hover:border-[#456fa3]/50' : 'bg-gray-50 hover:bg-white hover:shadow-lg hover:border-primary-100 border-transparent'}`}>
                 <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary-200 transition-colors">
                   {feature.icon}
                 </div>
@@ -474,9 +470,18 @@ export default function HomePage() {
 
       {/* Early Access */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-800" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-500/20 via-transparent to-transparent" />
-        <div className="absolute top-0 left-1/2 w-[800px] h-[800px] -translate-x-1/2 -translate-y-1/2 bg-primary-400/10 rounded-full blur-3xl" />
+        {isGlobal ? (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a1527]/25 to-[#081120]/15" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_center,_var(--tw-gradient-stops))] from-amber-600/50 via-amber-700/20 to-transparent" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-800" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-500/20 via-transparent to-transparent" />
+            <div className="absolute top-0 left-1/2 w-[800px] h-[800px] -translate-x-1/2 -translate-y-1/2 bg-primary-400/10 rounded-full blur-3xl" />
+          </>
+        )}
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-5">
@@ -516,7 +521,7 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 bg-white">
+      <section className={`py-24 ${isGlobal ? 'bg-[#081120]/20 backdrop-blur-[2px]' : 'bg-white'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-snug">
             {t.home.finalCta.title}
@@ -534,7 +539,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/auth/signup?type=influencer"
-              className="px-8 py-3.5 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition min-w-[160px]"
+              className={`px-8 py-3.5 border rounded-full font-semibold transition min-w-[160px] ${isGlobal ? 'border-[#d4e0fd]/15 text-gray-200 hover:bg-[#0a1527]/45' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
             >
               {t.home.finalCta.ctaCreator}
             </Link>
