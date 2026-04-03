@@ -66,6 +66,7 @@ export async function GET(
             platform: true,
           },
         },
+        payment: true,
       },
       orderBy: {
         appliedAt: 'desc',

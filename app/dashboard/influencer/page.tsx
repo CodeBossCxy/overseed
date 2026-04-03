@@ -122,6 +122,7 @@ export default async function InfluencerDashboardPage() {
         influencerProfile={JSON.parse(JSON.stringify(influencerProfile))}
         totalFollowers={totalFollowers}
         userName={session.user?.name || 'Influencer'}
+        stripeOnboardingComplete={influencerProfile.stripeOnboardingComplete}
       />
     </MainLayout>
   )

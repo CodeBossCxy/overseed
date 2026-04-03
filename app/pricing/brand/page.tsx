@@ -114,7 +114,7 @@ export default function BrandPricingPage() {
                 href="/auth/signup?type=brand"
                 className="block w-full py-3 text-center rounded-xl bg-primary-600 text-white font-medium text-sm hover:bg-primary-700 transition shadow-sm"
               >
-                {p.getStarted}
+                {p.startWithPro}
               </Link>
             )}
           </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import ApplicationCard from '@/components/applications/ApplicationCard'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
@@ -33,6 +34,7 @@ interface InfluencerDashboardClientProps {
   influencerProfile: InfluencerProfile
   totalFollowers: number
   userName: string
+  stripeOnboardingComplete?: boolean
 }
 
 export default function InfluencerDashboardClient({
@@ -41,8 +43,10 @@ export default function InfluencerDashboardClient({
   influencerProfile,
   totalFollowers,
   userName,
+  stripeOnboardingComplete = false,
 }: InfluencerDashboardClientProps) {
   const { t } = useLanguage()
+  const [stripeLoading, setStripeLoading] = useState(false)
 
   const shortcutLinks = [
     { href: '/browse', label: t.influencer.dashboard.browseCampaigns, icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
@@ -61,6 +65,41 @@ export default function InfluencerDashboardClient({
           {t.influencer.dashboard.welcomeBack} {influencerProfile.displayName || userName}!
         </p>
       </div>
+
+      {/* Stripe Connect Banner */}
+      {!stripeOnboardingComplete && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-purple-900">Set Up Payments</p>
+              <p className="text-xs text-purple-700">Connect your bank account to receive campaign payments from brands.</p>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              setStripeLoading(true)
+              try {
+                const res = await fetch('/api/stripe/connect', { method: 'POST' })
+                if (res.ok) {
+                  const data = await res.json()
+                  window.location.href = data.url
+                }
+              } catch {} finally {
+                setStripeLoading(false)
+              }
+            }}
+            disabled={stripeLoading}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition flex-shrink-0 disabled:opacity-50"
+          >
+            {stripeLoading ? 'Loading...' : 'Set Up'}
+          </button>
+        </div>
+      )}
 
       <section className="mb-8 rounded-2xl border border-gray-100 bg-white shadow-sm p-4 sm:p-5">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-4">{t.influencer.dashboard.overview}</h2>

@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import MainLayout from '@/components/MainLayout'
 import ApplicationStatus from '@/components/applications/ApplicationStatus'
 import ApplicationActions from '@/components/applications/ApplicationActions'
+import PaymentModal from '@/components/payments/PaymentModal'
+import PaymentStatusBadge from '@/components/payments/PaymentStatus'
 import Link from 'next/link'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { formatDate } from '@/lib/i18n/formatDate'
@@ -40,6 +42,15 @@ interface Application {
     username: string
     followerCount: number
   } | null
+  payment?: {
+    id: string
+    status: string
+    amount: number | string
+    platformFee: number | string
+    creatorPayout: number | string
+    paidAt?: string | null
+    releasedAt?: string | null
+  } | null
 }
 
 export default function CampaignApplicationsPage() {
@@ -53,6 +64,13 @@ export default function CampaignApplicationsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<string>('')
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
+  const [paymentModal, setPaymentModal] = useState<{
+    clientSecret: string
+    amount: number
+    platformFee: number
+    creatorPayout: number
+  } | null>(null)
+  const [paymentLoading, setPaymentLoading] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -324,6 +342,109 @@ export default function CampaignApplicationsPage() {
                     {t.messages?.messageButton || 'Message'}
                   </button>
                 </div>
+
+                {/* Payment Section */}
+                {selectedApplication.status === 'APPROVED' && campaign?.compensationType && ['PAID', 'PAID_PLUS_GIFT', 'NEGOTIABLE'].includes(campaign.compensationType) && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Payment</h3>
+                    {selectedApplication.payment ? (
+                      <div className="space-y-3">
+                        <PaymentStatusBadge
+                          status={selectedApplication.payment.status}
+                          amount={Number(selectedApplication.payment.amount)}
+                          creatorPayout={Number(selectedApplication.payment.creatorPayout)}
+                          paidAt={selectedApplication.payment.paidAt}
+                          releasedAt={selectedApplication.payment.releasedAt}
+                        />
+                        {selectedApplication.payment.status === 'HELD' && (
+                          <button
+                            onClick={async () => {
+                              if (!confirm('Release payment to the creator? This cannot be undone.')) return
+                              setPaymentLoading(true)
+                              try {
+                                const res = await fetch('/api/stripe/release', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ applicationId: selectedApplication.id }),
+                                })
+                                if (res.ok) {
+                                  fetchData()
+                                } else {
+                                  const data = await res.json()
+                                  alert(data.error || 'Failed to release payment')
+                                }
+                              } catch {
+                                alert('Failed to release payment')
+                              } finally {
+                                setPaymentLoading(false)
+                              }
+                            }}
+                            disabled={paymentLoading}
+                            className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition disabled:opacity-50"
+                          >
+                            {paymentLoading ? 'Releasing...' : 'Release Payment to Creator'}
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          setPaymentLoading(true)
+                          try {
+                            const res = await fetch('/api/stripe/checkout', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ applicationId: selectedApplication.id }),
+                            })
+                            if (res.ok) {
+                              const data = await res.json()
+                              // Calculate fee breakdown from the response
+                              const amount = Number(selectedApplication.proposedRate || campaign?.paymentMin || 0)
+                              const feePct = 10
+                              const platformFee = Math.round(amount * feePct) / 100
+                              const creatorPayout = amount - platformFee
+                              setPaymentModal({
+                                clientSecret: data.clientSecret,
+                                amount,
+                                platformFee,
+                                creatorPayout,
+                              })
+                            } else {
+                              const data = await res.json()
+                              alert(data.error || 'Failed to create payment')
+                            }
+                          } catch {
+                            alert('Failed to create payment')
+                          } finally {
+                            setPaymentLoading(false)
+                          }
+                        }}
+                        disabled={paymentLoading}
+                        className="w-full px-4 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        {paymentLoading ? 'Setting up...' : 'Fund Payment'}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Payment Modal */}
+                {paymentModal && (
+                  <PaymentModal
+                    clientSecret={paymentModal.clientSecret}
+                    amount={paymentModal.amount}
+                    platformFee={paymentModal.platformFee}
+                    creatorPayout={paymentModal.creatorPayout}
+                    onSuccess={() => {
+                      setPaymentModal(null)
+                      fetchData()
+                    }}
+                    onCancel={() => setPaymentModal(null)}
+                  />
+                )}
 
                 {/* Actions */}
                 <div className="pt-6 border-t">

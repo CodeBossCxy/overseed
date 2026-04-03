@@ -68,6 +68,14 @@ enum AlertFrequency {
   WEEKLY
 }
 
+enum PaymentStatus {
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+  FAILED
+}
+
 enum SubscriptionTier {
   FREE
   PRO
@@ -220,6 +228,8 @@ model InfluencerProfile {
   languages        String[]
   isVerified       Boolean   @default(false)
   verificationDate DateTime?
+  stripeConnectId          String?
+  stripeOnboardingComplete Boolean @default(false)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -289,6 +299,8 @@ model BrandProfile {
   businessCountry         String?
   businessWebsite         String?
   businessDocuments       String[]       @default([])
+
+  stripeCustomerId    String?
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -466,6 +478,7 @@ model Application {
   influencer    InfluencerProfile        @relation(fields: [influencerId], references: [id], onDelete: Cascade)
   socialAccount InfluencerSocialAccount? @relation(fields: [socialAccountId], references: [id])
   conversation  Conversation?
+  payment       Payment?
 
   @@unique([campaignId, influencerId])
   @@index([influencerId, status])
@@ -652,4 +665,31 @@ model SavedSearch {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("saved_searches")
+}
+
+// ===========================================
+// PAYMENTS
+// ===========================================
+
+model Payment {
+  id                    String        @id @default(cuid())
+  applicationId         String        @unique
+  amount                Decimal       @db.Decimal(10, 2)
+  platformFee           Decimal       @db.Decimal(10, 2)
+  creatorPayout         Decimal       @db.Decimal(10, 2)
+  currency              String        @default("usd")
+  status                PaymentStatus @default(PENDING)
+  stripePaymentIntentId String?       @unique
+  stripeTransferId      String?
+  stripeRefundId        String?
+  paidAt                DateTime?
+  releasedAt            DateTime?
+  refundedAt            DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  application           Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("payments")
 }
