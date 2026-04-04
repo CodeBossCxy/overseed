@@ -1,11 +1,14 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { useViewMode } from '@/lib/hooks/useViewMode'
 import { useTheme } from './ThemeProvider'
+
+const FloatingLines = dynamic(() => import('@/components/backgrounds/FloatingLines'), { ssr: false })
 
 export default function HomePage() {
   const { data: session } = useSession()
@@ -33,47 +36,53 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className={`relative overflow-hidden ${isGlobal ? 'bg-transparent' : 'bg-white'}`}>
-        {isGlobal ? (
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a1527]/40 via-[#081120]/20 to-transparent" />
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-white to-white" />
-            <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-primary-100/20 rounded-full blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-primary-50/30 rounded-full blur-3xl" />
-          </>
-        )}
+      <section className="relative overflow-hidden bg-[#020a18] min-h-screen flex items-center">
+        {/* Floating Lines Background */}
+        <div className="absolute inset-0">
+          <FloatingLines
+            enabledWaves={['top', 'middle', 'bottom']}
+            lineCount={[6]}
+            lineDistance={[5]}
+            animationSpeed={1}
+            interactive={true}
+            bendRadius={5.0}
+            bendStrength={-0.5}
+            mouseDamping={0.05}
+            parallax={true}
+            parallaxStrength={0.2}
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#020a18]/30 pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 md:pt-24 md:pb-28">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8 ${isGlobal ? 'bg-[#ff769f]/10 border border-[#ff769f]/25 text-[#ff769f] backdrop-blur-sm' : 'bg-primary-50 border border-primary-100 text-primary-700'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isGlobal ? 'bg-[#ff769f]' : 'bg-primary-500'}`} />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 pointer-events-none">
+          <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8 bg-white/10 border border-white/20 text-white/90 backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-primary-400" />
                 {t.home.hero.badge}
               </div>
 
-              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.08] tracking-tight mb-6 ${isGlobal ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]' : 'text-gray-900'}`}>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.08] tracking-tight mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                 {t.home.hero.title}
               </h1>
 
-              <p className={`text-lg leading-relaxed mb-8 max-w-lg ${isGlobal ? 'text-gray-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]' : 'text-gray-600'}`}>
+              <p className="text-lg leading-relaxed mb-8 max-w-2xl mx-auto text-gray-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
                 {t.home.hero.description}
               </p>
 
-              <div className="space-y-3 mb-10">
+              <div className="inline-flex flex-col space-y-3 mb-10">
                 {[t.home.hero.check1, t.home.hero.check2, t.home.hero.check3].map((text, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${isGlobal ? 'bg-[#ff769f]/25' : 'bg-primary-100'}`}>
-                      <svg className={`w-3 h-3 ${isGlobal ? 'text-[#ff769f]' : 'text-primary-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-primary-500/25">
+                      <svg className="w-3 h-3 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </span>
-                    <span className={`text-sm md:text-base ${isGlobal ? 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]' : 'text-gray-700'}`}>{text}</span>
+                    <span className="text-sm md:text-base text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">{text}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center gap-4 pointer-events-auto">
                 <button
                   onClick={handleGetStarted}
                   className="px-8 py-3.5 bg-primary-600 text-white rounded-full font-semibold hover:bg-primary-700 transition shadow-lg shadow-primary-600/20"
@@ -82,81 +91,11 @@ export default function HomePage() {
                 </button>
                 <Link
                   href="/contact"
-                  className={`px-6 py-3.5 border rounded-full font-medium transition ${isGlobal ? 'border-[#d4e0fd]/15 text-gray-200 hover:bg-[#0a1527]/45' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                  className="px-6 py-3.5 border border-white/20 text-gray-200 rounded-full font-medium transition hover:bg-white/10 backdrop-blur-sm"
                 >
                   {t.home.hero.requestDemo}
                 </Link>
               </div>
-            </div>
-
-            <div className={`hidden ${isGlobal ? '' : 'lg:block'}`}>
-              <div className="relative">
-                <div className={`rounded-3xl p-8 aspect-square flex items-center justify-center ${isGlobal ? 'bg-white/5 backdrop-blur-sm border border-white/10' : 'bg-gradient-to-br from-primary-50 to-primary-100/50'}`}>
-                  <div className="relative w-full h-full">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg className="w-52 h-52 drop-shadow-lg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="100" cy="100" r="90" fill="#4AADE8" />
-                        <circle cx="100" cy="100" r="90" fill="url(#globeGrad)" />
-                        <path d="M70 45c-5 3-12 8-15 18s-2 22 3 28c4 5 10 4 14 8s6 14 2 22c-3 6-8 10-6 16s10 12 18 14c6 2 14 0 20-4s10-12 16-14c8-2 16 2 22-2s10-14 8-24c-2-8-8-14-6-22s10-14 8-22c-2-6-8-8-14-10s-14-2-18-6c-6-6-4-16-10-20s-16-2-22 2c-6 4-10 10-16 12s-10 0-4-2" fill="#6DC44F" />
-                        <path d="M35 90c-2 8 0 18 6 24s16 8 20 14c3 5 2 12-2 16s-10 6-10 12c0 4 4 8 8 10" fill="#6DC44F" />
-                        <path d="M130 35c4-2 10-4 16-2s10 8 12 14c2 5 0 10-3 14" fill="#6DC44F" />
-                        <path d="M75 55c-3 4-6 10-4 16s8 10 12 8 6-8 4-14-6-12-12-10z" fill="#5AB840" opacity="0.6" />
-                        <path d="M100 80c-2 6 0 14 6 18s14 4 18-2 2-16-6-20-14-4-18 4z" fill="#5AB840" opacity="0.5" />
-                        <circle cx="100" cy="100" r="90" stroke="#1B3A5C" strokeWidth="4" />
-                        <path d="M70 45c-5 3-12 8-15 18s-2 22 3 28c4 5 10 4 14 8s6 14 2 22c-3 6-8 10-6 16s10 12 18 14c6 2 14 0 20-4s10-12 16-14c8-2 16 2 22-2s10-14 8-24c-2-8-8-14-6-22s10-14 8-22c-2-6-8-8-14-10s-14-2-18-6c-6-6-4-16-10-20s-16-2-22 2c-6 4-10 10-16 12s-10 0-4-2" stroke="#1B3A5C" strokeWidth="2.5" strokeLinejoin="round" />
-                        <path d="M35 90c-2 8 0 18 6 24s16 8 20 14c3 5 2 12-2 16s-10 6-10 12c0 4 4 8 8 10" stroke="#1B3A5C" strokeWidth="2.5" strokeLinejoin="round" />
-                        <path d="M130 35c4-2 10-4 16-2s10 8 12 14c2 5 0 10-3 14" stroke="#1B3A5C" strokeWidth="2.5" strokeLinejoin="round" />
-                        <ellipse cx="72" cy="58" rx="18" ry="28" fill="white" opacity="0.15" transform="rotate(-20 72 58)" />
-                        <defs>
-                          <radialGradient id="globeGrad" cx="0.35" cy="0.3" r="0.65">
-                            <stop offset="0%" stopColor="white" stopOpacity="0.25" />
-                            <stop offset="100%" stopColor="#1B3A5C" stopOpacity="0.15" />
-                          </radialGradient>
-                        </defs>
-                      </svg>
-                    </div>
-
-                    <div className="absolute top-6 left-6 bg-white rounded-xl shadow-lg p-4 w-44">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                          <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-xs font-semibold text-gray-800">{t.home.hero.cardCreator}</div>
-                          <div className="text-[10px] text-gray-500">{t.home.hero.cardCreatorNiche}</div>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <span className="px-2 py-0.5 bg-primary-50 text-primary-600 rounded text-[10px]">50K+</span>
-                        <span className="px-2 py-0.5 bg-green-50 text-green-600 rounded text-[10px]">4.8%</span>
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-8 right-6 bg-white rounded-xl shadow-lg p-4 w-48">
-                      <div className="text-xs font-semibold text-gray-800 mb-1">{t.home.hero.cardCampaignLive}</div>
-                      <div className="text-[10px] text-gray-500 mb-2">{t.home.hero.cardCampaignName}</div>
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-primary-500 h-1.5 rounded-full w-3/4" />
-                      </div>
-                      <div className="text-[10px] text-gray-400 mt-1">{t.home.hero.cardCreatorsMatched}</div>
-                    </div>
-
-                    <div className="absolute top-1/2 right-4 -translate-y-1/2 bg-white rounded-xl shadow-lg p-3 w-36">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full" />
-                        <span className="text-[10px] font-medium text-gray-700">{t.home.hero.cardMarkets}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-primary-400 rounded-full" />
-                        <span className="text-[10px] font-medium text-gray-700">{t.home.hero.cardAiMatching}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
