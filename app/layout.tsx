@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Noto_Sans_SC } from 'next/font/google'
 import './globals.css'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -8,6 +8,11 @@ import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import ThemeProvider from '@/components/ThemeProvider'
 
 const inter = Inter({ subsets: ['latin'] })
+const notoSansSC = Noto_Sans_SC({
+  subsets: ['latin'],
+  weight: ['300', '700', '900'],
+  variable: '--font-noto-sans-sc',
+})
 
 export const metadata: Metadata = {
   title: {
@@ -46,7 +51,7 @@ export default async function RootLayout({
       <head>
         <link rel="icon" type="image/png" href="/icon-pink.png" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${notoSansSC.variable}`}>
         <SessionProvider session={session}>
           <LanguageProvider>
             <ThemeProvider>
