@@ -24,7 +24,7 @@ function useSectionReveal() {
           }
         })
       },
-      { threshold: 0.12 }
+      { threshold: 0.05 }
     )
     refs.current.forEach((el) => el && observer.observe(el))
     return () => observer.disconnect()
@@ -67,11 +67,19 @@ export default function HomePage() {
   const titleWords = (t.home.hero.title as string).split(' ')
 
   return (
-    <>
+    <div className="relative">
+      {/* Global background image */}
+      <div
+        className="fixed inset-0 bg-cover bg-center opacity-30 pointer-events-none"
+        style={{ backgroundImage: "url('/background_2.jpg')" }}
+      />
+      <div className="fixed inset-0 bg-[#020a18]/60 pointer-events-none" />
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#020a18] min-h-screen flex items-center">
+      <section className="relative overflow-hidden min-h-screen flex items-center">
         <div className="absolute inset-0">
           <FloatingLines
+            linesGradient={['#A855F7', '#3B82F6']}
             enabledWaves={['top', 'middle', 'bottom']}
             lineCount={[6]}
             lineDistance={[5]}
@@ -151,13 +159,8 @@ export default function HomePage() {
       </section>
 
       {/* Platform Section */}
-      <section ref={setRef(0)} className="hp-section relative py-24 bg-[#020a18] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-8"
-          style={{ backgroundImage: "url('/background_2.jpg')" }}
-        />
-        <div className="absolute inset-0 bg-[#020a18]/80" />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={setRef(0)} className="hp-section relative min-h-screen flex items-center py-24 overflow-hidden">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
               {t.home.platform.title}
@@ -198,8 +201,8 @@ export default function HomePage() {
       </section>
 
       {/* Brand Value Section */}
-      <section ref={setRef(1)} className="hp-section relative py-24 overflow-hidden bg-[#040e1f]">
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={setRef(1)} className="hp-section relative min-h-screen flex items-center py-24 overflow-hidden bg-[#040e1f]/40">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/15 text-white/80 rounded-full text-xs font-medium mb-6 uppercase tracking-wider">
@@ -279,8 +282,8 @@ export default function HomePage() {
       </section>
 
       {/* Creator Value Section */}
-      <section ref={setRef(2)} className="hp-section py-24 bg-[#020a18]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={setRef(2)} className="hp-section min-h-screen flex items-center py-24 bg-[#020a18]/40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             <div className="space-y-5 lg:pt-12 order-2 lg:order-1">
               {[
@@ -336,8 +339,8 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Flow */}
-      <section ref={setRef(3)} className="hp-section py-24 bg-[#040e1f]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={setRef(3)} className="hp-section min-h-screen flex items-center py-24 bg-[#040e1f]/40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl text-white mb-3" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
               {t.home.howItWorksFlow.title}
@@ -386,8 +389,8 @@ export default function HomePage() {
       </section>
 
       {/* Platform Features */}
-      <section ref={setRef(4)} className="hp-section py-24 bg-[#020a18]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={setRef(4)} className="hp-section min-h-screen flex items-center py-24 bg-[#020a18]/40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
               {t.home.features.title}
@@ -428,8 +431,8 @@ export default function HomePage() {
       </section>
 
       {/* Early Access */}
-      <section ref={setRef(5)} className="hp-section relative py-24 overflow-hidden bg-[#040e1f]">
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section ref={setRef(5)} className="hp-section relative min-h-screen flex items-center py-24 overflow-hidden bg-[#040e1f]/40">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
           <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
             {t.home.earlyAccess.title}
           </h2>
@@ -469,8 +472,8 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section ref={setRef(6)} className="hp-section py-24 bg-[#020a18]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section ref={setRef(6)} className="hp-section min-h-screen flex items-center py-24 bg-[#020a18]/40">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
           <h2 className="text-3xl md:text-4xl text-white mb-6 leading-snug" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
             {t.home.finalCta.title}
           </h2>
@@ -498,6 +501,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   )
 }
