@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
-import { Inter, Noto_Sans_SC } from 'next/font/google'
+import { DM_Serif_Display, Noto_Sans_SC } from 'next/font/google'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -7,7 +9,11 @@ import SessionProvider from '@/components/SessionProvider'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import ThemeProvider from '@/components/ThemeProvider'
 
-const inter = Inter({ subsets: ['latin'] })
+const dmSerifDisplay = DM_Serif_Display({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-display',
+})
 const notoSansSC = Noto_Sans_SC({
   subsets: ['latin'],
   weight: ['300', '700', '900'],
@@ -51,7 +57,7 @@ export default async function RootLayout({
       <head>
         <link rel="icon" type="image/png" href="/icon-pink.png" />
       </head>
-      <body className={`${inter.className} ${notoSansSC.variable}`}>
+      <body className={`${GeistSans.className} ${GeistMono.variable} ${dmSerifDisplay.variable} ${notoSansSC.variable}`}>
         <SessionProvider session={session}>
           <LanguageProvider>
             <ThemeProvider>

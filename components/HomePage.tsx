@@ -34,9 +34,8 @@ function useSectionReveal() {
 }
 
 /* ── Font helpers ── */
-const fontHeavy = 'var(--font-noto-sans-sc), sans-serif'
-const fontBold = 'var(--font-noto-sans-sc), sans-serif'
-const fontLight = 'var(--font-noto-sans-sc), sans-serif'
+const fontDisplay = 'var(--font-display), Georgia, serif'   /* DM Serif Display 400 — hero headlines */
+const fontSans = 'var(--font-geist-sans), system-ui, sans-serif' /* Geist — body/UI */
 
 export default function HomePage() {
   const { data: session } = useSession()
@@ -103,7 +102,7 @@ export default function HomePage() {
 
             <h1
               className="text-4xl md:text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
-              style={{ fontFamily: fontHeavy, fontWeight: 900 }}
+              style={{ fontFamily: fontDisplay, fontWeight: 400 }}
             >
               {titleWords.map((word, i) => (
                 <span
@@ -118,7 +117,7 @@ export default function HomePage() {
 
             <p
               className="text-lg leading-relaxed mb-8 max-w-2xl mx-auto text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
-              style={{ fontFamily: fontLight, fontWeight: 300 }}
+              style={{ fontFamily: fontSans, fontWeight: 300 }}
             >
               {t.home.hero.description}
             </p>
@@ -131,7 +130,7 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </span>
-                  <span className="text-sm md:text-base text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" style={{ fontFamily: fontLight, fontWeight: 300 }}>{text}</span>
+                  <span className="text-sm md:text-base text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" style={{ fontFamily: fontSans, fontWeight: 300 }}>{text}</span>
                 </div>
               ))}
             </div>
@@ -141,7 +140,7 @@ export default function HomePage() {
               <button
                 onClick={handleGetStarted}
                 className="px-8 py-3.5 bg-white text-gray-900 rounded-full font-semibold hover:bg-white/90 transition shadow-lg shadow-[#A855F7]/15"
-                style={{ fontFamily: fontBold, fontWeight: 700 }}
+                style={{ fontFamily: fontSans, fontWeight: 700 }}
               >
                 {t.home.hero.getStarted}
               </button>
@@ -149,7 +148,7 @@ export default function HomePage() {
               <Link
                 href="/contact"
                 className="px-6 py-3.5 border border-white/20 text-white rounded-full font-medium transition hover:bg-white/10 backdrop-blur-md bg-white/5"
-                style={{ fontFamily: fontBold, fontWeight: 700 }}
+                style={{ fontFamily: fontSans, fontWeight: 700 }}
               >
                 {t.home.hero.requestDemo}
               </Link>
@@ -162,10 +161,10 @@ export default function HomePage() {
       <section ref={setRef(0)} className="hp-section relative min-h-screen flex items-center py-24 overflow-hidden">
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
+            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
               {t.home.platform.title}
             </h2>
-            <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto" style={{ fontFamily: fontLight, fontWeight: 300 }}>
+            <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto" style={{ fontFamily: fontSans, fontWeight: 300 }}>
               {t.home.platform.description}
             </p>
           </div>
@@ -192,8 +191,8 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110">
                   {card.icon}
                 </div>
-                <h3 className="text-xl text-white mb-3" style={{ fontFamily: fontBold, fontWeight: 700 }}>{card.title}</h3>
-                <p className="text-white/60 leading-relaxed" style={{ fontFamily: fontLight, fontWeight: 300 }}>{card.desc}</p>
+                <h3 className="text-xl text-white mb-3" style={{ fontFamily: fontSans, fontWeight: 700 }}>{card.title}</h3>
+                <p className="text-white/60 leading-relaxed" style={{ fontFamily: fontSans, fontWeight: 300 }}>{card.desc}</p>
               </div>
             ))}
           </div>
@@ -212,14 +211,14 @@ export default function HomePage() {
                 {t.home.toggle.brand}
               </div>
 
-              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
+              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
                 {t.home.brandValue.title}
               </h2>
-              <p className="text-white/60 text-lg leading-relaxed mb-8" style={{ fontFamily: fontLight, fontWeight: 300 }}>
+              <p className="text-white/60 text-lg leading-relaxed mb-8" style={{ fontFamily: fontSans, fontWeight: 300 }}>
                 {t.home.brandValue.description}
               </p>
 
-              <p className="text-white font-medium mb-4" style={{ fontFamily: fontBold, fontWeight: 700 }}>{t.home.brandValue.hereYouCan}</p>
+              <p className="text-white font-medium mb-4" style={{ fontFamily: fontSans, fontWeight: 700 }}>{t.home.brandValue.hereYouCan}</p>
               <ul className="space-y-3 mb-8">
                 {[t.home.brandValue.bullet1, t.home.brandValue.bullet2, t.home.brandValue.bullet3, t.home.brandValue.bullet4].map((text, i) => (
                   <li key={i} className="flex items-start gap-3">
@@ -228,7 +227,7 @@ export default function HomePage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </span>
-                    <span className="text-white/80" style={{ fontFamily: fontLight, fontWeight: 300 }}>{text}</span>
+                    <span className="text-white/80" style={{ fontFamily: fontSans, fontWeight: 300 }}>{text}</span>
                   </li>
                 ))}
               </ul>
@@ -241,8 +240,8 @@ export default function HomePage() {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-base text-white mb-1" style={{ fontFamily: fontBold, fontWeight: 700 }}>{t.home.brandValue.aiTitle}</h4>
-                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontLight, fontWeight: 300 }}>{t.home.brandValue.aiDesc}</p>
+                    <h4 className="text-base text-white mb-1" style={{ fontFamily: fontSans, fontWeight: 700 }}>{t.home.brandValue.aiTitle}</h4>
+                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontSans, fontWeight: 300 }}>{t.home.brandValue.aiDesc}</p>
                   </div>
                 </div>
               </div>
@@ -271,8 +270,8 @@ export default function HomePage() {
                     {card.icon}
                   </div>
                   <div>
-                    <h3 className="text-lg text-white mb-1.5" style={{ fontFamily: fontBold, fontWeight: 700 }}>{card.title}</h3>
-                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontLight, fontWeight: 300 }}>{card.desc}</p>
+                    <h3 className="text-lg text-white mb-1.5" style={{ fontFamily: fontSans, fontWeight: 700 }}>{card.title}</h3>
+                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontSans, fontWeight: 300 }}>{card.desc}</p>
                   </div>
                 </div>
               ))}
@@ -298,8 +297,8 @@ export default function HomePage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg text-white mb-1.5" style={{ fontFamily: fontBold, fontWeight: 700 }}>{card.title}</h3>
-                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontLight, fontWeight: 300 }}>{card.desc}</p>
+                    <h3 className="text-lg text-white mb-1.5" style={{ fontFamily: fontSans, fontWeight: 700 }}>{card.title}</h3>
+                    <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontSans, fontWeight: 300 }}>{card.desc}</p>
                   </div>
                 </div>
               ))}
@@ -313,14 +312,14 @@ export default function HomePage() {
                 {t.home.toggle.creator}
               </div>
 
-              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
+              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
                 {t.home.creatorValue.title}
               </h2>
-              <p className="text-white/60 text-lg leading-relaxed mb-8" style={{ fontFamily: fontLight, fontWeight: 300 }}>
+              <p className="text-white/60 text-lg leading-relaxed mb-8" style={{ fontFamily: fontSans, fontWeight: 300 }}>
                 {t.home.creatorValue.description}
               </p>
 
-              <p className="text-white font-medium mb-4" style={{ fontFamily: fontBold, fontWeight: 700 }}>{t.home.creatorValue.hereYouCan}</p>
+              <p className="text-white font-medium mb-4" style={{ fontFamily: fontSans, fontWeight: 700 }}>{t.home.creatorValue.hereYouCan}</p>
               <ul className="space-y-3">
                 {[t.home.creatorValue.bullet1, t.home.creatorValue.bullet2, t.home.creatorValue.bullet3, t.home.creatorValue.bullet4, t.home.creatorValue.bullet5].map((text, i) => (
                   <li key={i} className="flex items-start gap-3">
@@ -329,7 +328,7 @@ export default function HomePage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </span>
-                    <span className="text-white/80" style={{ fontFamily: fontLight, fontWeight: 300 }}>{text}</span>
+                    <span className="text-white/80" style={{ fontFamily: fontSans, fontWeight: 300 }}>{text}</span>
                   </li>
                 ))}
               </ul>
@@ -342,10 +341,10 @@ export default function HomePage() {
       <section ref={setRef(3)} className="hp-section min-h-screen flex items-center py-24 bg-[#040e1f]/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-white mb-3" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
+            <h2 className="text-3xl md:text-4xl text-white mb-3" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
               {t.home.howItWorksFlow.title}
             </h2>
-            <p className="text-white/60 text-lg" style={{ fontFamily: fontLight, fontWeight: 300 }}>{t.home.howItWorksFlow.subtitle}</p>
+            <p className="text-white/60 text-lg" style={{ fontFamily: fontSans, fontWeight: 300 }}>{t.home.howItWorksFlow.subtitle}</p>
           </div>
 
           <div className="relative">
@@ -379,8 +378,8 @@ export default function HomePage() {
                   <div className="w-16 h-16 border border-white/20 text-white bg-black rounded-2xl flex items-center justify-center mx-auto mb-5 relative z-10">
                     {step.icon}
                   </div>
-                  <h3 className="text-base text-white mb-2" style={{ fontFamily: fontBold, fontWeight: 700 }}>{step.title}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontLight, fontWeight: 300 }}>{step.desc}</p>
+                  <h3 className="text-base text-white mb-2" style={{ fontFamily: fontSans, fontWeight: 700 }}>{step.title}</h3>
+                  <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontSans, fontWeight: 300 }}>{step.desc}</p>
                 </div>
               ))}
             </div>
@@ -392,7 +391,7 @@ export default function HomePage() {
       <section ref={setRef(4)} className="hp-section min-h-screen flex items-center py-24 bg-[#020a18]/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
+            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
               {t.home.features.title}
             </h2>
           </div>
@@ -419,24 +418,24 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl text-white mb-2" style={{ fontFamily: fontBold, fontWeight: 700 }}>{feature.title}</h3>
+                <h3 className="text-xl text-white mb-2" style={{ fontFamily: fontSans, fontWeight: 700 }}>{feature.title}</h3>
                 <p className="text-sm text-white/70 font-medium mb-3">{feature.subtitle}</p>
-                <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontLight, fontWeight: 300 }}>{feature.desc}</p>
+                <p className="text-white/60 text-sm leading-relaxed" style={{ fontFamily: fontSans, fontWeight: 300 }}>{feature.desc}</p>
               </div>
             ))}
           </div>
 
-          <p className="text-center text-sm text-white/40 mt-10" style={{ fontFamily: fontLight, fontWeight: 300 }}>{t.home.features.moreFeatures}</p>
+          <p className="text-center text-sm text-white/40 mt-10" style={{ fontFamily: fontSans, fontWeight: 300 }}>{t.home.features.moreFeatures}</p>
         </div>
       </section>
 
       {/* Early Access */}
       <section ref={setRef(5)} className="hp-section relative min-h-screen flex items-center py-24 overflow-hidden bg-[#040e1f]/40">
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
-          <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
+          <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
             {t.home.earlyAccess.title}
           </h2>
-          <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto mb-12" style={{ fontFamily: fontLight, fontWeight: 300 }}>
+          <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto mb-12" style={{ fontFamily: fontSans, fontWeight: 300 }}>
             {t.home.earlyAccess.description}
           </p>
 
@@ -453,9 +452,9 @@ export default function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </span>
-                  <span className="text-white font-medium text-sm" style={{ fontFamily: fontBold, fontWeight: 700 }}>{pair[0]}</span>
+                  <span className="text-white font-medium text-sm" style={{ fontFamily: fontSans, fontWeight: 700 }}>{pair[0]}</span>
                 </div>
-                <p className="text-white/60 text-sm pl-8" style={{ fontFamily: fontLight, fontWeight: 300 }}>{pair[1]}</p>
+                <p className="text-white/60 text-sm pl-8" style={{ fontFamily: fontSans, fontWeight: 300 }}>{pair[1]}</p>
               </div>
             ))}
           </div>
@@ -464,7 +463,7 @@ export default function HomePage() {
           <button
             onClick={handleGetStarted}
             className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-lg hover:bg-white/15 transition shadow-xl shadow-[#A855F7]/10"
-            style={{ fontFamily: fontBold, fontWeight: 700 }}
+            style={{ fontFamily: fontSans, fontWeight: 700 }}
           >
             {t.home.earlyAccess.ctaSignup}
           </button>
@@ -474,10 +473,10 @@ export default function HomePage() {
       {/* Final CTA */}
       <section ref={setRef(6)} className="hp-section min-h-screen flex items-center py-24 bg-[#020a18]/40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
-          <h2 className="text-3xl md:text-4xl text-white mb-6 leading-snug" style={{ fontFamily: fontHeavy, fontWeight: 900 }}>
+          <h2 className="text-3xl md:text-4xl text-white mb-6 leading-snug" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
             {t.home.finalCta.title}
           </h2>
-          <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto mb-10" style={{ fontFamily: fontLight, fontWeight: 300 }}>
+          <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto mb-10" style={{ fontFamily: fontSans, fontWeight: 300 }}>
             {t.home.finalCta.description}
           </p>
 
@@ -486,7 +485,7 @@ export default function HomePage() {
             <Link
               href="/auth/signup?type=brand"
               className="px-8 py-3.5 bg-white text-gray-900 rounded-full hover:bg-white/90 transition shadow-lg shadow-[#A855F7]/15 min-w-[160px]"
-              style={{ fontFamily: fontBold, fontWeight: 700 }}
+              style={{ fontFamily: fontSans, fontWeight: 700 }}
             >
               {t.home.finalCta.ctaBrand}
             </Link>
@@ -494,7 +493,7 @@ export default function HomePage() {
             <Link
               href="/auth/signup?type=influencer"
               className="px-8 py-3.5 border border-white/20 text-white rounded-full transition min-w-[160px] hover:bg-white/10 backdrop-blur-md bg-white/5"
-              style={{ fontFamily: fontBold, fontWeight: 700 }}
+              style={{ fontFamily: fontSans, fontWeight: 700 }}
             >
               {t.home.finalCta.ctaCreator}
             </Link>
