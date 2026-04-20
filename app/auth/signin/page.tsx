@@ -54,7 +54,8 @@ export default function SignInPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link href="/" className="flex justify-center">
-          <span className="text-4xl font-bold text-primary-600">Overseed</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/pink_logo_with_txt.png" alt="Overseed" className="h-14 w-auto" />
         </Link>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           {t.auth.signin.title}

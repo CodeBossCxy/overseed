@@ -181,12 +181,9 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {isGlobal ? (
-              <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-9 w-auto brightness-200" />
+              <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-16 w-auto object-contain brightness-200" />
             ) : (
-              <>
-                <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto" />
-                <span className="text-2xl font-bold text-primary-600">OVERSEED</span>
-              </>
+              <img src={themeMode === 'brand' ? "/blue_logo_with_txt.png" : "/pink_logo_with_txt.png"} alt="Overseed" className="h-16 w-auto object-contain" />
             )}
             <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-400 text-amber-900 rounded uppercase tracking-wider">Beta</span>
           </Link>
