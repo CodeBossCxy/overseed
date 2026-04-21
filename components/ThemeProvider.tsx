@@ -34,9 +34,9 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   // Homepage → global (dark space theme)
   // Other pages → sync with user's view mode (creator pink / brand blue)
   useEffect(() => {
-    const isHomePage = pathname === '/'
+    const isGlobalPage = pathname === '/' || pathname === '/contact'
 
-    if (isHomePage) {
+    if (isGlobalPage) {
       document.documentElement.setAttribute('data-theme', 'global')
       setThemeModeState('global')
     } else {
@@ -46,7 +46,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     }
 
     // Update favicon
-    const iconHref = (!session || pathname === '/') ? '/icon-pink.png' : isBrand ? '/icon-blue.png' : '/icon-pink.png'
+    const iconHref = (!session || isGlobalPage) ? '/icon-pink.png' : isBrand ? '/icon-blue.png' : '/icon-pink.png'
     let link = document.querySelector<HTMLLinkElement>('link[data-dynamic-icon]')
     if (!link) {
       link = document.createElement('link')
@@ -55,7 +55,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
       link.setAttribute('data-dynamic-icon', 'true')
       document.head.appendChild(link)
     }
-    link.href = iconHref + '?v=' + (pathname === '/' ? 'global' : isBrand ? 'brand' : 'creator')
+    link.href = iconHref + '?v=' + (isGlobalPage ? 'global' : isBrand ? 'brand' : 'creator')
   }, [pathname, session, isBrand])
 
   const value = useMemo(() => ({

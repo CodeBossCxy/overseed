@@ -40,12 +40,16 @@ function NavDropdown({ label, items, isGlobal }: { label: string; items: Dropdow
         </svg>
       </button>
       {open && (
-        <div className={`absolute top-full left-0 mt-2 w-48 rounded-lg shadow-lg py-1 z-50 ${isGlobal ? 'bg-[#0a1527]/95 backdrop-blur-xl border border-[#d4e0fd]/10' : 'bg-white border border-gray-100'}`}>
+        <div
+          className={`absolute top-full left-0 mt-2 w-48 rounded-lg shadow-lg py-1 z-50 ${isGlobal ? 'backdrop-blur-xl' : 'bg-white border border-gray-100'}`}
+          style={isGlobal ? { backgroundColor: 'rgba(10, 21, 39, 0.95)', border: '1px solid rgba(212, 224, 253, 0.1)' } : undefined}
+        >
           {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`block px-4 py-2 text-sm transition ${isGlobal ? 'text-gray-300 hover:bg-[#456fa3]/15 hover:text-[#ff769f]' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'}`}
+              className={`block px-4 py-2 text-sm transition ${isGlobal ? 'hover:bg-white/10' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'}`}
+              style={isGlobal ? { color: 'rgba(255,255,255,0.85)' } : undefined}
               onClick={() => setOpen(false)}
             >
               {item.label}
@@ -101,7 +105,7 @@ function MessageBadge({ isGlobal }: { isGlobal?: boolean }) {
   return (
     <Link
       href="/dashboard/messages"
-      className={`relative transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
+      className={`relative p-2 rounded-md transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f] hover:bg-[#456fa3]/15' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}`}
       title="Messages"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,7 +126,7 @@ export default function Header() {
   const { currentMode, isBrand, switchView, isSwitching } = useViewMode()
   const { themeMode } = useTheme()
   const pathname = usePathname()
-  const isHomePage = pathname === '/'
+  const isHomePage = pathname === '/' || pathname === '/contact'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
 
@@ -174,16 +178,19 @@ export default function Header() {
   const isGlobal = themeMode === 'global'
 
   return (
-    <header className={`sticky top-0 z-50 ${isGlobal ? 'bg-[#0a1527]/70 backdrop-blur-xl border-b border-[#d4e0fd]/10' : 'bg-white shadow-sm'}`}>
+    <header className={`sticky top-0 z-50 ${isGlobal ? 'bg-[#0a1527]/40 backdrop-blur-xl border-b border-[#d4e0fd]/08' : 'bg-white shadow-sm'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {isGlobal ? (
-              <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-16 w-auto object-contain brightness-200" />
+              <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-20 -my-2 w-auto object-contain brightness-200" />
             ) : (
-              <img src={themeMode === 'brand' ? "/blue_logo_with_txt.png" : "/pink_logo_with_txt.png"} alt="Overseed" className="h-16 w-auto object-contain" />
+              <>
+                <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto object-contain" />
+                <span className="text-xl font-bold tracking-wide text-primary-600">OVERSEED</span>
+              </>
             )}
             <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-400 text-amber-900 rounded uppercase tracking-wider">Beta</span>
           </Link>
@@ -196,43 +203,48 @@ export default function Header() {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-1">
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className={`px-3 py-1 rounded-md border transition text-sm ${isGlobal ? 'border-[#d4e0fd]/15 text-gray-200 hover:bg-[#456fa3]/15' : 'border-gray-300 hover:bg-gray-50'}`}
+              className={`p-2 rounded-md transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f] hover:bg-[#456fa3]/15' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}`}
+              title={locale === 'en' ? '切换中文' : 'Switch to English'}
             >
-              {locale === 'en' ? '中文' : 'EN'}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
             </button>
 
             {/* Auth buttons */}
             {session ? (
-              <div className="hidden lg:flex items-center space-x-4">
+              <div className="hidden lg:flex items-center gap-1">
                 {/* View Switcher — hidden on home page (has its own toggle) */}
                 {!isHomePage && (
                   <button
                     onClick={() => switchView()}
                     disabled={isSwitching}
-                    className={`px-3 py-1 rounded-md border transition text-sm disabled:opacity-50 ${isGlobal ? 'border-[#ff769f]/30 text-[#ff769f] hover:bg-[#ff769f]/10' : 'border-primary-300 text-primary-600 hover:bg-primary-50'}`}
+                    className={`p-2 rounded-md transition disabled:opacity-50 ${isGlobal ? 'text-[#ff769f] hover:bg-[#ff769f]/10' : 'text-primary-600 hover:bg-primary-50'}`}
+                    title={isSwitching ? t.nav.switching : isBrand ? t.nav.switchToCreator : t.nav.switchToBrand}
                   >
-                    {isSwitching
-                      ? t.nav.switching
-                      : isBrand
-                        ? t.nav.switchToCreator
-                        : t.nav.switchToBrand}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
                   </button>
                 )}
                 <MessageBadge isGlobal={isGlobal} />
                 <Link
                   href={dashboardLink}
-                  className={`text-sm font-medium ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
+                  className={`p-2 rounded-md transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f] hover:bg-[#456fa3]/15' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}`}
+                  title={t.nav.myCenter}
                 >
-                  {t.nav.myCenter}
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </Link>
                 {(session.user as any)?.userType === 'ADMIN' && (
                   <Link
                     href="/admin"
-                    className={`relative transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
+                    className={`p-2 rounded-md transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f] hover:bg-[#456fa3]/15' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}`}
                     title="Admin"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +254,7 @@ export default function Header() {
                 )}
                 <Link
                   href="/settings"
-                  className={`relative transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f]' : 'text-gray-700 hover:text-primary-600'}`}
+                  className={`p-2 rounded-md transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f] hover:bg-[#456fa3]/15' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}`}
                   title={t.nav.settings}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,9 +264,12 @@ export default function Header() {
                 </Link>
                 <button
                   onClick={() => signOut()}
-                  className={`px-4 py-2 rounded-md transition text-sm ${isGlobal ? 'bg-[#456fa3]/15 hover:bg-[#456fa3]/25 text-gray-200' : 'bg-gray-200 hover:bg-gray-300'}`}
+                  className={`p-2 rounded-md transition ${isGlobal ? 'text-gray-200 hover:text-[#ff769f] hover:bg-[#456fa3]/15' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}`}
+                  title={t.nav.logout}
                 >
-                  {t.nav.logout}
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
                 </button>
               </div>
             ) : (

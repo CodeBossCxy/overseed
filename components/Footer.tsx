@@ -7,7 +7,7 @@ export default function Footer() {
   const { t } = useLanguage()
 
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-auto">
+    <footer className="text-gray-300 mt-auto relative" style={{ backgroundColor: 'rgba(2, 10, 24, 0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(212, 224, 253, 0.08)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About */}
