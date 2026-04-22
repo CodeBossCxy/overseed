@@ -7,13 +7,13 @@ export default function Footer() {
   const { t } = useLanguage()
 
   return (
-    <footer className="text-gray-300 mt-auto relative" style={{ backgroundColor: 'rgba(2, 10, 24, 0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(212, 224, 253, 0.08)' }}>
+    <footer className="text-white mt-auto relative" style={{ backgroundColor: 'rgba(2, 10, 24, 0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(212, 224, 253, 0.08)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About */}
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">{t.footer.about}</h3>
-            <p className="text-sm">
+            <p className="text-sm font-light">
               {t.footer.tagline}
             </p>
           </div>
@@ -21,30 +21,29 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-white text-sm font-semibold mb-4">{t.footer.quickLinks}</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-white transition">{t.footer.home}</Link></li>
-              <li><Link href="/browse" className="hover:text-white transition">{t.footer.browse}</Link></li>
-              <li><Link href="/about" className="hover:text-white transition">{t.footer.aboutUs}</Link></li>
+            <ul className="space-y-2 text-sm font-light">
+              <li><Link href="/" className="hover:text-white/70 transition">{t.footer.home}</Link></li>
+              <li><Link href="/browse" className="hover:text-white/70 transition">{t.footer.browse}</Link></li>
+              <li><Link href="/about" className="hover:text-white/70 transition">{t.footer.aboutUs}</Link></li>
             </ul>
           </div>
 
           {/* Resources */}
           <div>
             <h4 className="text-white text-sm font-semibold mb-4">{t.footer.resources}</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/help" className="hover:text-white transition">{t.footer.helpCenter}</Link></li>
-              <li><Link href="/guidelines" className="hover:text-white transition">{t.footer.guidelines}</Link></li>
-              <li><Link href="/faq" className="hover:text-white transition">{t.footer.faq}</Link></li>
+            <ul className="space-y-2 text-sm font-light">
+              <li><Link href="/guidelines" className="hover:text-white/70 transition">{t.footer.guidelines}</Link></li>
+              <li><Link href="/faq" className="hover:text-white/70 transition">{t.footer.faq}</Link></li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
             <h4 className="text-white text-sm font-semibold mb-4">{t.footer.legal}</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/terms" className="hover:text-white transition">{t.footer.terms}</Link></li>
-              <li><Link href="/privacy" className="hover:text-white transition">{t.footer.privacy}</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition">{t.footer.contact}</Link></li>
+            <ul className="space-y-2 text-sm font-light">
+              <li><Link href="/terms" className="hover:text-white/70 transition">{t.footer.terms}</Link></li>
+              <li><Link href="/privacy" className="hover:text-white/70 transition">{t.footer.privacy}</Link></li>
+              <li><Link href="/contact" className="hover:text-white/70 transition">{t.footer.contact}</Link></li>
             </ul>
           </div>
         </div>

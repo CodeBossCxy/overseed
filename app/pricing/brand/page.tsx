@@ -34,7 +34,6 @@ export default function BrandPricingPage() {
     { label: p.newChatsPerDay, free: '10', pro: '30' },
     { label: p.teamSeats, free: '1', pro: '1' },
     { label: p.aiChat, free: p.notAvailable, pro: p.lightUsage },
-    { label: p.tokenLimit, free: '/', pro: `150k tokens${p.perMonth}` },
   ]
 
   const faqs = [

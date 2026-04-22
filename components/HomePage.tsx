@@ -34,8 +34,8 @@ function useSectionReveal() {
 }
 
 /* ── Font helpers ── */
-const fontDisplay = 'var(--font-display), Georgia, serif'   /* DM Serif Display 400 — hero headlines */
-const fontSans = 'var(--font-geist-sans), system-ui, sans-serif' /* Geist — body/UI */
+const fontDisplay = 'var(--font-noto-sans-sc), system-ui, sans-serif'   /* 思源黑体 Heavy — headlines */
+const fontSans = 'var(--font-noto-sans-sc), system-ui, sans-serif'      /* 思源黑体 — body/UI */
 
 export default function HomePage() {
   const { data: session } = useSession()
@@ -62,8 +62,11 @@ export default function HomePage() {
     }
   }
 
-  /* Split hero title into words for staggered animation */
-  const titleWords = (t.home.hero.title as string).split(' ')
+  /* Split hero title into words for staggered animation.
+     Chinese has no spaces, so split by character for CJK text. */
+  const titleText = t.home.hero.title as string
+  const hasCJK = /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(titleText)
+  const titleWords = hasCJK ? titleText.split('') : titleText.split(' ')
 
   return (
     <div className="relative">
@@ -101,16 +104,16 @@ export default function HomePage() {
             </div>
 
             <h1
-              className="text-4xl md:text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
-              style={{ fontFamily: fontDisplay, fontWeight: 400 }}
+              className="text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-wide mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+              style={{ fontFamily: fontDisplay, fontWeight: 900 }}
             >
               {titleWords.map((word, i) => (
                 <span
                   key={i}
                   className="hp-title-word"
-                  style={{ animationDelay: `${0.1 + i * 0.12}s` }}
+                  style={{ animationDelay: `${0.1 + i * (hasCJK ? 0.06 : 0.12)}s` }}
                 >
-                  {word}{i < titleWords.length - 1 ? '\u00A0' : ''}
+                  {word}{!hasCJK && i < titleWords.length - 1 ? '\u00A0' : ''}
                 </span>
               ))}
             </h1>
@@ -136,10 +139,10 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center justify-center gap-4 pointer-events-auto">
-              {/* Solid white button */}
+              {/* Frosted glass button */}
               <button
                 onClick={handleGetStarted}
-                className="px-8 py-3.5 bg-white text-gray-900 rounded-full font-semibold hover:bg-white/90 transition shadow-lg shadow-[#A855F7]/15"
+                className="px-6 py-3.5 border border-white/20 text-white rounded-full font-medium transition hover:bg-white/10 backdrop-blur-md bg-white/5"
                 style={{ fontFamily: fontSans, fontWeight: 700 }}
               >
                 {t.home.hero.getStarted}
@@ -161,7 +164,7 @@ export default function HomePage() {
       <section ref={setRef(0)} className="hp-section relative min-h-screen flex items-center py-24 overflow-hidden">
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
+            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 900 }}>
               {t.home.platform.title}
             </h2>
             <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto" style={{ fontFamily: fontSans, fontWeight: 300 }}>
@@ -211,7 +214,7 @@ export default function HomePage() {
                 {t.home.toggle.brand}
               </div>
 
-              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
+              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 900 }}>
                 {t.home.brandValue.title}
               </h2>
               <p className="text-white/60 text-lg leading-relaxed mb-8" style={{ fontFamily: fontSans, fontWeight: 300 }}>
@@ -312,7 +315,7 @@ export default function HomePage() {
                 {t.home.toggle.creator}
               </div>
 
-              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
+              <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 900 }}>
                 {t.home.creatorValue.title}
               </h2>
               <p className="text-white/60 text-lg leading-relaxed mb-8" style={{ fontFamily: fontSans, fontWeight: 300 }}>
@@ -341,7 +344,7 @@ export default function HomePage() {
       <section ref={setRef(3)} className="hp-section min-h-screen flex items-center py-24 bg-[#040e1f]/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-white mb-3" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
+            <h2 className="text-3xl md:text-4xl text-white mb-3" style={{ fontFamily: fontDisplay, fontWeight: 900 }}>
               {t.home.howItWorksFlow.title}
             </h2>
             <p className="text-white/60 text-lg" style={{ fontFamily: fontSans, fontWeight: 300 }}>{t.home.howItWorksFlow.subtitle}</p>
@@ -391,7 +394,7 @@ export default function HomePage() {
       <section ref={setRef(4)} className="hp-section min-h-screen flex items-center py-24 bg-[#020a18]/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
+            <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 900 }}>
               {t.home.features.title}
             </h2>
           </div>
@@ -400,7 +403,9 @@ export default function HomePage() {
             {[
               { title: t.home.features.feature1Title, subtitle: t.home.features.feature1Subtitle, desc: t.home.features.feature1Desc, icon: (
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364V3M3 11.25h4.5m0 0a2.25 2.25 0 014.5 0m-4.5 0v4.5m4.5-4.5v4.5m0-4.5h6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.6 9h16.8M3.6 15h16.8" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3a15.3 15.3 0 014 9 15.3 15.3 0 01-4 9 15.3 15.3 0 01-4-9 15.3 15.3 0 014-9z" />
                 </svg>
               )},
               { title: t.home.features.feature2Title, subtitle: t.home.features.feature2Subtitle, desc: t.home.features.feature2Desc, icon: (
@@ -432,7 +437,7 @@ export default function HomePage() {
       {/* Early Access */}
       <section ref={setRef(5)} className="hp-section relative min-h-screen flex items-center py-24 overflow-hidden bg-[#040e1f]/40">
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
-          <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
+          <h2 className="text-3xl md:text-4xl text-white mb-5" style={{ fontFamily: fontDisplay, fontWeight: 900 }}>
             {t.home.earlyAccess.title}
           </h2>
           <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto mb-12" style={{ fontFamily: fontSans, fontWeight: 300 }}>
@@ -473,7 +478,7 @@ export default function HomePage() {
       {/* Final CTA */}
       <section ref={setRef(6)} className="hp-section min-h-screen flex items-center py-24 bg-[#020a18]/40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
-          <h2 className="text-3xl md:text-4xl text-white mb-6 leading-snug" style={{ fontFamily: fontDisplay, fontWeight: 400 }}>
+          <h2 className="text-3xl md:text-4xl text-white mb-6 leading-snug" style={{ fontFamily: fontDisplay, fontWeight: 900 }}>
             {t.home.finalCta.title}
           </h2>
           <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto mb-10" style={{ fontFamily: fontSans, fontWeight: 300 }}>

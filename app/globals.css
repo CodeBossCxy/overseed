@@ -228,6 +228,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
+  font-weight: 900;
 }
 
 @layer utilities {

@@ -48,7 +48,7 @@ function NavDropdown({ label, items, isGlobal }: { label: string; items: Dropdow
             <Link
               key={item.href}
               href={item.href}
-              className={`block px-4 py-2 text-sm transition ${isGlobal ? 'hover:bg-white/10' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'}`}
+              className={`block px-4 py-2 text-sm font-light transition ${isGlobal ? 'hover:bg-white/10' : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600'}`}
               style={isGlobal ? { color: 'rgba(255,255,255,0.85)' } : undefined}
               onClick={() => setOpen(false)}
             >
@@ -151,7 +151,6 @@ export default function Header() {
       label: t.nav.brandGlobalization,
       items: [
         { label: t.nav.aiAssistant, href: '/ai-assistant' },
-        { label: t.nav.marketInsights, href: '/market-insights' },
         { label: t.nav.growthServices, href: '/growth-services' },
       ],
     },
@@ -178,14 +177,14 @@ export default function Header() {
   const isGlobal = themeMode === 'global'
 
   return (
-    <header className={`sticky top-0 z-50 ${isGlobal ? 'bg-[#0a1527]/40 backdrop-blur-xl border-b border-[#d4e0fd]/08' : 'bg-white shadow-sm'}`}>
+    <header className={`sticky top-0 z-50 ${isGlobal ? 'bg-[#0a1527]/20 backdrop-blur-md border-b border-[#d4e0fd]/05' : 'bg-white shadow-sm'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {isGlobal ? (
-              <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-20 -my-2 w-auto object-contain brightness-200" />
+              <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-28 -my-4 translate-y-[2px] w-auto object-contain brightness-200" />
             ) : (
               <>
                 <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto object-contain" />

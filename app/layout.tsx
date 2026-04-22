@@ -16,7 +16,7 @@ const dmSerifDisplay = DM_Serif_Display({
 })
 const notoSansSC = Noto_Sans_SC({
   subsets: ['latin'],
-  weight: ['300', '700', '900'],
+  weight: ['300', '400', '500', '700', '900'],
   variable: '--font-noto-sans-sc',
 })
 
@@ -57,7 +57,7 @@ export default async function RootLayout({
       <head>
         <link rel="icon" type="image/png" href="/icon-pink.png" />
       </head>
-      <body className={`${GeistSans.className} ${GeistMono.variable} ${dmSerifDisplay.variable} ${notoSansSC.variable}`}>
+      <body className={`${notoSansSC.className} ${GeistMono.variable} ${dmSerifDisplay.variable} ${notoSansSC.variable}`}>
         <SessionProvider session={session}>
           <LanguageProvider>
             <ThemeProvider>
