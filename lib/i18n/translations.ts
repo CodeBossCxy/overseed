@@ -712,6 +712,186 @@ export const translations = {
         actions: 'Actions',
       },
     },
+    help: {
+      title: 'Help Center',
+      subtitle: 'Find answers and learn how to get the most out of Overseed.',
+      ctaTitle: 'Still need help?',
+      ctaDesc: 'Our team is here to help. Reach out and we\'ll get back to you within 24 hours.',
+      ctaButton: 'Contact Us',
+      sections: {
+        gettingStarted: {
+          title: 'Getting Started',
+          desc: 'New to Overseed? Start here.',
+          items: [
+            'Creating your account (brand or creator)',
+            'Setting up your profile',
+            'Understanding the dashboard',
+            'Your first campaign or application',
+          ],
+        },
+        campaigns: {
+          title: 'Campaigns',
+          desc: 'Everything about creating and joining campaigns.',
+          items: [
+            'How to create a campaign brief',
+            'Campaign types: paid, gifted, affiliate',
+            'Managing applications and deadlines',
+            'Campaign status and lifecycle',
+          ],
+        },
+        account: {
+          title: 'Account & Profile',
+          desc: 'Manage your account settings and profile.',
+          items: [
+            'Editing your profile information',
+            'Linking social media accounts',
+            'Switching between brand and creator roles',
+            'Language and notification preferences',
+          ],
+        },
+        payments: {
+          title: 'Payments & Billing',
+          desc: 'Plans, subscriptions, and cross-border payments.',
+          items: [
+            'Free vs. Pro plan comparison',
+            'Upgrading or downgrading your plan',
+            'Supported payment methods',
+            'Cross-border payment support',
+          ],
+        },
+        messaging: {
+          title: 'Messaging & Translation',
+          desc: 'Communicate across languages seamlessly.',
+          items: [
+            'Sending and receiving messages',
+            'Auto-translate for conversations',
+            'One-click brief translation',
+            'Managing conversation threads',
+          ],
+        },
+        safety: {
+          title: 'Trust & Safety',
+          desc: 'Staying safe on the platform.',
+          items: [
+            'Reporting inappropriate content',
+            'Verifying brand and creator identities',
+            'Data privacy and security',
+            'Community guidelines overview',
+          ],
+        },
+      },
+    },
+    guidelines: {
+      title: 'Community Guidelines',
+      subtitle: 'Standards for a respectful, trustworthy, and professional community.',
+      intro: 'Overseed connects brands and creators across borders. These guidelines help ensure every interaction on the platform is professional, authentic, and respectful. By using Overseed, you agree to follow these standards.',
+      lastUpdated: 'Last updated: April 2026',
+      sections: {
+        respect: {
+          title: 'Respect & Professionalism',
+          desc: 'Treat every member of the community with courtesy.',
+          rules: [
+            'Be respectful in all communications — messages, applications, and reviews.',
+            'No harassment, hate speech, discrimination, or personal attacks of any kind.',
+            'Use professional language when communicating with brands or creators.',
+            'Respect cultural differences — we are a global, cross-border community.',
+          ],
+        },
+        authenticity: {
+          title: 'Authenticity & Honesty',
+          desc: 'Build trust through transparency.',
+          rules: [
+            'Provide accurate information in your profile, including follower counts and engagement data.',
+            'Do not misrepresent your identity, brand, or capabilities.',
+            'Brands must provide truthful campaign details, compensation terms, and product information.',
+            'Do not use fake accounts, bots, or purchased followers.',
+          ],
+        },
+        collaboration: {
+          title: 'Fair Collaboration',
+          desc: 'Honor your commitments and communicate clearly.',
+          rules: [
+            'Honor agreed-upon deadlines, deliverables, and compensation terms.',
+            'Communicate promptly if circumstances change or you cannot fulfill a commitment.',
+            'Do not ghost — if you need to decline or withdraw, notify the other party.',
+            'Brands should review applications in a timely manner and provide clear feedback.',
+          ],
+        },
+        privacy: {
+          title: 'Privacy & Data',
+          desc: 'Protect personal and business information.',
+          rules: [
+            'Do not share private conversations, personal contact details, or confidential business information outside the platform.',
+            'Respect intellectual property — do not copy or reuse another creator\'s content without permission.',
+            'Do not scrape, collect, or misuse data from the platform.',
+            'Report any suspected data breaches or privacy violations immediately.',
+          ],
+        },
+        content: {
+          title: 'Content Standards',
+          desc: 'Keep content appropriate and lawful.',
+          rules: [
+            'Do not post content that is illegal, violent, sexually explicit, or promotes dangerous activities.',
+            'Campaign briefs and content must comply with local advertising and disclosure laws.',
+            'Sponsored content must be clearly disclosed as required by applicable regulations.',
+            'Do not promote counterfeit goods, prohibited substances, or fraudulent services.',
+          ],
+        },
+        enforcement: {
+          title: 'Enforcement',
+          desc: 'What happens when guidelines are violated.',
+          rules: [
+            'Violations may result in warnings, temporary suspension, or permanent account removal.',
+            'Repeated or severe violations will lead to immediate account termination.',
+            'If you encounter a violation, report it using the in-platform reporting tools.',
+            'Overseed reserves the right to remove content or accounts that violate these guidelines at any time.',
+          ],
+        },
+      },
+    },
+    faq: {
+      title: 'Frequently Asked Questions',
+      subtitle: 'Quick answers to common questions about Overseed.',
+      ctaTitle: 'Didn\'t find your answer?',
+      ctaDesc: 'Reach out to our support team and we\'ll help you out.',
+      ctaButton: 'Contact Support',
+      categories: {
+        general: 'General',
+        brands: 'For Brands',
+        creators: 'For Creators',
+        payments: 'Payments & Plans',
+      },
+      items: {
+        general: [
+          { q: 'What is Overseed?', a: 'Overseed is a cross-border influencer marketing platform that connects brands with creators worldwide. We help brands find the right creators for their campaigns and help creators discover quality collaboration opportunities — all in one place.' },
+          { q: 'Who can use Overseed?', a: 'Overseed is open to brands, agencies, distributors, and content creators of all sizes. Whether you are a startup launching your first product overseas or an established creator looking for brand deals, Overseed is built for you.' },
+          { q: 'Is Overseed free to use?', a: 'Yes! We offer a free plan for both brands and creators. The free plan includes core features like posting campaigns, browsing opportunities, and messaging. Our Pro plan unlocks additional features like unlimited campaigns, AI tools, and more.' },
+          { q: 'What languages does Overseed support?', a: 'The platform interface is available in English and Chinese. Our built-in translation feature supports briefs, messages, and content across multiple languages, making cross-border collaboration seamless.' },
+          { q: 'How does the translation feature work?', a: 'Overseed uses AI-powered translation to instantly translate campaign briefs, messages, and content. You can translate with one click directly on the platform — no need to use external tools.' },
+        ],
+        brands: [
+          { q: 'How do I post a campaign?', a: 'After signing up as a brand, go to your dashboard and click "Create Campaign." Fill in the campaign details — title, description, compensation type, platform requirements, and deadlines — then publish. Creators can start applying immediately.' },
+          { q: 'What types of campaigns can I create?', a: 'You can create paid campaigns, gifted (product-only) campaigns, paid + gift combos, affiliate/commission-based campaigns, or set the compensation as negotiable. Choose the model that fits your budget and goals.' },
+          { q: 'How do I find the right creators?', a: 'When creators apply to your campaign, you can review their profiles, social media stats, engagement rates, and past work. You can also browse the platform to discover creators who match your niche and target market.' },
+          { q: 'Can I manage multiple campaigns at once?', a: 'Yes. On the free plan you can manage up to 3 active campaigns simultaneously. The Pro plan removes this limit so you can run as many campaigns as you need.' },
+          { q: 'How do I communicate with creators?', a: 'Use our built-in messaging system to chat directly with creators. Messages can be auto-translated so language is never a barrier.' },
+        ],
+        creators: [
+          { q: 'How do I apply to campaigns?', a: 'Browse available campaigns on the Browse page, find ones that match your niche and audience, and click "Apply Now." You can include a pitch message and select which of your social accounts to use for the campaign.' },
+          { q: 'Do I need a minimum follower count?', a: 'It depends on the campaign. Each brand sets their own follower requirements. Many campaigns are open to micro and nano creators, so there are opportunities for creators of all sizes.' },
+          { q: 'How do I set up my creator profile?', a: 'Go to your Creator Center and fill in your profile with your bio, niche, location, and languages. Then link your social media accounts — you can add them via URL, screenshot, or manual entry.' },
+          { q: 'Can I apply to multiple campaigns?', a: 'Yes, you can apply to as many campaigns as you like. Each application is reviewed independently by the brand.' },
+          { q: 'How do I track my applications?', a: 'Go to "My Applications" in your Creator Center to see all your applications and their status — pending, under review, approved, rejected, or completed.' },
+        ],
+        payments: [
+          { q: 'What is included in the Free plan?', a: 'The Free plan includes basic campaign posting (up to 2/day for brands), browsing and applying to campaigns, in-platform messaging, translation, and up to 3 active campaigns simultaneously.' },
+          { q: 'What does the Pro plan include?', a: 'Pro unlocks unlimited campaigns per day, unlimited active campaigns, unlimited new conversations, team seats, AI assistant access, and priority support. It\'s designed for brands and creators who need more capacity.' },
+          { q: 'What payment methods are accepted?', a: 'We accept major credit cards. WeChat Pay and Alipay support is coming soon.' },
+          { q: 'Can I cancel my Pro subscription?', a: 'Yes, monthly subscriptions can be cancelled at any time. Annual plans are billed upfront but can also be cancelled — you\'ll keep access until the end of your billing period.' },
+          { q: 'Does Overseed handle payments between brands and creators?', a: 'We are building cross-border payment support to make settling payments with overseas creators smooth and simple. This feature is currently in development.' },
+        ],
+      },
+    },
     contact: {
       title: 'Contact Us',
       subtitle: 'Have a question or want to learn more? We\'d love to hear from you.',
@@ -1693,6 +1873,186 @@ export const translations = {
         reviewedOn: '审核日期',
         viewFullProfile: '查看完整资料',
         actions: '操作',
+      },
+    },
+    help: {
+      title: '帮助中心',
+      subtitle: '查找答案，了解如何充分利用 Overseed。',
+      ctaTitle: '仍需帮助？',
+      ctaDesc: '我们的团队随时为您服务。联系我们，我们将在 24 小时内回复。',
+      ctaButton: '联系我们',
+      sections: {
+        gettingStarted: {
+          title: '入门指南',
+          desc: '初次使用 Overseed？从这里开始。',
+          items: [
+            '创建账户（品牌方或达人）',
+            '完善个人资料',
+            '了解仪表盘功能',
+            '发布第一个活动或提交申请',
+          ],
+        },
+        campaigns: {
+          title: '活动管理',
+          desc: '创建和参与活动的详细说明。',
+          items: [
+            '如何创建合作通告',
+            '活动类型：付费、赠品、分佣',
+            '管理申请和截止日期',
+            '活动状态与生命周期',
+          ],
+        },
+        account: {
+          title: '账户与资料',
+          desc: '管理账户设置和个人资料。',
+          items: [
+            '编辑个人资料信息',
+            '关联社交媒体账号',
+            '在品牌方和达人角色间切换',
+            '语言和通知偏好设置',
+          ],
+        },
+        payments: {
+          title: '支付与订阅',
+          desc: '方案、订阅和跨境支付。',
+          items: [
+            '免费版与 Pro 版对比',
+            '升级或降级方案',
+            '支持的支付方式',
+            '跨境支付说明',
+          ],
+        },
+        messaging: {
+          title: '消息与翻译',
+          desc: '跨语言无缝沟通。',
+          items: [
+            '发送和接收消息',
+            '会话自动翻译',
+            '一键翻译通告',
+            '管理对话记录',
+          ],
+        },
+        safety: {
+          title: '信任与安全',
+          desc: '在平台上保持安全。',
+          items: [
+            '举报不当内容',
+            '验证品牌和达人身份',
+            '数据隐私与安全',
+            '社区规范概览',
+          ],
+        },
+      },
+    },
+    guidelines: {
+      title: '社区规范',
+      subtitle: '构建尊重、诚信和专业的社区标准。',
+      intro: 'Overseed 连接全球品牌与达人。这些规范确保平台上的每次互动都是专业、真实和尊重的。使用 Overseed 即表示您同意遵守这些标准。',
+      lastUpdated: '最后更新：2026 年 4 月',
+      sections: {
+        respect: {
+          title: '尊重与专业',
+          desc: '以礼相待社区每一位成员。',
+          rules: [
+            '在所有沟通中保持尊重——消息、申请和评价。',
+            '禁止任何形式的骚扰、仇恨言论、歧视或人身攻击。',
+            '与品牌方或达人沟通时使用专业语言。',
+            '尊重文化差异——我们是一个全球化的跨境社区。',
+          ],
+        },
+        authenticity: {
+          title: '真实与诚信',
+          desc: '通过透明建立信任。',
+          rules: [
+            '在个人资料中提供准确信息，包括粉丝数和互动数据。',
+            '不得虚假陈述您的身份、品牌或能力。',
+            '品牌方必须提供真实的活动详情、报酬条款和产品信息。',
+            '不得使用虚假账号、机器人或购买粉丝。',
+          ],
+        },
+        collaboration: {
+          title: '公平合作',
+          desc: '遵守承诺，清晰沟通。',
+          rules: [
+            '遵守约定的截止日期、交付物和报酬条款。',
+            '如情况变化或无法履行承诺，请及时沟通。',
+            '不要失联——如需拒绝或退出，请通知对方。',
+            '品牌方应及时审核申请并提供明确反馈。',
+          ],
+        },
+        privacy: {
+          title: '隐私与数据',
+          desc: '保护个人和商业信息。',
+          rules: [
+            '不得在平台外分享私人对话、个人联系方式或机密商业信息。',
+            '尊重知识产权——未经许可不得复制或再使用他人内容。',
+            '不得爬取、收集或滥用平台数据。',
+            '发现疑似数据泄露或隐私违规，请立即举报。',
+          ],
+        },
+        content: {
+          title: '内容标准',
+          desc: '保持内容合规合法。',
+          rules: [
+            '不得发布违法、暴力、色情或宣扬危险活动的内容。',
+            '合作通告和内容必须遵守当地广告和披露法律。',
+            '赞助内容必须按照适用法规明确标注。',
+            '不得推广假冒商品、违禁物品或欺诈服务。',
+          ],
+        },
+        enforcement: {
+          title: '执行措施',
+          desc: '违反规范时的处理方式。',
+          rules: [
+            '违规可能导致警告、临时封禁或永久移除账户。',
+            '多次或严重违规将导致账户立即终止。',
+            '如发现违规行为，请使用平台内的举报工具进行举报。',
+            'Overseed 保留随时移除违反本规范的内容或账户的权利。',
+          ],
+        },
+      },
+    },
+    faq: {
+      title: '常见问题',
+      subtitle: '关于 Overseed 的常见问题解答。',
+      ctaTitle: '没有找到答案？',
+      ctaDesc: '联系我们的支持团队，我们会为您提供帮助。',
+      ctaButton: '联系客服',
+      categories: {
+        general: '通用',
+        brands: '品牌方',
+        creators: '达人',
+        payments: '支付与方案',
+      },
+      items: {
+        general: [
+          { q: 'Overseed 是什么？', a: 'Overseed 是一个跨境达人营销平台，连接全球品牌与创作者。我们帮助品牌找到合适的达人，帮助达人发现优质合作机会——一站式完成。' },
+          { q: '谁可以使用 Overseed？', a: 'Overseed 面向所有规模的品牌、代理商、分销商和内容创作者开放。无论您是首次出海的初创品牌，还是寻找品牌合作的成熟达人，Overseed 都为您而建。' },
+          { q: 'Overseed 免费吗？', a: '是的！我们为品牌方和达人都提供免费方案。免费方案包括发布活动、浏览机会和站内消息等核心功能。Pro 方案解锁更多功能，如无限活动、AI 工具等。' },
+          { q: 'Overseed 支持哪些语言？', a: '平台界面支持中文和英文。内置翻译功能支持多种语言的通告、消息和内容翻译，让跨境合作无障碍。' },
+          { q: '翻译功能如何工作？', a: 'Overseed 使用 AI 驱动的翻译技术，即时翻译合作通告、消息和内容。您可以在平台内一键翻译，无需使用外部工具。' },
+        ],
+        brands: [
+          { q: '如何发布活动？', a: '注册品牌账号后，进入仪表盘点击「创建活动」。填写活动详情——标题、描述、报酬类型、平台要求和截止日期——然后发布。达人可以立即开始申请。' },
+          { q: '可以创建哪些类型的活动？', a: '您可以创建付费活动、赠品活动、付费+赠品组合、分佣/佣金制活动，或设置为可协商。选择适合您预算和目标的模式。' },
+          { q: '如何找到合适的达人？', a: '当达人申请您的活动时，您可以查看他们的资料、社交媒体数据、互动率和过往作品。您也可以浏览平台发现符合您垂类和目标市场的达人。' },
+          { q: '可以同时管理多个活动吗？', a: '可以。免费方案最多同时管理 3 个活动。Pro 方案取消此限制，您可以同时运行任意数量的活动。' },
+          { q: '如何与达人沟通？', a: '使用我们的站内消息系统直接与达人聊天。消息可以自动翻译，语言不再是障碍。' },
+        ],
+        creators: [
+          { q: '如何申请活动？', a: '在浏览页面查看可用活动，找到与您的垂类和受众匹配的活动，点击「立即申请」。您可以附上自荐信息并选择用于该活动的社交账号。' },
+          { q: '需要最低粉丝数吗？', a: '取决于活动。每个品牌设置自己的粉丝要求。很多活动对微型和纳米达人开放，各种规模的达人都有机会。' },
+          { q: '如何设置达人资料？', a: '进入达人中心，填写您的简介、垂类、地区和语言。然后关联社交媒体账号——可以通过链接、截图或手动输入添加。' },
+          { q: '可以申请多个活动吗？', a: '可以，您可以申请任意数量的活动。每个申请由品牌方独立审核。' },
+          { q: '如何跟踪申请状态？', a: '进入达人中心的「我的申请」，查看所有申请及其状态——待处理、审核中、已通过、已拒绝或已完成。' },
+        ],
+        payments: [
+          { q: '免费方案包含什么？', a: '免费方案包括基本的活动发布（品牌方每天最多 2 个）、浏览和申请活动、站内消息、翻译，以及最多 3 个同时在线的活动。' },
+          { q: 'Pro 方案包含什么？', a: 'Pro 解锁每天无限发布活动、无限同时在线活动、无限新会话、团队席位、AI 助手和优先支持。专为需要更大容量的品牌和达人设计。' },
+          { q: '接受哪些支付方式？', a: '我们接受主流信用卡。微信支付和支付宝支持即将上线。' },
+          { q: '可以取消 Pro 订阅吗？', a: '可以，月付订阅可以随时取消。年付方案一次性付款，也可以取消——您将保留访问权限直到当前计费周期结束。' },
+          { q: 'Overseed 处理品牌与达人之间的付款吗？', a: '我们正在构建跨境支付功能，让与海外达人的付款结算变得简单顺畅。该功能目前正在开发中。' },
+        ],
       },
     },
     contact: {

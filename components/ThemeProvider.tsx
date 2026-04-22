@@ -34,7 +34,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   // Homepage → global (dark space theme)
   // Other pages → sync with user's view mode (creator pink / brand blue)
   useEffect(() => {
-    const isGlobalPage = pathname === '/' || pathname === '/contact'
+    const isGlobalPage = pathname === '/' || pathname === '/contact' || pathname === '/help' || pathname === '/guidelines' || pathname === '/faq' || pathname === '/terms' || pathname === '/privacy'
 
     if (isGlobalPage) {
       document.documentElement.setAttribute('data-theme', 'global')
