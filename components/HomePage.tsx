@@ -104,7 +104,7 @@ export default function HomePage() {
             </div>
 
             <h1
-              className="text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-wide mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+              className="text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-wide mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] whitespace-nowrap"
               style={{ fontFamily: fontDisplay, fontWeight: 900 }}
             >
               {titleWords.map((word, i) => (
@@ -467,7 +467,7 @@ export default function HomePage() {
           {/* Frosted glass CTA button */}
           <button
             onClick={handleGetStarted}
-            className="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-lg hover:bg-white/15 transition shadow-xl shadow-[#A855F7]/10"
+            className="px-6 py-3.5 border border-white/20 text-white rounded-full font-medium transition hover:bg-white/10 backdrop-blur-md bg-white/5"
             style={{ fontFamily: fontSans, fontWeight: 700 }}
           >
             {t.home.earlyAccess.ctaSignup}
@@ -489,7 +489,7 @@ export default function HomePage() {
             {/* White solid button */}
             <Link
               href="/auth/signup?type=brand"
-              className="px-8 py-3.5 bg-white text-gray-900 rounded-full hover:bg-white/90 transition shadow-lg shadow-[#A855F7]/15 min-w-[160px]"
+              className="px-8 py-3.5 border border-white/20 text-white rounded-full font-medium transition hover:bg-white/10 backdrop-blur-md bg-white/5 min-w-[160px]"
               style={{ fontFamily: fontSans, fontWeight: 700 }}
             >
               {t.home.finalCta.ctaBrand}
@@ -497,7 +497,7 @@ export default function HomePage() {
             {/* Frosted glass button */}
             <Link
               href="/auth/signup?type=influencer"
-              className="px-8 py-3.5 border border-white/20 text-white rounded-full transition min-w-[160px] hover:bg-white/10 backdrop-blur-md bg-white/5"
+              className="px-8 py-3.5 border border-white/20 text-white rounded-full font-medium transition hover:bg-white/10 backdrop-blur-md bg-white/5 min-w-[160px]"
               style={{ fontFamily: fontSans, fontWeight: 700 }}
             >
               {t.home.finalCta.ctaCreator}

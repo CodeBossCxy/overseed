@@ -177,7 +177,7 @@ export default function Header() {
   const isGlobal = themeMode === 'global'
 
   return (
-    <header className={`sticky top-0 z-50 ${isGlobal ? 'bg-[#0a1527]/20 backdrop-blur-md border-b border-[#d4e0fd]/05' : 'bg-white shadow-sm'}`}>
+    <header className={`sticky top-0 z-50 ${isGlobal ? 'bg-[#0a1527]/20 backdrop-blur-md' : 'bg-white shadow-sm'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -186,10 +186,7 @@ export default function Header() {
             {isGlobal ? (
               <img src="/gray_logo_with_txt.png" alt="Overseed" className="h-28 -my-4 translate-y-[2px] w-auto object-contain brightness-200" />
             ) : (
-              <>
-                <img src={themeMode === 'brand' ? "/Overseed-blue.PNG" : "/Overseed.PNG"} alt="Overseed" className="h-10 w-auto object-contain" />
-                <span className="text-xl font-bold tracking-wide text-primary-600">OVERSEED</span>
-              </>
+              <img src={themeMode === 'brand' ? "/blue_overseed.png" : "/pink_overseed.png"} alt="Overseed" className="h-28 -my-4 translate-y-[2px] w-auto object-contain" />
             )}
             <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-400 text-amber-900 rounded uppercase tracking-wider">Beta</span>
           </Link>
