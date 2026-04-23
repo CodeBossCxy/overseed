@@ -104,7 +104,7 @@ export default function HomePage() {
             </div>
 
             <h1
-              className="text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-wide mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] whitespace-nowrap"
+              className={`text-5xl md:text-6xl lg:text-7xl leading-[1.08] tracking-wide mb-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]${hasCJK ? ' whitespace-nowrap' : ''}`}
               style={{ fontFamily: fontDisplay, fontWeight: 900 }}
             >
               {titleWords.map((word, i) => (
