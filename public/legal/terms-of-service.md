@@ -1,136 +1,168 @@
 # Terms of Service
 
-**Last Updated and Effective Date:** April 1, 2026
+**Effective Date:** April 25, 2026
 
-Welcome to Overseed! These Terms of Service ("Terms") govern your access to and use of the website located at [overseed.net](https://overseed.net) and any related applications, tools, or services (collectively, the "Platform") operated by [Overseed Legal Entity Name] and its affiliates ("Overseed," "we," "us," or "our"), a company registered in China at [Full Registered Address].
+Welcome to Overseed. These Terms of Service apply to your access and use of the website, platform, tools, and related services provided by Overseed (hereinafter "Overseed," "we," or "the Platform").
 
-By clicking "Accept," "Register," or by otherwise accessing or using the Platform, you agree to be bound by these Terms. If you do not agree to these Terms, do not use the Platform.
+By registering an account, accessing, or using Overseed services, you agree to these Terms. If you do not agree to these Terms, please do not use our services.
 
 ---
 
-## 1. Acceptance of Terms
-These Terms constitute a legally binding agreement between you ("User," "you," or "your") and Overseed. "User" includes both "Brands/Merchants" and "Creators/Influencers" as defined below. Your use of specific features of the Platform may be subject to additional guidelines or rules, which are incorporated by reference into these Terms.
+## 1. Our Services
 
-## 2. Eligibility
-By using the Platform, you represent and warrant that:
-- You are at least 18 years of age and have the legal capacity to enter into a binding contract.
-- If you are registering on behalf of a company or legal entity (e.g., as a Brand), you have the authority to bind that entity to these Terms.
-- You have not been previously suspended or removed from the Platform.
-- Your use of the Platform complies with all applicable local, state, national, and international laws and regulations.
+Overseed is a cross-border creator marketing collaboration platform that helps brands, merchants, factories, agencies, PR firms, and operations companies connect with overseas creators, communicate about collaborations, and manage promotional opportunities.
 
-## 3. Account Registration & Security
-- **Invite-Only Beta:** Access to the Platform is currently restricted to invited users. You may not share your invitation or account credentials with unauthorized third parties.
-- **Account Accuracy:** You must provide accurate, current, and complete information during registration and keep your account details updated.
-- **Authentication:** We support email/password, Google OAuth, and WeChat OAuth. You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.
-- **Security Breach:** You must immediately notify Overseed at legal@overseed.net if you suspect any unauthorized use of your account.
-- **Account Deletion:** Users may request account deletion at any time through their account settings or by contacting privacy@overseed.net. For further details on data handling upon deletion, please refer to our [Privacy Policy](https://overseed.net/privacy-policy).
+Our services may include: brand brief posting, creator profile display, in-platform messaging, automatic translation, AI tools, content planning, cross-border settlement support, data analytics, campaign management, and other related services.
 
-## 4. Platform Services Description
-Overseed provides an AI-driven cross-border collaboration marketplace that connects global brands and merchants (primarily Chinese small and medium-sized enterprises) with overseas content creators and influencers. 
+Unless otherwise explicitly stated in writing, Overseed is solely a platform and technology service provider and is not an employer, agent, distributor, seller, legal advisor, tax advisor, or product compliance advisor in the relationship between merchants and creators.
 
-**Platform Role:** Overseed is a platform provider and intermediary. **Overseed is NOT a party to any agreement, contract, or transaction between Brands and Creators.** We do not employ Creators, nor are we agents for any User. We do not guarantee the quality, safety, legality, or suitability of any campaign, content, or service offered through the Platform.
+## 2. User Eligibility and Accounts
 
-## 5. Electronic Contracts & Compliance (China)
-In accordance with the E-Commerce Law of the People's Republic of China:
-- **Binding Nature:** You acknowledge and agree that electronic contracts and signatures exchanged through the Platform are legally binding and have the same legal effect as traditional paper contracts.
-- **Information Disclosure:** Overseed displays its business license information or equivalent regulatory filings as required by law.
-- **Fair Rules:** Overseed provides clear and transparent rules for service agreements, ensuring the rights of both parties are protected.
+You must be at least 18 years old, or have reached the legal age of majority in your jurisdiction, to use Overseed.
 
-## 6. User Content & Licensing
-- **Ownership:** You retain all ownership rights to the content (text, images, videos, campaign briefs, etc.) you upload or post to the Platform ("User Content").
-- **License to Overseed:** By posting User Content, you grant Overseed a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to host, store, use, display, reproduce, modify, adapt, publish, and distribute such content for the purpose of operating, developing, providing, promoting, and improving the Platform.
-- **Responsibility:** You are solely responsible for your User Content and for ensuring you have all necessary rights and permissions to grant the licenses above.
+You must ensure that your registration information is truthful, accurate, and complete, and keep it up to date. You are responsible for safeguarding your account and password, and for all activities that occur under your account.
 
-## 7. Brand-Creator Relationships
-- **Direct Engagement:** Brands and Creators are responsible for negotiating the specific terms of their collaboration (e.g., deliverables, deadlines, compensation).
-- **Compliance:** Both parties are responsible for complying with applicable advertising and disclosure laws (e.g., FTC Endorsement Guides in the US, ASA rules in the UK, China Advertising Law).
-- **Disputes:** Any disputes arising from a collaboration must be resolved directly between the Brand and the Creator. Overseed may, at its sole discretion, offer informal dispute assistance but is not obligated to do so.
+If we reasonably believe that you have provided false information, violated these Terms, abused the Platform, infringed on others' rights, or posed legal, security, or reputational risks to the Platform and other users, we reserve the right to restrict, suspend, or terminate your account.
 
-## 8. Payment Terms & Fees
-- **Facilitation:** Overseed facilitates cross-border payments between Brands and Creators using third-party payment processors.
-- **Service Fees:** Overseed charges service fees or commissions for use of the Platform, as specified at the time of the transaction or in a separate fee schedule. These fees are non-refundable.
-- **Taxes:** Users are solely responsible for determining and fulfilling their tax obligations (e.g., VAT, income tax, withholding tax) in their respective jurisdictions. Overseed is not responsible for tax advice or collection, except where required by law.
-- **Currency:** Payments may be subject to currency conversion rates and fees.
+## 3. Merchant and Brand Responsibilities
 
-## 9. Intellectual Property & DMCA Policy
-- **Platform IP:** All rights, title, and interest in and to the Platform (including software, algorithms, AI models, UI/UX, and branding) are owned by Overseed or its licensors.
-- **Copyright Policy (DMCA):** We respect intellectual property rights. Pursuant to 17 U.S.C. § 512, if you believe your work has been infringed, please send a written notice to our Designated Agent at legal@overseed.net containing:
-    - A physical or electronic signature of a person authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.
-    - Identification of the copyrighted work claimed to have been infringed.
-    - Identification of the material that is claimed to be infringing and information reasonably sufficient to permit us to locate the material.
-    - Information reasonably sufficient to permit us to contact you, such as an address, telephone number, and email address.
-    - A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.
-    - A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner.
-- **Counter-Notice:** If you believe your content was removed by mistake, you may submit a counter-notice to legal@overseed.net including your signature, identification of the removed material, and a statement under penalty of perjury that you have a good faith belief the material was removed as a result of mistake or misidentification.
-- **Repeat Infringers:** We reserve the right to terminate accounts of users who are found to be repeat infringers.
+If you use Overseed as a brand, merchant, supplier, agency, PR firm, or operations company, you are responsible for:
 
-## 10. AI-Generated Content & Tools
-- **AI Disclaimer:** The Platform offers AI-powered features, including matching algorithms, market strategy assistants, translation tools, and content generation. 
-- **No Guarantee:** AI outputs are provided "AS-IS" for reference and convenience only. We do not guarantee the accuracy, completeness, legality, or suitability of AI-generated suggestions or content. You are responsible for reviewing and verifying all AI-generated outputs before use.
+- Ensuring that products, images, copy, claims, labels, pricing, logistics, after-sales service, and advertising materials comply with the laws, regulations, and platform rules of the target market;
+- Providing creators with truthful, accurate, and lawful product and collaboration information;
+- Making necessary disclosures regarding paid, gifted, commission-based, affiliate marketing, or other collaboration arrangements;
+- Independently obtaining required product certifications, licenses, registrations, testing, insurance, customs, or tax documents;
+- Handling product quality, order fulfillment, returns and exchanges, consumer complaints, tax obligations, and other product-related issues, unless otherwise agreed in writing by both parties.
 
-## 11. Prohibited Conduct
-You agree not to:
-- Use the Platform for any illegal purpose or in violation of any local, state, national, or international law.
-- Circumvent the Platform’s payment systems to avoid fees.
-- Harass, abuse, or harm other Users.
-- Upload viruses, malware, or any code intended to damage or disrupt the Platform.
-- Use automated systems (robots, spiders) to scrape data without our express permission.
-- Impersonate any person or entity.
+Overseed may provide templates, tools, AI suggestions, compliance tips, or operational support, but these are for reference only and do not replace your own legal, product, tax, or market compliance judgment.
 
-## 12. Disclaimer of Warranties
-THE PLATFORM IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. TO THE FULLEST EXTENT PERMITTED BY LAW, OVERSEED DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE PLATFORM WILL BE UNINTERRUPTED, ERROR-FREE, OR SECURE.
+## 4. Creator Responsibilities
+
+If you use Overseed as a creator, content producer, or affiliate promoter, you are responsible for:
+
+- Ensuring that your profile, social media accounts, follower data, rates, portfolio, and collaboration capabilities are truthful and accurate;
+- Creating and publishing content in accordance with applicable laws, social media platform rules, and collaboration requirements;
+- Making necessary disclosures regarding paid collaborations, gifts, commissions, affiliate links, or other material relationships;
+- Not using fake followers, fake engagement, misleading data, or impersonating others;
+- Independently handling tax obligations, invoicing, income reporting, and compliance with local laws.
+
+When publishing content, comply with the rules of relevant social media platforms, advertising disclosure requirements, and local laws and regulations.
+
+## 5. Collaborations Between Users
+
+Merchants and creators may communicate and establish collaborations through Overseed. Unless Overseed has explicitly agreed otherwise in writing, we are not responsible for:
+
+- Whether a collaboration is ultimately established or completed;
+- The quality, accuracy, legality, or reach of creator content;
+- Impressions, engagement, sales, conversion rates, ROI, or other business outcomes;
+- Product quality, logistics, after-sales service, returns, or consumer disputes;
+- Payment disputes between users;
+- The actions of any user or third party.
+
+We may provide assistance, templates, or dispute communication support as circumstances warrant, but we are not obligated to proactively review, supervise, or enforce all collaboration arrangements between users.
+
+## 6. Fees, Subscriptions, and Settlement
+
+Some Overseed services may be free, while others may require payment of subscription fees, service fees, transaction fees, settlement fees, or other charges. Specific fees are based on what is displayed on the website, in orders, quotations, invoices, or written agreements between the parties.
+
+If a user subscribes to a service billed on a monthly, annual, or other recurring basis, the service may automatically renew unless the user cancels before the start of the next billing cycle in accordance with platform instructions. Subscription pricing, billing cycles, cancellation methods, and refund policies are as displayed on the subscription or order page. Users should confirm subscription details, fees, and renewal arrangements before making payment.
+
+Overseed may provide payment and settlement support for collaborations between merchants and creators through Stripe Connect or other third-party payment service providers. Unless otherwise explicitly stated, payments, fund processing, fund holds, transfers, withdrawals, refunds, and chargeback handling are subject to the terms, rules, and review requirements of the applicable third-party payment service provider.
+
+In some collaboration scenarios, merchants may need to complete payment first; after the creator completes the agreed content and the merchant confirms it, the relevant funds will be paid to the creator in accordance with the platform process and third-party payment service provider rules. Overseed does not itself provide banking, escrow, custodial, lending, or remittance services, and does not guarantee specific payment timing or settlement outcomes.
+
+Cross-border payments and settlements may be affected by third-party payment institutions, banks, exchange rates, fees, taxes, identity verification, compliance reviews, sanctions screening, and local regulations. Users should cooperate in completing identity verification, tax, or payment account information submissions required by the payment service provider.
+
+Unless otherwise stated, fees for completed or activated services are generally non-refundable. In the event of refunds, chargebacks, disputes, violations, or collaboration cancellations, Overseed may process them in accordance with platform rules, collaboration records, user confirmations, and third-party payment service provider rules.
+
+Users are responsible for their own income, payments, invoicing, and tax reporting obligations.
+
+For collaborations managed through the platform process, merchants should confirm, request revisions, or initiate a dispute within the timeframe specified by the platform or agreed upon by both parties after receiving the creator's deliverables. If the merchant does not respond within a reasonable timeframe, the platform may treat the collaboration as completed or initiate a dispute resolution process based on collaboration records, delivery evidence, communications between the parties, and platform rules.
+
+In the event of refunds, chargebacks, collaboration cancellations, delivery disputes, violations, or payment service provider reviews, Overseed may process them based on platform records, collaboration requirements, user confirmations, and third-party payment service provider rules. Overseed does not provide escrow or custodial services; payments and settlements are processed by Stripe or other third-party payment service providers according to their rules.
+
+## 7. AI Tools and Generated Content
+
+Overseed may provide AI-assisted tools, including but not limited to: brief generation, creator matching, product selection, content planning, script generation, email/direct message generation, translation, localization adaptation, product image/e-commerce image set/listing page generation, data analytics, and compliance tips.
+
+AI outputs are for reference only and may be inaccurate, incomplete, outdated, or unsuitable for specific scenarios. Users should review, modify, and confirm outputs before use.
+
+AI outputs do not constitute legal, tax, financial, medical, regulatory, or other professional advice. Users should consult professionals when making important decisions.
+
+Users must not submit others' private information, trade secrets, sensitive information, copyrighted content, or other third-party materials to AI tools without authorization.
+
+AI tools may generate similar or identical content for different users. Overseed does not guarantee that AI-generated content is unique, registrable, non-infringing, or absolutely suitable for commercial use.
+
+## 8. User Content
+
+Users retain their rights to content they upload or submit, including but not limited to brand materials, creator profiles, product information, briefs, images, videos, text, messages, data, and feedback.
+
+To provide, maintain, optimize, and promote Overseed services, you grant us a worldwide, non-exclusive, royalty-free license to store, display, process, translate, reformat, analyze, and use the content you submit as necessary.
+
+You warrant that you have the right to submit and use the relevant content, and that such content does not infringe on others' rights or violate laws, regulations, or platform rules.
+
+If we reasonably believe that any content is illegal, infringing, false, misleading, fraudulent, harassing, or in violation of these Terms, we reserve the right to remove it, restrict its display, or take other necessary measures.
+
+Users should ensure they have obtained the necessary rights when using images, videos, music, fonts, trademarks, likenesses, product materials, and other content. Overseed is not responsible for disputes arising from users' use of content beyond their authorized scope.
+
+## 9. Prohibited Conduct
+
+You may not use Overseed to:
+
+- Post false, misleading, illegal, infringing, or unsafe content;
+- Promote counterfeit goods, infringing products, stolen merchandise, hazardous materials, or restricted products;
+- Violate advertising, consumer protection, data protection, intellectual property, customs, sanctions, or social media platform rules;
+- Harass, threaten, defame, impersonate, engage in fake engagement, or send spam;
+- Scrape, copy, attack, reverse-engineer, or interfere with platform systems without authorization;
+- Upload malicious code, viruses, or other harmful content;
+- Circumvent platform fees, settlement, or collaboration processes where applicable;
+- Abuse AI tools, automated systems, or others' personal information;
+- Collect, use, or disclose others' personal information without a lawful basis or consent.
+
+Users may not post, promote, or trade products or services through Overseed that violate applicable laws, social media platform rules, payment service provider rules, or Overseed platform rules. Overseed reserves the right to refuse, restrict, or remove products, services, or briefs that involve high risk, are restricted, or require additional review, including but not limited to counterfeit goods, infringing goods, pharmaceuticals, medical or therapeutic claim products, restricted supplements, adult content, tobacco/e-cigarettes, weapons, hazardous materials, illegal products, gambling, financial investments, sanctioned entities, or other categories restricted by payment service providers.
+
+Even if a product category is legal in a particular region, Overseed may still refuse or restrict its posting, promotion, settlement, or display based on platform risk, payment service provider rules, advertising platform rules, or target market compliance requirements.
+
+If any claims, complaints, investigations, fines, losses, costs, or legal fees are incurred by Overseed, its affiliates, employees, partners, or service providers as a result of content, products, services, advertising claims, collaboration conduct, payment conduct, tax handling, legal violations, infringement of third-party rights, or violations of these Terms by a user, the relevant user shall bear the corresponding responsibility to the extent permitted by law and shall indemnify Overseed for reasonable losses and costs incurred as a result.
+
+## 10. Intellectual Property
+
+The Overseed website, software, systems, designs, trademarks, logos, databases, platform content, and related technologies are owned by Overseed or its licensors. You may not copy, modify, sell, distribute, or commercially exploit them without our written permission.
+
+If you believe that platform content infringes your intellectual property rights, please contact us at legal@overseed.net with sufficient information for our review.
+
+## 11. Third-Party Services
+
+Overseed may integrate with third-party services, including login services, payment services, AI services, cloud services, analytics tools, advertising tools, social media platforms, and e-commerce platforms.
+
+Third-party services are governed by their own terms and privacy policies. Overseed is not responsible for the availability, pricing, policies, content, failures, or decisions of third-party services.
+
+## 12. Disclaimer
+
+Overseed provides services on an "as is" and "as available" basis.
+
+To the fullest extent permitted by law, we do not guarantee that our services will be continuously available, error-free, absolutely secure, fully accurate, or suitable for your specific purposes. We do not guarantee any creator performance, content effectiveness, sales results, compliance outcomes, platform traffic, follower quality, or business returns.
 
 ## 13. Limitation of Liability
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, OVERSEED SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES. 
 
-**IN NO EVENT SHALL OVERSEED’S AGGREGATE LIABILITY FOR ALL CLAIMS RELATED TO THE PLATFORM EXCEED THE GREATER OF: (A) ONE HUNDRED US DOLLARS ($100 USD); OR (B) THE TOTAL FEES PAID BY YOU TO OVERSEED IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.**
+To the fullest extent permitted by law, Overseed shall not be liable for indirect, incidental, special, or punitive damages, loss of profits, business interruption, or data loss.
 
-## 14. Indemnification
-You agree to indemnify, defend, and hold harmless Overseed, its officers, directors, employees, and agents from and against any and all claims, liabilities, damages, losses, and expenses (including reasonable legal fees) arising out of or in any way connected with: (a) your access to or use of the Platform; (b) your User Content; (c) your violation of these Terms; or (d) your interactions or agreements with other Users.
+To the fullest extent permitted by law, Overseed's total liability for any claims related to the services shall not exceed the service fees you actually paid to Overseed in the three months preceding the claim; if you have not paid any fees to us, the limit shall not exceed $50 USD.
 
-## 15. Force Majeure
-Overseed shall not be liable for any delay or failure to perform resulting from causes outside its reasonable control, including, but not limited to, acts of God, war, terrorism, riots, embargos, acts of civil or military authorities, fire, floods, accidents, strikes or shortages of transportation facilities, fuel, energy, labor or materials, or pandemics.
+These Terms do not exclude or limit liability that cannot be excluded or limited by law.
 
-## 16. Governing Law & Dispute Resolution
-- **Governing Law:** These Terms shall be governed by and construed in accordance with the laws of the People's Republic of China, without regard to conflict of law principles.
-- **Arbitration:** Any dispute, controversy, or claim arising out of or relating to these Terms shall be submitted to the Shenzhen Court of International Arbitration (SCIA) for arbitration in Shenzhen in accordance with its rules then in effect. The language of arbitration shall be English or Chinese. The arbitral award is final and binding.
-- **Consumer Protection:** If you are a consumer residing in the United Kingdom, European Union, or Canada, you may have rights to bring a claim in your local courts under mandatory local consumer protection laws. Nothing in these Terms limits such mandatory rights.
+## 14. Changes to Terms
 
-## 17. Termination
-- **By You:** You may stop using the Platform at any time. Upon termination, you may request an export of your personal data as outlined in our [Privacy Policy](https://overseed.net/privacy-policy).
-- **By Overseed:** We reserve the right to suspend or terminate your account or access to the Platform at our sole discretion, without notice, for conduct that we believe violates these Terms or is harmful to other Users, us, or third parties, or for business reasons.
-- **Settlement:** Upon termination of your account, any pending payments for completed collaborations will be settled in accordance with our standard payment processing timelines.
-- **Survival:** Sections 4, 6, 8, 9, 10, 12, 13, 14, and 16 shall survive any termination of these Terms.
+We may update these Terms from time to time. If changes are material, we will notify users through reasonable means such as website announcements, in-platform notifications, or email.
 
-## 18. Modifications to Terms
-We may modify these Terms from time to time. We will notify you of material changes by posting the updated Terms on the Platform or via email. Your continued use of the Platform after such changes constitutes your acceptance of the new Terms.
+Your continued use of Overseed after Terms are updated constitutes your acceptance of the updated Terms.
 
-## 19. Related Policies
-Your use of the Platform is also governed by the following policies, which are incorporated into these Terms by reference:
-- [Privacy Policy](https://overseed.net/privacy-policy)
-- [Cookie Policy](https://overseed.net/cookie-policy)
-- [Community Guidelines](https://overseed.net/community-guidelines)
+## 15. Governing Law
 
-## 20. Miscellaneous
-- **Severability:** If any provision of these Terms is found to be unenforceable, the remaining provisions will remain in full force and effect.
-- **Entire Agreement:** These Terms constitute the entire agreement between you and Overseed regarding the Platform.
-- **Assignment:** You may not assign your rights under these Terms without our consent. Overseed may assign its rights and obligations freely.
-- **Waiver:** Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights.
+These Terms are governed by the laws of the United States, without regard to conflict of law rules.
 
-## 21. Contact Information
-If you have any questions about these Terms, please contact us at:
+If the mandatory laws of your country or region grant you rights that cannot be waived, these Terms do not limit such mandatory rights.
 
-**Overseed Legal Department**  
-Email: legal@overseed.net  
-Address: [Full Registered Address in China]
+## 16. Contact Us
 
----
-
-**Special Provisions for Specific Jurisdictions:**
-
-- **California Residents:** Under California Civil Code Section 1789.3, you may report complaints to the Complaint Assistance Unit of the Division of Consumer Services of the California Department of Consumer Affairs.
-- **UK Consumers (Consumer Rights Act 2015):** 
-    - You have a legal right to receive services that are provided with reasonable care and skill. 
-    - **Cooling-off Period:** Under the Consumer Contracts Regulations 2013, you may have a right to cancel digital services within 14 days of signup, provided performance has not begun.
-    - **Digital Content:** If any digital content provided is not of satisfactory quality, fit for purpose, or as described, you have a right to a repair, replacement, price reduction, or refund.
-- **Canada:** For users in Canada, these Terms and any related communications may be provided in English. *Il est de la volonté expresse des parties que la présente convention ainsi que tous les documents qui s'y rattachent soient rédigés en anglais.*
+Email: legal@overseed.net
