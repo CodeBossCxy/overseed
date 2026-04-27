@@ -71,7 +71,8 @@ Overseed has sole discretion in making enforcement decisions.
 
 For questions regarding these Guidelines or community standards, please contact:
 **Email:** community@overseed.net
-**Website:** overseed.net
+
+**Address:** 6633 18 Mile Rd, Sterling Heights, MI 48314
 
 ---
 *Thank you for being a part of the Overseed community and helping us build the future of cross-border collaboration.*

@@ -59,8 +59,10 @@ We may update this Cookie Policy from time to time to reflect changes in the coo
 
 ## 8. Contact Us
 
-If you have any questions about our use of cookies or other technologies, please email us at:
+If you have any questions about our use of cookies or other technologies, please contact us:
 **Email:** privacy@overseed.net
+
+**Address:** 6633 18 Mile Rd, Sterling Heights, MI 48314
 
 ---
 *Overseed Platform – Bridging Brands and Creators with Transparency.*

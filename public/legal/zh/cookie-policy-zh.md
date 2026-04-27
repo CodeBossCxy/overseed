@@ -59,5 +59,7 @@ Overseed 使用多类 Cookie 来提供、保护和改进我们的服务：
 
 ## 8. 联系我们
 
-如果您对我们使用 Cookie 或其他技术有任何疑问，请发送电子邮件至：
-电子邮件：privacy@overseed.net
+如果您对我们使用 Cookie 或其他技术有任何疑问，请联系我们：
+邮箱：privacy@overseed.net
+
+地址：6633 18 Mile Rd, Sterling Heights, MI 48314

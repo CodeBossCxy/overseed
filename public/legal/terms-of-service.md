@@ -166,3 +166,5 @@ If the mandatory laws of your country or region grant you rights that cannot be 
 ## 16. Contact Us
 
 Email: legal@overseed.net
+
+Address: 6633 18 Mile Rd, Sterling Heights, MI 48314

@@ -72,5 +72,6 @@ Overseed 对执行决定拥有最终裁量权。
 ## 7. 联系我们
 
 如果您对本准则或社区标准有任何疑问，请联系：
-电子邮件：community@overseed.net
-网站：overseed.net
+邮箱：community@overseed.net
+
+地址：6633 18 Mile Rd, Sterling Heights, MI 48314
