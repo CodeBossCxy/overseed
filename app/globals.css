@@ -217,13 +217,11 @@
   text-shadow: none !important;
 }
 
-
 /* Global theme: pink/blue text accents */
 [data-theme='global'] .text-blue-600 { color: #456fa3 !important; }
 [data-theme='global'] .text-blue-700 { color: #5683c3 !important; }
 [data-theme='global'] .text-pink-600 { color: #ff769f !important; }
 [data-theme='global'] .text-pink-700 { color: #ff769f !important; }
-
 
 body {
   color: var(--foreground);
